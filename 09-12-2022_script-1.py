@@ -6,7 +6,7 @@ import scipy.constants as sc
 import nyquist_bandwidths as nq
 
 # ______________________________________________________________________________________________________________________
-path = r'C:\Users\fastdaq\SynologyDrive\Research_Projects\Microscope\FreeRunningSpectra/'
+path = r'C:\Users\pchan\SynologyDrive\Research_Projects\Microscope\FreeRunningSpectra/'
 name = 'First_Dual_Comb_From_Microscope_19152x51896.bin'
 ppifg = 51896
 center = ppifg // 2
@@ -66,12 +66,3 @@ dfr = nq.bandwidth(frep, nyq)
 vi = sc.c / 3.85e-6
 vf = sc.c / 2.9e-6
 window_bounds = nq.find_allowed_nyquist_bandwidths(vi, vf)[::-1]
-window_bounds = np.vstack([np.array([0, vf]), window_bounds])
-
-nu = np.linspace(0, vf, 5000) * 1e-12
-plt.axvline(vi * 1e-12, color='k', linestyle='--', linewidth=2)
-plt.axvline(vf * 1e-12, color='k', linestyle='--', linewidth=2)
-
-plt.plot(nu, np.zeros(len(nu)))
-for n, i in enumerate(window_bounds * 1e-12):
-    [plt.axvline(e, color=f'C{n}') for e in i]
