@@ -138,6 +138,8 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         max_dfr = nq.bandwidth(self.frep, dnu)
         if max_dfr < 1e5:
             self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
+        else:
+            self.verticalScrollBar.setMaximum(int(1e5))
         self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
 
     def update_wl_min(self):
@@ -262,14 +264,12 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                 self.lr_rf_added_to_plot.set()
 
             compression = self.frep / self.dfrep
-            translation_rf = compression * (len(self.region_list) - 1)
-            ll_rf = self.nu_min / compression + translation_rf
-            ul_rf = self.nu_max / compression + translation_rf
-            region = np.array([ll_rf, ul_rf]) * 1e-6
-            if len(self.region_list) > 1:
-                nyquist_rf = self.frep * 1e-6 / 2
-                region -= nyquist_rf * (len(self.region_list) - 1)
-            self.lr_rf.setRegion(region)
+            vi_rf = self.nu_min / compression
+            vf_rf = self.nu_max / compression
+            dist = vf_rf - self.frep / 2
+            N_trans = np.ceil(dist / self.frep)
+            region = np.array([vi_rf, vf_rf]) - N_trans * self.frep
+            self.lr_rf.setRegion(abs(region * 1e-6))
 
 
 if __name__ == '__main__':
