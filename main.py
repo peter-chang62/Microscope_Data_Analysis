@@ -48,7 +48,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                                             self.gv_2)
         self.lr = pg.LinearRegionItem()
         self.lr_nyquist = pg.LinearRegionItem()
-        self.lr.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 2)))
+        self.lr.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0, 255 // 2)))
         self.lr_nyquist.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 4)))
         self.lr.setMovable(False)
         self.lr_nyquist.setMovable(False)
@@ -126,9 +126,11 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.wl_min = wl_min * 1e-6
 
+        # _____________________________________ updates based on min wavelength ________________________________________
         max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
         if max_dfr < 1e5:
             self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
+        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
 
     def update_wl_max(self):
         wl_max = float(self.le_max_wl.text())
@@ -141,9 +143,11 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.wl_max = wl_max * 1e-6
 
+        # _____________________________________ updates based on max wavelength ________________________________________
         max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
         if max_dfr < 1e5:
             self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
+        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
 
     def update_f01(self):
         f01 = float(self.le_f01.text())
@@ -170,9 +174,15 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.frep = frep
 
+        # _____________________________________ updates based on frep __________________________________________________
+        self.update_nyquist()
+
     def update_dfrep_from_lcd(self):
         self.lcd.display(self.verticalScrollBar.value())
         self.dfrep = self.verticalScrollBar.value()
+
+        # _____________________________________ updates based on delta frep_____________________________________________
+        self.update_nyquist()
 
     def update_dfrep_from_le(self):
         dfrep = int(self.le_dfrep.text())
@@ -182,6 +192,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.dfrep = dfrep
         self.verticalScrollBar.setValue(self.dfrep)
+
+        # _____________________________________ updates based on delta frep_____________________________________________
+        self.update_nyquist()
 
     def update_nyquist(self):
         bandwidth = nq.bandwidth(self.frep, self.dfrep)
