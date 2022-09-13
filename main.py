@@ -2,6 +2,7 @@
 the purpose of figuring out the lock window. Specifically, I would like to be able to visualize where the spectrum
 would fall inside the nyquist window in both the optical domain, and in the DCS frequency domain, and be able to see
 where the f0's would fall """
+import copy
 
 import numpy as np
 import scipy.constants as sc
@@ -47,14 +48,15 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                                             self.le_ymax_2,
                                             self.gv_2)
         self.lr = pg.LinearRegionItem()
-        self.lr_nyquist = pg.LinearRegionItem()
+        self.lr_nyquist = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
         self.lr.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0, 255 // 2)))
         self.lr_nyquist.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 4)))
         self.lr.setMovable(False)
         self.lr_nyquist.setMovable(False)
+        self.region_list = [self.lr_nyquist]
 
-        self.plot_window_optical.plotwidget.addItem(self.lr_nyquist)
         self.plot_window_optical.plotwidget.addItem(self.lr)
+        self.plot_window_optical.plotwidget.addItem(self.lr_nyquist)
 
         self.curve_optical = pw.create_curve()
         self.curve_rf = pw.create_curve()
@@ -86,6 +88,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         self.update_wl_max()
         self.update_wl_min()
+
         self.update_nyquist()
 
     def connect(self):
@@ -115,6 +118,12 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.nu_min = sc.c / val
         self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
 
+    def set_scrollbar_max(self):
+        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
+        if max_dfr < 1e5:
+            self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
+        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
+
     def update_wl_min(self):
         wl_min = float(self.le_min_wl.text())
         if wl_min <= 0:
@@ -127,10 +136,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.wl_min = wl_min * 1e-6
 
         # _____________________________________ updates based on min wavelength ________________________________________
-        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
-        if max_dfr < 1e5:
-            self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
-        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
+        self.set_scrollbar_max()
 
     def update_wl_max(self):
         wl_max = float(self.le_max_wl.text())
@@ -144,10 +150,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.wl_max = wl_max * 1e-6
 
         # _____________________________________ updates based on max wavelength ________________________________________
-        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
-        if max_dfr < 1e5:
-            self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
-        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
+        self.set_scrollbar_max()
 
     def update_f01(self):
         f01 = float(self.le_f01.text())
@@ -175,6 +178,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.frep = frep
 
         # _____________________________________ updates based on frep __________________________________________________
+        self.set_scrollbar_max()
         self.update_nyquist()
 
     def update_dfrep_from_lcd(self):
@@ -182,6 +186,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.dfrep = self.verticalScrollBar.value()
 
         # _____________________________________ updates based on delta frep_____________________________________________
+        self.set_scrollbar_max()
         self.update_nyquist()
 
     def update_dfrep_from_le(self):
@@ -198,7 +203,25 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
     def update_nyquist(self):
         bandwidth = nq.bandwidth(self.frep, self.dfrep)
-        self.lr_nyquist.setRegion([0, bandwidth * 1e-12])
+        bandwidth_THz = bandwidth * 1e-12
+
+        N = np.ceil(self.nu_max / bandwidth)
+        N_diff = int(N - len(self.region_list))
+        if N_diff > 0:  # N_diff is positive -> add region items
+            for n in range(N_diff):
+                lr = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
+                lr.setBrush(self.lr_nyquist.brush)
+                lr.setMovable(False)
+
+                self.plot_window_optical.plotwidget.addItem(lr)
+                self.region_list.append(lr)
+        elif N_diff < 0:  # N_diff is negative -> remove region items
+            for n in range(N_diff, 0):
+                self.plot_window_optical.plotwidget.removeItem(self.region_list[n])
+            self.region_list = self.region_list[:N_diff]
+
+        for n, lr in enumerate(self.region_list):
+            lr.setRegion(np.array([0, bandwidth_THz]) + bandwidth_THz * n)
 
 
 if __name__ == '__main__':
