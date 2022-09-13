@@ -3,6 +3,7 @@ the purpose of figuring out the lock window. Specifically, I would like to be ab
 would fall inside the nyquist window in both the optical domain, and in the DCS frequency domain, and be able to see
 where the f0's would fall """
 
+import numpy as np
 import scipy.constants as sc
 import PyQt5.QtWidgets as qt
 from Error_Window import Ui_Form
@@ -10,6 +11,7 @@ import PlotWidgets as pw
 import PyQt5.QtGui as qtg
 from Gui_DCS_Lockpoints import Ui_MainWindow
 import pyqtgraph as pg
+import nyquist_bandwidths as nq
 
 
 class ErrorWindow(qt.QWidget, Ui_Form):
@@ -59,6 +61,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.le_dfrep.setValidator(qtg.QIntValidator())
 
         self.lcd.setSegmentStyle(qt.QLCDNumber.Flat)
+        self.lcd.setDigitCount(6)
 
         self.nu_min = sc.c / 5e-6
         self.nu_max = sc.c / 3e-6
@@ -67,17 +70,14 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.frep = 1000e6
         self.dfrep = 50
 
+        self.connect()
+
         self.verticalScrollBar.setMinimum(50)
-        self.verticalScrollBar.setMaximum(int(1e5))
-        self.verticalScrollBar.setValue(50)
         self.verticalScrollBar.setPageStep(1)
         self.verticalScrollBar.setSingleStep(1)
-        self.lcd.setDigitCount(6)
-        self.lcd.display(50)
 
-        self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
-
-        self.connect()
+        self.update_wl_max()
+        self.update_wl_min()
 
     def connect(self):
         self.le_min_wl.editingFinished.connect(self.update_wl_min)
@@ -117,6 +117,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.wl_min = wl_min * 1e-6
 
+        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
+        if max_dfr < 1e5:
+            self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
+
     def update_wl_max(self):
         wl_max = float(self.le_max_wl.text())
         if wl_max <= 0:
@@ -127,6 +131,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             self.le_max_wl.setText(str(self.wl_max * 1e6))
             return
         self.wl_max = wl_max * 1e-6
+
+        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
+        if max_dfr < 1e5:
+            self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
 
     def update_f01(self):
         f01 = float(self.le_f01.text())
