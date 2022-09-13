@@ -261,14 +261,14 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                 self.plot_window_rf.plotwidget.addItem(self.lr_rf)
                 self.lr_rf_added_to_plot.set()
 
-            factor_optical = self.frep / self.dfrep
-            trans = factor_optical * (len(self.region_list) - 1)
-            ll = self.nu_min / factor_optical + trans
-            ul = self.nu_max / factor_optical + trans
+            compression = self.frep / self.dfrep
+            trans = compression * (len(self.region_list) - 1)
+            ll = self.nu_min / compression + trans
+            ul = self.nu_max / compression + trans
             region = np.array([ll, ul]) * 1e-6
             if len(self.region_list) > 1:
-                factor_rf = self.frep * 1e-6 / 2
-                region -= factor_rf * (len(self.region_list) - 1)
+                nyquist_rf = self.frep * 1e-6 / 2
+                region -= nyquist_rf * (len(self.region_list) - 1)
             self.lr_rf.setRegion(region)
 
 
