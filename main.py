@@ -262,10 +262,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                 self.lr_rf_added_to_plot.set()
 
             compression = self.frep / self.dfrep
-            trans = compression * (len(self.region_list) - 1)
-            ll = self.nu_min / compression + trans
-            ul = self.nu_max / compression + trans
-            region = np.array([ll, ul]) * 1e-6
+            translation_rf = compression * (len(self.region_list) - 1)
+            ll_rf = self.nu_min / compression + translation_rf
+            ul_rf = self.nu_max / compression + translation_rf
+            region = np.array([ll_rf, ul_rf]) * 1e-6
             if len(self.region_list) > 1:
                 nyquist_rf = self.frep * 1e-6 / 2
                 region -= nyquist_rf * (len(self.region_list) - 1)
