@@ -58,8 +58,6 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lr_rf = pg.LinearRegionItem()
         self.lr_rf.setMovable(False)
         self.plot_window_rf.plotwidget.addItem(self.lr_rf)
-        self.lr_rf_added_to_plot = threading.Event()
-        self.lr_rf_added_to_plot.set()
 
         self.lr_f0 = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
         self.lr_f0.setMovable(False)
@@ -256,20 +254,17 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         last_window = np.array(self.region_list[-1].getRegion()) * 1e12
         alias = self.nu_min < last_window[0]
         if alias:
-            self.plot_window_rf.plotwidget.removeItem(self.lr_rf)
-            self.lr_rf_added_to_plot.clear()
+            self.lr_rf.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0)))
         else:
-            if not self.lr_rf_added_to_plot.is_set():
-                self.plot_window_rf.plotwidget.addItem(self.lr_rf)
-                self.lr_rf_added_to_plot.set()
+            self.lr_rf.setBrush(pg.mkBrush(color=qtg.QColor(0, 255, 0)))
 
-            compression = self.frep / self.dfrep
-            vi_rf = self.nu_min / compression
-            vf_rf = self.nu_max / compression
-            dist = vf_rf - self.frep / 2
-            N_trans = np.ceil(dist / self.frep)
-            region = np.array([vi_rf, vf_rf]) - N_trans * self.frep
-            self.lr_rf.setRegion(abs(region * 1e-6))
+        compression = self.frep / self.dfrep
+        vi_rf = self.nu_min / compression
+        vf_rf = self.nu_max / compression
+        dist = vf_rf - self.frep / 2
+        N_trans = np.ceil(dist / self.frep)
+        region = np.array([vi_rf, vf_rf]) - N_trans * self.frep
+        self.lr_rf.setRegion(abs(region * 1e-6))
 
 
 if __name__ == '__main__':

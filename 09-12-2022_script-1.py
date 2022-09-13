@@ -62,4 +62,4 @@ plt.figure()
 plt.plot(wl, spec_final)
 
 plt.figure()
-plt.plot(lab_freq, spec_final)
+plt.plot(abs(lab_freq), spec_final)
