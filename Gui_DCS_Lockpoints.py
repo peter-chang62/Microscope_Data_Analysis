@@ -243,6 +243,8 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "x max"))
         self.label_11.setText(_translate("MainWindow", "y max"))
         self.label_12.setText(_translate("MainWindow", "y min"))
+        self.le_xmin_2.setText(_translate("MainWindow", "0"))
         self.label_13.setText(_translate("MainWindow", "x min"))
         self.label_14.setText(_translate("MainWindow", "x max"))
+        self.le_xmax_2.setText(_translate("MainWindow", "500"))
 from PlotWidgets import PlotWidget

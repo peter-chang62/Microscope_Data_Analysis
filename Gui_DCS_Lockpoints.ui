@@ -388,6 +388,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="text">
+               <string>0</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -424,6 +427,9 @@
                 <width>91</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="text">
+               <string>500</string>
               </property>
              </widget>
             </item>

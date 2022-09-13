@@ -2,8 +2,9 @@
 the purpose of figuring out the lock window. Specifically, I would like to be able to visualize where the spectrum
 would fall inside the nyquist window in both the optical domain, and in the DCS frequency domain, and be able to see
 where the f0's would fall """
-import copy
 
+import copy
+import threading
 import numpy as np
 import scipy.constants as sc
 import PyQt5.QtWidgets as qt
@@ -55,6 +56,17 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lr_nyquist.setMovable(False)
         self.region_list = [self.lr_nyquist]
 
+        self.lr_rf = pg.LinearRegionItem()
+        self.lr_rf.setMovable(False)
+        self.plot_window_rf.plotwidget.addItem(self.lr_rf)
+        self.lr_rf_added_to_plot = threading.Event()
+        self.lr_rf_added_to_plot.set()
+
+        self.lr_f0 = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
+        self.lr_f0.setMovable(False)
+        self.lr_f0.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 0)))
+        self.plot_window_rf.plotwidget.addItem(self.lr_f0)
+
         self.plot_window_optical.plotwidget.addItem(self.lr)
         self.plot_window_optical.plotwidget.addItem(self.lr_nyquist)
 
@@ -90,6 +102,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.update_wl_min()
 
         self.update_nyquist()
+        self.plot_window_rf.update_xmax()
+
+        self.update_f01()
+        self.update_f02()
 
     def connect(self):
         self.le_min_wl.editingFinished.connect(self.update_wl_min)
@@ -160,6 +176,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             self.le_f01.setText(str(self.f01 * 1e-6))
         self.f01 = f01
 
+        # _____________________________________ updates to run when updating f01 _______________________________________
+        self.lr_f0.setRegion([self.f01 * 1e-6, self.f02 * 1e-6])
+
     def update_f02(self):
         f02 = float(self.le_f02.text())
         f02 *= 1e6
@@ -167,6 +186,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             raise_error(self.error_window, "f02 must be 0 <= f02 <= frep")
             self.le_f02.setText(str(self.f02 * 1e-6))
         self.f02 = f02
+
+        # _____________________________________ updates to run when updating f02 _______________________________________
+        self.lr_f0.setRegion([self.f01 * 1e-6, self.f02 * 1e-6])
 
     def update_frep(self):
         frep = float(self.le_rep_rate.text())
@@ -223,8 +245,32 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         for n, lr in enumerate(self.region_list):
             lr.setRegion(np.array([0, bandwidth_THz]) + bandwidth_THz * n)
 
+        # ______________________________________ updates to run whenever running update_nyquist ________________________
+        self.update_rf_plot()
+
+    def update_rf_plot(self):
+        last_window = np.array(self.region_list[-1].getRegion()) * 1e12
+        alias = self.nu_min < last_window[0]
+        if alias:
+            self.plot_window_rf.plotwidget.removeItem(self.lr_rf)
+            self.lr_rf_added_to_plot.clear()
+        else:
+            if not self.lr_rf_added_to_plot.is_set():
+                self.plot_window_rf.plotwidget.addItem(self.lr_rf)
+                self.lr_rf_added_to_plot.set()
+
+            factor_optical = self.frep / self.dfrep
+            trans = factor_optical * (len(self.region_list) - 1)
+            ll = self.nu_min / factor_optical + trans
+            ul = self.nu_max / factor_optical + trans
+            region = np.array([ll, ul]) * 1e-6
+            if len(self.region_list) > 1:
+                factor_rf = self.frep * 1e-6 / 2
+                region -= factor_rf * (len(self.region_list) - 1)
+            self.lr_rf.setRegion(region)
+
 
 if __name__ == '__main__':
     app = qt.QApplication([])
-    hey = Gui()
+    gui = Gui()
     app.exec()
