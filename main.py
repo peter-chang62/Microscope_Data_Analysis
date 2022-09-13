@@ -3,7 +3,6 @@ the purpose of figuring out the lock window. Specifically, I would like to be ab
 would fall inside the nyquist window in both the optical domain, and in the DCS frequency domain, and be able to see
 where the f0's would fall """
 
-import copy
 import threading
 import numpy as np
 import scipy.constants as sc
