@@ -19,14 +19,20 @@
      <layout class="QVBoxLayout" name="verticalLayout_6">
       <item>
        <widget class="QGroupBox" name="groupBox">
+        <property name="minimumSize">
+         <size>
+          <width>231</width>
+          <height>79</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>217</width>
+          <width>231</width>
           <height>79</height>
          </size>
         </property>
         <property name="title">
-         <string>GroupBox</string>
+         <string>Laser Spectrum Overlap Wavelength Range</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">
@@ -62,14 +68,20 @@
       </item>
       <item>
        <widget class="QGroupBox" name="groupBox_2">
+        <property name="minimumSize">
+         <size>
+          <width>231</width>
+          <height>79</height>
+         </size>
+        </property>
         <property name="maximumSize">
          <size>
-          <width>206</width>
+          <width>231</width>
           <height>79</height>
          </size>
         </property>
         <property name="title">
-         <string>GroupBox</string>
+         <string>Laser Offset Frequencies</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
