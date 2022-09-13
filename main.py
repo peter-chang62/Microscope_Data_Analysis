@@ -92,8 +92,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.connect()
 
         self.verticalScrollBar.setMinimum(50)
-        self.verticalScrollBar.setPageStep(1)
-        self.verticalScrollBar.setSingleStep(1)
+        self.verticalScrollBar.setSingleStep(10)
 
         self.update_wl_max()
         self.update_wl_min()
