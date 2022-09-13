@@ -82,11 +82,11 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lcd.setSegmentStyle(qt.QLCDNumber.Flat)
         self.lcd.setDigitCount(6)
 
-        self.nu_min = sc.c / 5e-6
-        self.nu_max = sc.c / 3e-6
-        self.f01 = 240e6
-        self.f02 = 280e6
-        self.frep = 1000e6
+        self.nu_min = sc.c / (float(self.le_max_wl.text()) * 1e-6)
+        self.nu_max = sc.c / (float(self.le_min_wl.text()) * 1e-6)
+        self.f01 = float(self.le_f01.text()) * 1e6
+        self.f02 = float(self.le_f02.text()) * 1e6
+        self.frep = float(self.le_rep_rate.text()) * 1e6
         self.dfrep = 50
 
         self.connect()
