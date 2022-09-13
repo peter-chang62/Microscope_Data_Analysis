@@ -255,8 +255,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         alias = self.nu_min < last_window[0]
         if alias:
             self.lr_rf.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0)))
+            self.lr.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0, 255 // 2)))
         else:
             self.lr_rf.setBrush(pg.mkBrush(color=qtg.QColor(0, 255, 0)))
+            self.lr.setBrush(pg.mkBrush(color=qtg.QColor(0, 255, 0, 255 // 2)))
 
         compression = self.frep / self.dfrep
         vi_rf = self.nu_min / compression
