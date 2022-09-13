@@ -52,17 +52,14 @@ wl = np.where(nu > 0, sc.c * 1e6 / nu, np.nan)
 
 if Nyquist_Window % 2 == 0:
     spec_final = spec[:center]  # negative frequency side
+    lab_freq = np.linspace(-500, 0, center)
 else:
     spec_final = spec[center:]  # positive frequency side
+    lab_freq = np.linspace(0, 500, center)
 
 # ______________________________________________________________________________________________________________________
 plt.figure()
 plt.plot(wl, spec_final)
 
-nyq = center * frep
-dfr = nq.bandwidth(frep, nyq)
-
-# ______________________________________________________________________________________________________________________
-vi = sc.c / 3.85e-6
-vf = sc.c / 2.9e-6
-window_bounds = nq.find_allowed_nyquist_bandwidths(vi, vf)[::-1]
+plt.figure()
+plt.plot(lab_freq, spec_final)
