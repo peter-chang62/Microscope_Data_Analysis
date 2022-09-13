@@ -47,7 +47,15 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
                                             self.le_ymax_2,
                                             self.gv_2)
         self.lr = pg.LinearRegionItem()
+        self.lr_nyquist = pg.LinearRegionItem()
+        self.lr.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 2)))
+        self.lr_nyquist.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 4)))
+        self.lr.setMovable(False)
+        self.lr_nyquist.setMovable(False)
+
+        self.plot_window_optical.plotwidget.addItem(self.lr_nyquist)
         self.plot_window_optical.plotwidget.addItem(self.lr)
+
         self.curve_optical = pw.create_curve()
         self.curve_rf = pw.create_curve()
         self.plot_window_optical.plotwidget.addItem(self.curve_optical)
@@ -78,6 +86,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         self.update_wl_max()
         self.update_wl_min()
+        self.update_nyquist()
 
     def connect(self):
         self.le_min_wl.editingFinished.connect(self.update_wl_min)
@@ -173,6 +182,10 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.dfrep = dfrep
         self.verticalScrollBar.setValue(self.dfrep)
+
+    def update_nyquist(self):
+        bandwidth = nq.bandwidth(self.frep, self.dfrep)
+        self.lr_nyquist.setRegion([0, bandwidth * 1e-12])
 
 
 if __name__ == '__main__':
