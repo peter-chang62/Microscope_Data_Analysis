@@ -135,7 +135,8 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
 
     def set_scrollbar_max(self):
-        max_dfr = nq.find_allowed_dfr(self.nu_min, self.nu_max, self.frep)[-1][-1]
+        dnu = self.nu_max - self.nu_min
+        max_dfr = nq.bandwidth(self.frep, dnu)
         if max_dfr < 1e5:
             self.verticalScrollBar.setMaximum(int(np.round(max_dfr)))
         self.lr.setRegion([self.nu_min * 1e-12, self.nu_max * 1e-12])
@@ -153,6 +154,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         # _____________________________________ updates based on min wavelength ________________________________________
         self.set_scrollbar_max()
+        self.update_rf_plot()
 
     def update_wl_max(self):
         wl_max = float(self.le_max_wl.text())
@@ -167,6 +169,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         # _____________________________________ updates based on max wavelength ________________________________________
         self.set_scrollbar_max()
+        self.update_rf_plot()
 
     def update_f01(self):
         f01 = float(self.le_f01.text())
