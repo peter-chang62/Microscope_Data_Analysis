@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>771</width>
+    <width>785</width>
     <height>637</height>
    </rect>
   </property>
@@ -297,7 +297,7 @@
           </layout>
          </item>
          <item row="0" column="0">
-          <widget class="QFrame" name="">
+          <widget class="QFrame" name="frame">
            <property name="maximumSize">
             <size>
              <width>97</width>
@@ -495,7 +495,7 @@
           </layout>
          </item>
          <item row="0" column="0">
-          <widget class="QFrame" name="">
+          <widget class="QFrame" name="frame">
            <property name="maximumSize">
             <size>
              <width>97</width>
@@ -585,6 +585,12 @@
     </item>
     <item>
      <widget class="QScrollBar" name="verticalScrollBar">
+      <property name="minimumSize">
+       <size>
+        <width>31</width>
+        <height>0</height>
+       </size>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -597,7 +603,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>771</width>
+     <width>785</width>
      <height>21</height>
     </rect>
    </property>
