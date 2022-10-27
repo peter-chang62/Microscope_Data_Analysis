@@ -14,6 +14,8 @@ from Gui_DCS_Lockpoints import Ui_MainWindow
 import pyqtgraph as pg
 import nyquist_bandwidths as nq
 
+min_dfrep = 1
+
 
 class ErrorWindow(qt.QWidget, Ui_Form):
     def __init__(self):
@@ -87,11 +89,11 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.f01 = float(self.le_f01.text()) * 1e6
         self.f02 = float(self.le_f02.text()) * 1e6
         self.frep = float(self.le_rep_rate.text()) * 1e6
-        self.dfrep = 50
+        self.dfrep = min_dfrep
 
         self.connect()
 
-        self.verticalScrollBar.setMinimum(50)
+        self.verticalScrollBar.setMinimum(min_dfrep)
         self.verticalScrollBar.setSingleStep(10)
 
         self.update_wl_max()
@@ -214,8 +216,8 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
     def update_dfrep_from_le(self):
         dfrep = int(self.le_dfrep.text())
-        if not 50 <= dfrep <= 1e5:
-            raise_error(self.error_window, "delta frep must be 50 <= dfrep <= 100,000")
+        if not min_dfrep <= dfrep <= 1e5:
+            raise_error(self.error_window, f"delta frep must be {min_dfrep} <= dfrep <= 100,000")
             self.le_dfrep.setText(str(self.dfrep))
             return
         self.dfrep = dfrep
