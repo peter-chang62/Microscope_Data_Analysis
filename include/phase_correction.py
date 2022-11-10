@@ -92,12 +92,22 @@ def get_ind_total_to_throw(data, ppifg):
     bckgnd = np.copy(data)
     # remove all the interferograms
     bckgnd[:, center - 50:center + 50] = 0.0
-    # the first maximum of the baseline gives the incident wave
-    ind_incident = np.argmax(bckgnd.flatten()[:int(3e6)])
-    # clear the incident wave, and look for the reflected one
-    # don't let it look too far, in case there are subsequent shocks from reflection off the far end wall
-    skip = ind_incident + int(1e4)
-    ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
+
+    # switched to trying this instead __________________________________________________________________________________
+    bckgnd = bckgnd.flatten()
+    ind1 = np.argmax(bckgnd)
+    bckgnd_ = bckgnd.copy()
+    bckgnd_[ind1 - int(1e4): ind1 + int(1e4)] = 0
+    ind2 = np.argmax(bckgnd_)
+    ind_incident, ind_reflected = sorted([ind1, ind2])
+    # switched to trying this instead __________________________________________________________________________________
+
+    # # the first maximum of the baseline gives the incident wave
+    # ind_incident = np.argmax(bckgnd.flatten()[:int(3e6)])
+    # # clear the incident wave, and look for the reflected one
+    # # don't let it look too far, in case there are subsequent shocks from reflection off the far end wall
+    # skip = ind_incident + int(1e4)
+    # ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
 
     # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
     ind_incident += ind_THREW_OUT + ppifg // 2
