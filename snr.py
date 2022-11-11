@@ -10,7 +10,7 @@ import scipy.signal as si
 cr.style_sheet()
 
 # ______________________________________ load data _____________________________________________________________________
-path = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope\FreeRunningSpectra\11-09-2022/"
+path = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
 bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode='r')
 su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy", mmap_mode='r')
 ppifg = len(bckgnd[0])
