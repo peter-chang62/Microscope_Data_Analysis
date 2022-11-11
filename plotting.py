@@ -7,6 +7,8 @@ import os
 
 if os.name == 'posix':
     path = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/CLEO_2023/data_to_plot/"
+else:
+    path = r"C:\Users\Peter\SynologyDrive\Research_Projects\Microscope\CLEO_2023\data_to_plot/"
 
 cr.style_sheet()
 
