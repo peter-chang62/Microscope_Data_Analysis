@@ -49,7 +49,9 @@ def calculate_snr(data, plot=False):
         x = x - np.mean(x)
         ft = pc.fft(x).__abs__()
         num = ft[ll:ul]
-        noise = np.std(num / denom)
+        absorption = num / denom
+        absorbance = - np.log(absorption)
+        noise = np.std(absorbance)
         NOISE[n] = noise
 
         n += 1
@@ -65,5 +67,6 @@ def calculate_snr(data, plot=False):
 
     return np.c_[t, NOISE], avg
 
-# sigma_bckgnd, avg_bckgnd = calculate_snr(bckgnd)
-# sigma_su8, avg_su8 = calculate_snr(su8)
+
+sigma_bckgnd, avg_bckgnd = calculate_snr(bckgnd)
+sigma_su8, avg_su8 = calculate_snr(su8)
