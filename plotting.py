@@ -42,24 +42,17 @@ cmap = 'cividis'
 
 # group 3
 fig, ax = plt.subplots(1, 1)
-ax.pcolormesh(x_group3, y_group3, i_group3, cmap=cmap)
+ax.pcolormesh(x_group3 - x_group3.min(), y_group3 - y_group3.min(), i_group3, cmap=cmap)
 ax.set_xlabel("$\mathrm{\mu m}$")
 ax.set_ylabel("$\mathrm{\mu m}$")
 cr.square()
 
 # smallest patterns in group 3
 fig, ax = plt.subplots(1, 1)
-ax.pcolormesh(x_bar, y_bar, i_bar, cmap=cmap)
+ax.pcolormesh(x_bar - x_bar.min(), y_bar - y_bar.min(), i_bar, cmap=cmap)
 cr.square()
 
 # number 4
 fig, ax = plt.subplots(1, 1)
-ax.pcolormesh(x_num4, y_num4, i_num4, cmap=cmap)
+ax.pcolormesh(x_num4 - x_num4.min(), y_num4 - y_num4.min(), i_num4, cmap=cmap)
 cr.square()
-
-fig, ax = plt.subplots(1, 2)
-ax[0].plot(wl, bckgnd / 26.5e3)
-ax[0].set_ylim(0, 1)
-ax[1].loglog(snr_bckgnd[:, 0], snr_bckgnd[:, 1], 'o')
-ax[0].set_xlabel("wavelength ($\mathrm{\mu m}$)")
-ax[1].set_xlabel("time (s)")
