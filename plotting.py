@@ -10,7 +10,7 @@ import phase_correction as pc
 if os.name == 'posix':
     path = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/CLEO_2023/data_to_plot/"
 else:
-    path = r"C:\Users\fastdaq\SynologyDrive\Research_Projects\Microscope\CLEO_2023\data_to_plot/"
+    path = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope\CLEO_2023\data_to_plot/"
 
 cr.style_sheet()
 
@@ -38,6 +38,27 @@ bckgnd = abs(pc.fft(avg_bckgnd)[center:])
 su8 = abs(pc.fft(avg_su8)[center:])
 
 # ______________________________________________________ plotting ______________________________________________________
+wl_ll, wl_ul = 3.25, 3.6
+ind_ll, ind_ul = np.argmin(abs(wl - wl_ul)), np.argmin(abs(wl - wl_ll))
+
+abs_group3 = s_group3 / s_group3[0, 0]
+abs_group3 = - np.log(abs_group3)
+i_group3 = simps(abs_group3[:, :, ind_ll:ind_ul], axis=-1)
+i_group3 -= i_group3.min()
+i_group3 *= -1
+
+abs_bar = s_bar / s_bar[0, 0]
+abs_bar = - np.log(abs_bar)
+i_bar = simps(abs_bar[:, :, ind_ll:ind_ul], axis=-1)
+i_bar -= i_bar.min()
+i_bar *= -1
+
+abs_num4 = s_num4 / s_num4[0, 0]
+abs_num4 = - np.log(abs_num4)
+i_num4 = simps(abs_num4[:, :, ind_ll:ind_ul], axis=-1)
+i_num4 -= i_num4.min()
+i_num4 *= -1
+
 cmap = 'cividis'
 
 # group 3
