@@ -8,6 +8,7 @@ import phase_correction as pc
 import scipy.signal as si
 import os
 import scipy.constants as sc
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 cr.style_sheet()
 
@@ -92,10 +93,18 @@ bckgnd_1000 = abs(pc.fft(np.mean(bckgnd[:int(1e3)], axis=0)))[center:]
 su8_1000 = abs(pc.fft(np.mean(su8[:int(1e3)], axis=0)))[center:]
 
 fig, ax = plt.subplots(1, 2, figsize=np.array([13.04, 4.8]))
-ax[0].plot(wl, -np.log(su8_100 / bckgnd_100), label=f"{np.round(dt * 100 * 1e3, 2)} ms")
-ax[0].plot(wl, -np.log(su8_1000 / bckgnd_1000), label=f"{np.round(dt * 1000 * 1e3, 2)} ms")
+ax[0].plot(wl, -np.log(su8_100 / bckgnd_100),
+           # label=f"{np.round(dt * 100 * 1e3, 2)} ms",
+           label=f"100 averages"
+           )
+ax[0].plot(wl, -np.log(su8_1000 / bckgnd_1000),
+           # label=f"{np.round(dt * 1000 * 1e3, 2)} ms",
+           label=f"1000 averages"
+           )
 ax[0].plot(wl, -np.log(abs(pc.fft(avg_su8))[center:] / abs(pc.fft(avg_bckgnd))[center:]),
-           label=f"{np.round(dt * len(bckgnd), 1)} s")
+           # label=f"{np.round(dt * len(bckgnd), 1)} s",
+           label=f"{len(bckgnd)} averages"
+           )
 ax[0].legend(loc='best')
 ax[0].set_xlim(3.25, 3.6)
 ax[0].set_ylim(-.5, 2.5)
@@ -104,3 +113,12 @@ ax[0].set_xlabel("wavelength $\mathrm{\mu m}$")
 ax[1].loglog(sigma_su8[:, 0], sigma_su8[:, 1], 'o')
 ax[1].set_xlabel("time (s)")
 ax[1].set_ylabel("absorbance noise")
+axis = ax[1].twiny()
+axis.loglog(sigma_su8[:, 0] / dt, sigma_su8[:, 1], 'o')
+axis.set_xlabel("# of averages")
+
+axins = inset_axes(ax[0], width="25%", height="30%", loc="upper right")
+axins.plot(wl, abs(pc.fft(avg_bckgnd))[center:] / 30e3)
+axins.plot(wl, abs(pc.fft(avg_su8))[center:] / 30e3)
+axins.set_ylim(0, 1)
+axins.set_yticks([])
