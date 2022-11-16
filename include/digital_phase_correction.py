@@ -67,8 +67,9 @@ def apply_t0_and_phi0_shift(pdiff, data):
     apply_t0_shift(pdiff, freq, fft)
     td = pc.ifft(fft, 1).real
 
-    hbt = ss.hilbert(td)
-    apply_phi0_shift(pdiff, hbt)
-    hbt = hbt.real
+    # td is the linear phase corrected time domain data
+    hbt = ss.hilbert(td)  # take hilbert transform of the linear phase corrected time domain data
+    apply_phi0_shift(pdiff, hbt)  # multiply by constant phase offset
+    hbt = hbt.real  # just take the real (no inverse)
 
     data[:] = hbt.real
