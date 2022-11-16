@@ -5,7 +5,7 @@ from scipy.integrate import simps
 from images import *
 import os
 import scipy.constants as sc
-import phase_correction as pc
+import digital_phase_correction as dpc
 
 if os.name == 'posix':
     path = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/CLEO_2023/data_to_plot/"
@@ -34,8 +34,8 @@ Nyq_freq = frep * center
 nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
 
-bckgnd = abs(pc.fft(avg_bckgnd)[center:])
-su8 = abs(pc.fft(avg_su8)[center:])
+bckgnd = abs(dpc.fft(avg_bckgnd)[center:])
+su8 = abs(dpc.fft(avg_su8)[center:])
 
 # ______________________________________________________ plotting ______________________________________________________
 wl_ll, wl_ul = 3.25, 3.6

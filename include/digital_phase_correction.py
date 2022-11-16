@@ -1,7 +1,39 @@
 import numpy as np
-import phase_correction as pc
 import scipy.signal as ss
 import matplotlib.pyplot as plt
+
+try:
+    import mkl_fft
+except:
+    mkl_fft = np.fft
+
+
+def fft(x, axis=None):
+    """
+    calculates the 1D fft of the numpy array x
+    if x is not 1D you need to specify the axis
+    """
+
+    if axis is None:
+        return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x)))
+    else:
+        return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+
+
+def ifft(x, axis=None):
+    """
+    calculates the 1D ifft of the numpy array x
+    if x is not 1D you need to specify the axis
+    """
+
+    if axis is None:
+        return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x)))
+    else:
+        return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+
+
+def normalize(vec):
+    return vec / np.max(abs(vec))
 
 
 # useful for plotting and determining good apodization window
@@ -9,21 +41,21 @@ import matplotlib.pyplot as plt
 def get_phase(dat, N_apod, plot=True):
     ppifg = len(dat)
     center = ppifg // 2
-    fft = pc.fft(dat[center - N_apod // 2: center + N_apod // 2])
-    phase = np.unwrap(np.arctan2(fft.imag, fft.real))
+    ft = fft(dat[center - N_apod // 2: center + N_apod // 2])
+    phase = np.unwrap(np.arctan2(ft.imag, ft.real))
     freq = np.fft.fftshift(np.fft.fftfreq(len(phase)))
 
     if plot:
         plt.figure()
-        plt.plot(freq, pc.normalize(phase), '.-')
-        plt.plot(freq, pc.normalize(fft.__abs__()), '.-')
-    return freq, phase, fft.__abs__()
+        plt.plot(freq, normalize(phase), '.-')
+        plt.plot(freq, normalize(ft.__abs__()), '.-')
+    return freq, phase, ft.__abs__()
 
 
-def apply_t0_shift(pdiff, freq, fft):
+def apply_t0_shift(pdiff, freq, ft):
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
-    fft[:] *= np.exp(1j * freq * pdiff[:, 0][:, np.newaxis])
+    ft[:] *= np.exp(1j * freq * pdiff[:, 0][:, np.newaxis])
 
 
 def apply_phi0_shift(pdiff, hbt):
@@ -49,11 +81,11 @@ def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
     # not fftshifted
-    fft = pc.fft(zoom, 1)
-    freq = np.fft.fftshift(np.fft.fftfreq(len(fft[0])))
+    ft = fft(zoom, 1)
+    freq = np.fft.fftshift(np.fft.fftfreq(len(ft[0])))
     ll, ul = np.argmin(abs(freq - ll_freq)), np.argmin(abs(freq - ul_freq))
 
-    phase = np.unwrap(np.arctan2(fft.imag, fft.real))
+    phase = np.unwrap(np.arctan2(ft.imag, ft.real))
     phase = phase.T  # column order for polynomial fitting
     p = np.polyfit(freq[ll:ul], phase[ll:ul], 1).T
     pdiff = p[0] - p
@@ -63,9 +95,9 @@ def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
 
 def apply_t0_and_phi0_shift(pdiff, data):
     freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
-    fft = pc.fft(data, 1)
-    apply_t0_shift(pdiff, freq, fft)
-    td = pc.ifft(fft, 1).real
+    ft = fft(data, 1)
+    apply_t0_shift(pdiff, freq, ft)
+    td = ifft(ft, 1).real
 
     # td is the linear phase corrected time domain data
     hbt = ss.hilbert(td)  # take hilbert transform of the linear phase corrected time domain data

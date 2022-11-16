@@ -4,11 +4,11 @@ sys.path.append("include/")
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
-import phase_correction as pc
 import scipy.signal as si
 import os
 import scipy.constants as sc
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+import digital_phase_correction as dpc
 
 cr.style_sheet()
 
@@ -28,7 +28,7 @@ def calculate_snr(data, plot=False):
     # ______________________________________ calculate background ______________________________________________________
     avg = np.mean(data, 0)
     avg = avg - np.mean(avg)
-    ft_avg = pc.fft(avg).__abs__()
+    ft_avg = dpc.fft(avg).__abs__()
 
     # low pass filtered background
     b_lp, a_lp = si.butter(4, .20, 'low')
@@ -43,7 +43,7 @@ def calculate_snr(data, plot=False):
     # ______________________________________ calculate cumulative average ______________________________________________
     x = data[0]
     x = x - np.mean(x)
-    ft = pc.fft(x).__abs__()
+    ft = dpc.fft(x).__abs__()
     num = ft[ll:ul]
     absorption = num / denom
     absorbance = - np.log(absorption)
@@ -56,7 +56,7 @@ def calculate_snr(data, plot=False):
     for dat in data[1:]:
         x = x * n / (n + 1) + dat / (n + 1)
         x = x - np.mean(x)
-        ft = pc.fft(x).__abs__()
+        ft = dpc.fft(x).__abs__()
         num = ft[ll:ul]
         absorption = num / denom
         absorbance = - np.log(absorption)
@@ -87,10 +87,10 @@ nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
 dt = ppifg / frep
 
-bckgnd_100 = abs(pc.fft(np.mean(bckgnd[:int(1e2)], axis=0)))[center:]
-su8_100 = abs(pc.fft(np.mean(su8[:int(1e2)], axis=0)))[center:]
-bckgnd_1000 = abs(pc.fft(np.mean(bckgnd[:int(1e3)], axis=0)))[center:]
-su8_1000 = abs(pc.fft(np.mean(su8[:int(1e3)], axis=0)))[center:]
+bckgnd_100 = abs(dpc.fft(np.mean(bckgnd[:int(1e2)], axis=0)))[center:]
+su8_100 = abs(dpc.fft(np.mean(su8[:int(1e2)], axis=0)))[center:]
+bckgnd_1000 = abs(dpc.fft(np.mean(bckgnd[:int(1e3)], axis=0)))[center:]
+su8_1000 = abs(dpc.fft(np.mean(su8[:int(1e3)], axis=0)))[center:]
 
 fig, ax = plt.subplots(1, 2, figsize=np.array([13.04, 4.8]))
 ax[0].plot(wl, -np.log(su8_100 / bckgnd_100),
@@ -101,7 +101,7 @@ ax[0].plot(wl, -np.log(su8_1000 / bckgnd_1000),
            # label=f"{np.round(dt * 1000 * 1e3, 2)} ms",
            label=f"1000 averages"
            )
-ax[0].plot(wl, -np.log(abs(pc.fft(avg_su8))[center:] / abs(pc.fft(avg_bckgnd))[center:]),
+ax[0].plot(wl, -np.log(abs(dpc.fft(avg_su8))[center:] / abs(dpc.fft(avg_bckgnd))[center:]),
            # label=f"{np.round(dt * len(bckgnd), 1)} s",
            label=f"{len(bckgnd)} averages"
            )
@@ -118,8 +118,8 @@ axis.loglog(sigma_su8[:, 0] / dt, sigma_su8[:, 1], 'o')
 axis.set_xlabel("# of averages")
 
 axins = inset_axes(ax[0], width="25%", height="30%", loc="upper right")
-axins.plot(wl, abs(pc.fft(avg_bckgnd))[center:] / 30e3)
-axins.plot(wl, abs(pc.fft(avg_su8))[center:] / 30e3)
+axins.plot(wl, abs(dpc.fft(avg_bckgnd))[center:] / 30e3)
+axins.plot(wl, abs(dpc.fft(avg_su8))[center:] / 30e3)
 axins.set_ylim(0, 1)
 axins.set_xlim(2.9, 3.8)
 axins.set_yticks([])

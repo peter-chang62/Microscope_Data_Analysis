@@ -1,3 +1,5 @@
+"""old phase correction code using cross correlation + some useful functions """
+
 import numpy as np
 from scipy.signal import windows as wd
 import os
