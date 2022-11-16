@@ -3,9 +3,9 @@ import scipy.signal as ss
 import matplotlib.pyplot as plt
 
 try:
-    import mkl_fft
+    import mkl_fft  # a faster fft
 except:
-    mkl_fft = np.fft
+    mkl_fft = np.fft  # otherwise just use numpy's fft
 
 
 def fft(x, axis=None):
@@ -36,8 +36,8 @@ def normalize(vec):
     return vec / np.max(abs(vec))
 
 
-# useful for plotting and determining good apodization window
-# to fit spectral phase
+# useful for plotting in order to determine good apodization window
+# and frequency window to fit spectral phase
 def get_phase(dat, N_apod, plot=True):
     ppifg = len(dat)
     center = ppifg // 2
@@ -52,12 +52,14 @@ def get_phase(dat, N_apod, plot=True):
     return freq, phase, ft.__abs__()
 
 
+# modifies the ft array in place
 def apply_t0_shift(pdiff, freq, ft):
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
     ft[:] *= np.exp(1j * freq * pdiff[:, 0][:, np.newaxis])
 
 
+# modifies the hbt array in place
 def apply_phi0_shift(pdiff, hbt):
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
@@ -93,6 +95,7 @@ def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
     return pdiff
 
 
+# modifies the data array in place
 def apply_t0_and_phi0_shift(pdiff, data):
     freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
     ft = fft(data, 1)
