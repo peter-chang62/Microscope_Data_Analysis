@@ -38,7 +38,7 @@ def normalize(vec):
 
 # useful for plotting in order to determine good apodization window
 # and frequency window to fit spectral phase
-def get_phase(dat, N_apod, plot=True):
+def get_phase(dat, N_apod, plot=True, new_figure=True):
     ppifg = len(dat)
     center = ppifg // 2
     ft = fft(dat[center - N_apod // 2: center + N_apod // 2])
@@ -46,7 +46,8 @@ def get_phase(dat, N_apod, plot=True):
     freq = np.fft.fftshift(np.fft.fftfreq(len(phase)))
 
     if plot:
-        plt.figure()
+        if new_figure:
+            plt.figure()
         plt.plot(freq, normalize(phase), '.-')
         plt.plot(freq, normalize(ft.__abs__()), '.-')
     return freq, phase, ft.__abs__()
