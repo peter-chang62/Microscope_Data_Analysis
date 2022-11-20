@@ -92,6 +92,7 @@ su8_100 = abs(dpc.fft(np.mean(su8[:int(1e2)], axis=0)))[center:]
 bckgnd_1000 = abs(dpc.fft(np.mean(bckgnd[:int(1e3)], axis=0)))[center:]
 su8_1000 = abs(dpc.fft(np.mean(su8[:int(1e3)], axis=0)))[center:]
 
+# ________________ figure iteration 1 __________________________________________________________________________________
 fig, ax = plt.subplots(1, 2, figsize=np.array([13.04, 4.8]))
 ax[0].plot(wl, -np.log(su8_100 / bckgnd_100),
            # label=f"{np.round(dt * 100 * 1e3, 2)} ms",
@@ -123,3 +124,36 @@ axins.plot(wl, abs(dpc.fft(avg_su8))[center:] / 30e3)
 axins.set_ylim(0, 1)
 axins.set_xlim(2.9, 3.8)
 axins.set_yticks([])
+
+# ________________ figure iteration 2 __________________________________________________________________________________
+fig, ax = plt.subplots(1, 3, figsize=np.array([14.78, 4.8]))
+ax[1].plot(wl, -np.log(su8_100 / bckgnd_100),
+           # label=f"{np.round(dt * 100 * 1e3, 2)} ms",
+           label=f"100 averages"
+           )
+ax[1].plot(wl, -np.log(su8_1000 / bckgnd_1000),
+           # label=f"{np.round(dt * 1000 * 1e3, 2)} ms",
+           label=f"1000 averages"
+           )
+ax[1].plot(wl, -np.log(abs(dpc.fft(avg_su8))[center:] / abs(dpc.fft(avg_bckgnd))[center:]),
+           # label=f"{np.round(dt * len(bckgnd), 1)} s",
+           label=f"{len(bckgnd)} averages"
+           )
+ax[1].legend(loc='best')
+ax[1].set_xlim(3.25, 3.6)
+ax[1].set_ylim(-.5, 2.5)
+ax[1].set_ylabel("absorbance")
+ax[1].set_xlabel("wavelength ($\mathrm{\mu m}$)")
+ax[0].plot(wl, abs(dpc.fft(avg_bckgnd))[center:] / 30e3, label='background')
+ax[0].plot(wl, abs(dpc.fft(avg_su8))[center:] / 30e3, label='SU-8')
+ax[0].set_ylim(0, 1)
+ax[0].set_xlim(2.9, 3.8)
+ax[0].set_ylabel("a.u.")
+ax[0].set_xlabel("wavelength ($\mathrm{\mu m}$)")
+ax[0].legend(loc='best')
+ax[2].loglog(sigma_su8[:, 0], sigma_su8[:, 1], 'o')
+ax[2].set_xlabel("time (s)")
+ax[2].set_ylabel("absorbance noise")
+axis = ax[2].twiny()
+axis.loglog(sigma_su8[:, 0] / dt, sigma_su8[:, 1], 'o')
+axis.set_xlabel("# of averages")

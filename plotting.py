@@ -22,20 +22,12 @@ ind_inbw_patt = [57, 35]
 ind_inbw_bar = [30, 27]
 ind_on_bar = [24, 19]
 
-snr_bckgnd = np.load(path + "snr_bckgnd.npy")
-snr_su8 = np.load(path + "snr_su8.npy")
-avg_bckgnd = np.load(path + "avg_bckgnd.npy")
-avg_su8 = np.load(path + "avg_su8.npy")
-
 frep = 1e9
 ppifg = 74180
 center = ppifg // 2
 Nyq_freq = frep * center
 nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
-
-bckgnd = abs(dpc.fft(avg_bckgnd)[center:])
-su8 = abs(dpc.fft(avg_su8)[center:])
 
 # ______________________________________________________ plotting ______________________________________________________
 wl_ll, wl_ul = 3.25, 3.6
@@ -62,8 +54,10 @@ i_num4 *= -1
 cmap = 'cividis'
 
 # group 3
+x_group3_ = x_group3 - x_group3.min()
+ind = np.argmin(abs(x_group3_ - 550))
 fig, ax = plt.subplots(1, 1)
-ax.pcolormesh(x_group3 - x_group3.min(), y_group3 - y_group3.min(), i_group3, cmap=cmap)
+ax.pcolormesh(x_group3_[ind:], y_group3 - y_group3.min(), i_group3[:, ind:], cmap=cmap)
 ax.set_xlabel("$\mathrm{\mu m}$")
 ax.set_ylabel("$\mathrm{\mu m}$")
 cr.square()
