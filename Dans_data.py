@@ -10,7 +10,7 @@ import phase_correction as pc
 clipboard_and_style_sheet.style_sheet()
 
 # ________________________________________________ path and load data __________________________________________________
-path = r"C:\Users\Peter\Downloads/"
+path = r"/home/peterchang/Downloads/"
 data = np.genfromtxt(path + "Data.txt")
 T = np.genfromtxt(path + "t_axis.txt")
 N = np.arange(-len(data[0]) // 2, len(data[0]) // 2)
@@ -25,9 +25,9 @@ apod = 5000
 # plt.axvline(apod // 2)
 
 # ________________________________________________ fitting phase, find frequency fit window ____________________________
-dpc.get_phase(data[np.random.randint(0, len(data))], apod, True, False)
-dpc.get_phase(data[np.random.randint(0, len(data))], apod, True, False)
-dpc.get_phase(data[np.random.randint(0, len(data))], apod, True, False)
+f, p, a, ax, ax2 = dpc.get_phase(data[np.random.randint(0, len(data))], apod)
+dpc.get_phase(data[np.random.randint(0, len(data))], apod, ax=ax, ax2=ax2)
+dpc.get_phase(data[np.random.randint(0, len(data))], apod, ax=ax, ax2=ax2)
 
 ll, ul = .200526, .202436
 # ll, ul = .20623, .20792
@@ -50,11 +50,12 @@ plt.figure()
 
 # ________________ same thing, but just do t0 correction via cross-correlation instead _________________________________
 data_ = np.genfromtxt(path + "Data.txt")
+data_ = (data.T - np.mean(data_, axis=1)).T
 data_, shift = pc.t0_correct_via_cross_corr(data_, 5000, False)
 
 plt.figure()
-avg = np.mean(data_, axis=0)
-ft = dpc.fft(avg)
+avg_2 = np.mean(data_, axis=0)
+ft = dpc.fft(avg_2)
 plt.plot(abs(ft))
 
 plt.figure()
