@@ -56,7 +56,7 @@ cmap = 'cividis'
 # group 3
 x_group3_ = x_group3 - x_group3.min()
 ind = np.argmin(abs(x_group3_ - 550))
-fig, ax = plt.subplots(1, 1)
+fig, ax = plt.subplots(1, 1, dpi=300)
 ax.pcolormesh(x_group3_[ind:], y_group3 - y_group3.min(), i_group3[:, ind:], cmap=cmap)
 ax.set_xlabel("$\mathrm{\mu m}$")
 ax.set_ylabel("$\mathrm{\mu m}$")
@@ -64,10 +64,20 @@ cr.square()
 
 # smallest patterns in group 3
 fig, ax = plt.subplots(1, 1)
+for i in ['left', 'right', 'top', 'bottom']:
+    ax.spines[i].set_linewidth(4)
+    ax.spines[i].set_color('g')
+    ax.spines[i].set_linestyle('dotted')
+ax.tick_params(width=4)
 ax.pcolormesh(x_bar - x_bar.min(), y_bar - y_bar.min(), i_bar, cmap=cmap)
 cr.square()
 
 # number 4
 fig, ax = plt.subplots(1, 1)
 ax.pcolormesh(x_num4 - x_num4.min(), y_num4 - y_num4.min(), i_num4, cmap=cmap)
+for i in ['left', 'right', 'top', 'bottom']:
+    ax.spines[i].set_linewidth(4)
+    ax.spines[i].set_color('r')
+    ax.spines[i].set_linestyle('dotted')
+ax.tick_params(width=4)
 cr.square()
