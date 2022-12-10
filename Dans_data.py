@@ -10,7 +10,7 @@ import phase_correction as pc
 clipboard_and_style_sheet.style_sheet()
 
 # ________________________________________________ path and load data __________________________________________________
-path = r"/home/peterchang/Downloads/"
+path = r"data/Dans_interferograms/"
 data = np.genfromtxt(path + "Data.txt")
 T = np.genfromtxt(path + "t_axis.txt")
 N = np.arange(-len(data[0]) // 2, len(data[0]) // 2)
@@ -60,3 +60,6 @@ plt.plot(abs(ft))
 
 plt.figure()
 [plt.plot(i[center - 150 // 2:center + 300 // 2]) for i in data_]
+
+# for sublime-text
+plt.show()
