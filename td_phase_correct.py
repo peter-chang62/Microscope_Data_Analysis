@@ -64,8 +64,22 @@ for n, i in enumerate(data):
     print(res.x)
 
 # __________________________________________ optimization ______________________________________________________________
-for n, i in enumerate(corr):
+for n, i in enumerate(data):
     res = so.minimize(func2,
                       np.array([0]),
                       (i, corr[0]))
     print(res.x)
+
+# __________________________________________ some diagnostics __________________________________________________________
+# this is odd, it should have found a few of the optima... func2 is sooooo well behaved
+Phi = np.linspace(-2 * np.pi, 2 * np.pi, 500)
+F = np.zeros((len(data), len(Phi)))
+
+for n, i in enumerate(corr):
+    f = np.zeros(len(Phi))
+
+    for m, phi in enumerate(Phi):
+        f[m] = func2(phi, i, corr[0])
+
+    F[n] = f
+    print(n)
