@@ -1,6 +1,9 @@
 """" optimiztion in the time domain doesn't work! It never gives an answer different from the initial guess,
 even when it's obviously at an unstable maximum. """
 
+import sys
+
+sys.path.append("include/")
 import numpy as np
 import phase_correction as pc
 import scipy.signal as ss
