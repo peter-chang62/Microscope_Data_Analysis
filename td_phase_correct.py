@@ -7,6 +7,7 @@ import scipy.signal as ss
 import scipy.optimize as so
 import matplotlib.pyplot as plt
 
+zoom = 1500
 
 # shift a signal in time, I've vetted that this gives expected results
 def shift(x, dt):
@@ -25,7 +26,7 @@ def apply_phi0_shift(x, offst):
 
 
 # function to minimize, I've vetted that this at least looks physical
-def func(X, x, x0):
+def error_dt_offst(X, x, x0):
     dt, phi0 = X
 
     y = shift(x, dt)  # shift x by dt
@@ -36,12 +37,23 @@ def func(X, x, x0):
 
 # same as func but only with phase offset
 # I've vetted that this at least looks physical
-def func2(X, x, x0):
+def error_offst(X, x, x0):
     phi0 = X
 
     y = apply_phi0_shift(x, phi0)  # apply phase offset to x
     return np.mean((x0[center - zoom // 2: center + zoom // 2] -
                     y[center - zoom // 2: center + zoom // 2]) ** 2)
+
+
+class Optimize:
+    def __init__(self, data):
+        self.data = data
+
+    def error_shift_offst(self, X, n):
+        return error_dt_offst(X, self.data[n], self.data[0])
+
+    def error_offst(self, X, n):
+        return error_offst(X, self.data[n], self.data[0])
 
 
 # ____________________________________ load the data ___________________________________________________________________
@@ -52,34 +64,56 @@ N = np.arange(-len(data[0]) // 2, len(data[0]) // 2)
 ppifg = len(N)
 center = ppifg // 2
 
+data = (data.T / np.max(data, axis=1)).T
+data = (data.T - np.mean(data, axis=1)).T
+
 # ______________________________ calculate time shifts from cross correlation __________________________________________
-zoom = 1500
 corr, delta_t = pc.t0_correct_via_cross_corr(data, zoom, False)
 
 # __________________________________________ optimization ______________________________________________________________
+optimize = Optimize(data)
+offst_with_dt_guess = np.zeros((len(data), 2))
+CORR = data.copy()
+ERROR = np.zeros((len(data)))
 for n, i in enumerate(data):
-    res = so.minimize(func,
-                      np.array([delta_t[n], 0]),
-                      (i, data[0]))
+    # dt, phi0 = X
+    res = so.minimize(fun=optimize.error_shift_offst,
+                      # x0 = np.array([delta_t[n], 0]),
+                      x0=np.array([0, 0]),
+                      args=(n,),
+                      method='Nelder-Mead')
+    offst_with_dt_guess[n] = res.x
+    ERROR[n] = res.fun
+
+    x = shift(CORR[n], res.x[0])
+    x = apply_phi0_shift(x, res.x[1])
+    CORR[n] = x
+
     print(res.x)
 
 # __________________________________________ optimization ______________________________________________________________
-for n, i in enumerate(data):
-    res = so.minimize(func2,
-                      np.array([0]),
-                      (i, corr[0]))
-    print(res.x)
+# optimize = Optimize(data)
+# offst_no_dt_guess = np.zeros((len(data), 2))
+# for n, i in enumerate(data):
+#     res = so.minimize(optimize.error_offst,
+#                       np.array([0]),
+#                       (n,),
+#                       method='Powell')
+#     offst_no_dt_guess[n] = res.x
+#     print(res.x)
 
 # __________________________________________ some diagnostics __________________________________________________________
-# this is odd, it should have found a few of the optima... func2 is sooooo well behaved
-Phi = np.linspace(-2 * np.pi, 2 * np.pi, 500)
-F = np.zeros((len(data), len(Phi)))
-
-for n, i in enumerate(corr):
-    f = np.zeros(len(Phi))
-
-    for m, phi in enumerate(Phi):
-        f[m] = func2(phi, i, corr[0])
-
-    F[n] = f
-    print(n)
+# # this is odd, it should have found a few of the optima... func2 is sooooo well behaved
+# # looks like switching to Powell's method did the trick!
+# Phi = np.linspace(-2 * np.pi, 2 * np.pi, 500)
+# F = np.zeros((len(data), len(Phi)))
+#
+# optimize = Optimize(data)
+# for n, i in enumerate(optimize.data):
+#     f = np.zeros(len(Phi))
+#
+#     for m, phi in enumerate(Phi):
+#         f[m] = optimize.error_offst(phi, n)
+#
+#     F[n] = f
+#     print(n)
