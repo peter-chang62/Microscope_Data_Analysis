@@ -16,7 +16,7 @@ def shift(x, dt):
 
 
 # apply a phase offset, I've also vetted that this cycles the ceo phase by the expected amount
-def apply_phi0_shift(x, offst):
+def phi0_shift(x, offst):
     hbt = ss.hilbert(x)
     hbt *= np.exp(1j * offst)
     return hbt.real
@@ -28,7 +28,7 @@ def error_dt_offst(X, x, x0, zoom):
     ppifg = len(x)
     center = ppifg // 2
     y = shift(x, dt)  # shift x by dt
-    y = apply_phi0_shift(y, phi0)  # now apply phase offset to the shifted interferogram
+    y = phi0_shift(y, phi0)  # now apply phase offset to the shifted interferogram
     return np.mean((x0[center - zoom // 2: center + zoom // 2] -
                     y[center - zoom // 2: center + zoom // 2]) ** 2)
 
@@ -39,7 +39,7 @@ def error_offst(X, x, x0, zoom):
     phi0 = X
     ppifg = len(x)
     center = ppifg // 2
-    y = apply_phi0_shift(x, phi0)  # apply phase offset to x
+    y = phi0_shift(x, phi0)  # apply phase offset to x
     return np.mean((x0[center - zoom // 2: center + zoom // 2] -
                     y[center - zoom // 2: center + zoom // 2]) ** 2)
 
@@ -70,7 +70,7 @@ class Optimize:
             ERROR[n] = res.fun
 
             x = shift(CORR[n], res.x[0])
-            x = apply_phi0_shift(x, res.x[1])
+            x = phi0_shift(x, res.x[1])
             CORR[n] = x
 
             print(res.x)
