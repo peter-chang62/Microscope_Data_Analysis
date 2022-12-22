@@ -12,16 +12,27 @@ import digital_phase_correction as dpc
 
 cr.style_sheet()
 
+plt.ion()
+
 # ______________________________________ load data _____________________________________________________________________
 if os.name == 'posix':
-    path = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
+    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
 else:
-    path = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope\FreeRunningSpectra\11-09-2022/"
+    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\FreeRunningSpectra\\11-09-2022/"
 bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode='r')
 su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy", mmap_mode='r')
 ppifg = len(bckgnd[0])
 center = ppifg // 2
 frep = 1e9
+
+# ______________________________________ apodization ___________________________________________________________________
+apod = 1000
+bckgnd = bckgnd[:, center - apod // 2:center + apod // 2]
+su8 = su8[:, center - apod // 2:center + apod // 2]
+
+# subtract the DC baseline
+bckgnd = (bckgnd.T - np.mean(bckgnd, axis=1)).T
+su8 = (su8.T - np.mean(su8, axis=1)).T
 
 
 def calculate_snr(data, plot=False):
@@ -72,7 +83,7 @@ def calculate_snr(data, plot=False):
         fig, ax = plt.subplots(1, 1)
         ax.loglog(t, NOISE, 'o')
         ax.set_xlabel("time (s)")
-        ax.set_ylabel("$\mathrm{\sigma}$")
+        ax.set_ylabel("$\\mathrm{\\sigma}$")
 
     return np.c_[t, NOISE], avg
 
@@ -110,7 +121,7 @@ ax[0].legend(loc='best')
 ax[0].set_xlim(3.25, 3.6)
 ax[0].set_ylim(-.5, 2.5)
 ax[0].set_ylabel("absorbance")
-ax[0].set_xlabel("wavelength ($\mathrm{\mu m}$)")
+ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax[1].loglog(sigma_su8[:, 0], sigma_su8[:, 1], 'o')
 ax[1].set_xlabel("time (s)")
 ax[1].set_ylabel("absorbance noise")
@@ -143,13 +154,13 @@ ax[1].legend(loc='best')
 ax[1].set_xlim(3.25, 3.6)
 ax[1].set_ylim(-.5, 2.5)
 ax[1].set_ylabel("absorbance")
-ax[1].set_xlabel("wavelength ($\mathrm{\mu m}$)")
+ax[1].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax[0].plot(wl, abs(dpc.fft(avg_bckgnd))[center:] / 30e3, label='background')
 ax[0].plot(wl, abs(dpc.fft(avg_su8))[center:] / 30e3, label='SU-8')
 ax[0].set_ylim(0, 1)
 ax[0].set_xlim(2.9, 3.8)
 ax[0].set_ylabel("a.u.")
-ax[0].set_xlabel("wavelength ($\mathrm{\mu m}$)")
+ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax[0].legend(loc='best')
 ax[2].loglog(sigma_su8[:, 0], sigma_su8[:, 1], 'o')
 ax[2].set_xlabel("time (s)")

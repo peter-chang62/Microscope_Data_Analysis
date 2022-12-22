@@ -5,10 +5,10 @@ from scipy.integrate import simps
 import os
 
 if os.name == 'nt':
-    path_folder = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope\Images/"
+    path_folder = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\Images/"
 
 else:
-    path_folder = r"/home/peterchang/SynologyDrive/Research_Projects/Microscope/Images/"
+    path_folder = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/Images/"
 
 cr.style_sheet()
 
