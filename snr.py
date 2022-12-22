@@ -30,10 +30,6 @@ apod = 1000
 bckgnd = bckgnd[:, center - apod // 2:center + apod // 2]
 su8 = su8[:, center - apod // 2:center + apod // 2]
 
-# subtract the DC baseline
-bckgnd = (bckgnd.T - np.mean(bckgnd, axis=1)).T
-su8 = (su8.T - np.mean(su8, axis=1)).T
-
 
 def calculate_snr(data, plot=False):
     # ______________________________________ calculate background ______________________________________________________
