@@ -19,8 +19,10 @@ if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
 else:
     path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\FreeRunningSpectra\\11-09-2022/"
-bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode='r')
-su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy", mmap_mode='r')
+read_mode = "r"
+assert read_mode == "r", "if not you will literally overwrite the data file!!"
+bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode=read_mode)
+su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy", mmap_mode=read_mode)
 ppifg = len(bckgnd[0])
 center = ppifg // 2
 frep = 1e9
