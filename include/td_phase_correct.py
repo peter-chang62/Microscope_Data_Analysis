@@ -23,25 +23,33 @@ def phi0_shift(x, offst):
 
 
 # function to minimize, I've vetted that this at least looks physical
-def error_dt_offst(X, x, x0, zoom):
+def error_dt_offst(X, x, x0, zoom=None):
     dt, phi0 = X
     ppifg = len(x)
     center = ppifg // 2
     y = shift(x, dt)  # shift x by dt
     y = phi0_shift(y, phi0)  # now apply phase offset to the shifted interferogram
-    return np.mean((x0[center - zoom // 2: center + zoom // 2] -
-                    y[center - zoom // 2: center + zoom // 2]) ** 2)
+
+    if zoom is not None:
+        return np.mean((x0[center - zoom // 2: center + zoom // 2] -
+                        y[center - zoom // 2: center + zoom // 2]) ** 2)
+    else:
+        return np.mean((x0 - y) ** 2)
 
 
 # same as func but only with phase offset
 # I've vetted that this at least looks physical
-def error_offst(X, x, x0, zoom):
+def error_offst(X, x, x0, zoom=None):
     phi0 = X
     ppifg = len(x)
     center = ppifg // 2
     y = phi0_shift(x, phi0)  # apply phase offset to x
-    return np.mean((x0[center - zoom // 2: center + zoom // 2] -
-                    y[center - zoom // 2: center + zoom // 2]) ** 2)
+
+    if zoom is not None:
+        return np.mean((x0[center - zoom // 2: center + zoom // 2] -
+                        y[center - zoom // 2: center + zoom // 2]) ** 2)
+    else:
+        return np.mean((x0 - y) ** 2)
 
 
 class Optimize:

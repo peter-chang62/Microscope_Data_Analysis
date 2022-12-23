@@ -8,6 +8,10 @@ import numpy as np
 import phase_correction as pc
 import matplotlib.pyplot as plt
 import td_phase_correct as td
+import clipboard_and_style_sheet
+
+clipboard_and_style_sheet.style_sheet()
+plt.ion()
 
 # ____________________________________ load the data ___________________________________________________________________
 path = r"data/Dans_interferograms/"
