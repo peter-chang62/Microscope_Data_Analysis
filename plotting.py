@@ -15,6 +15,7 @@ else:
     path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\CLEO_2023\\data_to_plot/"
 
 cr.style_sheet()
+plt.ion()
 
 x_group3, y_group3, i_group3, s_group3 = group_3(False)
 x_num4, y_num4, i_num4, s_num4 = num_4(False)

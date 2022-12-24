@@ -1,3 +1,4 @@
+# %% imports
 import sys
 sys.path.append("include/")
 import numpy as np
@@ -13,6 +14,7 @@ cr.style_sheet()
 plt.ion()
 
 
+# %% function defs
 def calculate_snr(data, plot=False):
     # ______________________________________ calculate background ______________________________________________________
     avg = np.mean(data, 0)
@@ -66,7 +68,7 @@ def calculate_snr(data, plot=False):
     return np.c_[t, NOISE], avg, filtered
 
 
-# ______________________________________ load data _____________________________________________________________________
+# %% ___________________________________ load data _____________________________________________________________________
 if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
 else:
@@ -81,30 +83,32 @@ ppifg = len(bckgnd[0])
 center = ppifg // 2
 frep = 1e9
 
-# ______________________________________ apodize and re-phase correct __________________________________________________
+# %% ___________________________________ apodize and re-phase correct __________________________________________________
 # apodize
 apod = 1000
 bckgnd = bckgnd[:, center - apod // 2: center + apod // 2]
 su8 = su8[:, center - apod // 2: center + apod // 2]
 
+active_data = bckgnd
+
 # phase correct
-N = len(su8)
+N = len(active_data)
 zoom = 30
 X = np.zeros((N, apod))
-for n, x in enumerate(su8[:N]):
-    opt = td.Optimize(np.vstack([su8[0], x]))
+for n, x in enumerate(active_data[:N]):
+    opt = td.Optimize(np.vstack([active_data[0], x]))
     opt.phase_correct(zoom=zoom)
     corr = opt.CORR[1]
     X[n] = corr
-    print(len(su8[:N]) - n - 1)
+    print(len(active_data[:N]) - n - 1)
 
 # calculate SNR of apodized + phase corrected data
 sigma, avg, filt_avg = calculate_snr(X)
 
-# ______________________________________ plotting ______________________________________________________________________
+# %% ___________________________________ plotting ______________________________________________________________________
 plt.figure()
 plt.loglog(sigma[:, 0], sigma[:, 1], '.')
 
 plt.figure()
 [plt.plot(i) for i in X[::100]]
-plt.plot(avg, 'k')
+# plt.plot(avg, 'k')
