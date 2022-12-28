@@ -1,5 +1,6 @@
-"""" optimiztion in the time domain doesn't work! It never gives an answer different from the initial guess,
-even when it's obviously at an unstable maximum. """
+"""" optimiztion in the time domain doesn't work! It never gives an answer
+different from the initial guess, even when it's obviously at an unstable
+maximum. """
 
 # %%
 import sys
@@ -13,7 +14,7 @@ import clipboard_and_style_sheet
 clipboard_and_style_sheet.style_sheet()
 plt.ion()
 
-# %% _________________________________ load the data ___________________________________________________________________
+# %% _________________________________ load the data ___________________________
 path = r"data/Dans_interferograms/"
 data = np.genfromtxt(path + "Data.txt")
 T = np.genfromtxt(path + "t_axis.txt")
@@ -21,11 +22,11 @@ N = np.arange(-len(data[0]) // 2, len(data[0]) // 2)
 ppifg = len(N)
 center = ppifg // 2
 
-# %% _________________________________ phase correction ________________________________________________________________
+# %% _________________________________ phase correction ________________________
 opt = td.Optimize(data)
 opt.phase_correct(1500)
 
-# %% _______________________________________ plotting __________________________________________________________________
+# %% _______________________________________ plotting __________________________
 avg = np.mean(opt.CORR, axis=0)
 ft = abs(pc.fft(avg))
 
