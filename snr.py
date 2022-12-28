@@ -14,11 +14,13 @@ cr.style_sheet()
 
 plt.ion()
 
-# ______________________________________ load data _____________________________________________________________________
+# ________________________ load data __________________________________________
 if os.name == 'posix':
-    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
+    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope" \
+           r"/FreeRunningSpectra/11-09-2022/ "
 else:
-    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\FreeRunningSpectra\\11-09-2022/"
+    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope" \
+           r"\\FreeRunningSpectra\\11-09-2022/ "
 read_mode = "r"
 assert read_mode == "r", "if not you will literally overwrite the data file!!"
 bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode=read_mode)
@@ -27,14 +29,14 @@ ppifg = len(bckgnd[0])
 center = ppifg // 2
 frep = 1e9
 
-# ______________________________________ apodization ___________________________________________________________________
+# ____________________________ apodization ____________________________________
 apod = 1000
 bckgnd = bckgnd[:, center - apod // 2:center + apod // 2]
 su8 = su8[:, center - apod // 2:center + apod // 2]
 
 
 def calculate_snr(data, plot=False):
-    # ______________________________________ calculate background ______________________________________________________
+    # _____________________ calculate background ______________________________
     avg = np.mean(data, 0)
     avg = avg - np.mean(avg)
     ft_avg = dpc.fft(avg).__abs__()
@@ -49,7 +51,7 @@ def calculate_snr(data, plot=False):
     ul = np.argmin(abs(freq - .19547047721757888))
     denom = filtered[ll:ul].copy()
 
-    # ______________________________________ calculate cumulative average ______________________________________________
+    # _______________________ calculate cumulative average ____________________
     x = data[0]
     x = x - np.mean(x)
     ft = dpc.fft(x).__abs__()
@@ -86,11 +88,11 @@ def calculate_snr(data, plot=False):
     return np.c_[t, NOISE], avg
 
 
-# _____________________________________ calculate absorbance noise _____________________________________________________
+# _____________________ calculate absorbance noise ____________________________
 sigma_bckgnd, avg_bckgnd = calculate_snr(bckgnd)
 sigma_su8, avg_su8 = calculate_snr(su8)
 
-# _____________________________________ generating figures for CLEO ____________________________________________________
+# _____________________ generating figures for CLEO ___________________________
 Nyq_freq = frep * center
 nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
@@ -101,7 +103,7 @@ su8_100 = abs(dpc.fft(np.mean(su8[:int(1e2)], axis=0)))[center:]
 bckgnd_1000 = abs(dpc.fft(np.mean(bckgnd[:int(1e3)], axis=0)))[center:]
 su8_1000 = abs(dpc.fft(np.mean(su8[:int(1e3)], axis=0)))[center:]
 
-# ________________ figure iteration 1 __________________________________________________________________________________
+# ________________ figure iteration 1 _________________________________________
 fig, ax = plt.subplots(1, 2, figsize=np.array([13.04, 4.8]))
 ax[0].plot(wl, -np.log(su8_100 / bckgnd_100),
            # label=f"{np.round(dt * 100 * 1e3, 2)} ms",
@@ -134,7 +136,7 @@ axins.set_ylim(0, 1)
 axins.set_xlim(2.9, 3.8)
 axins.set_yticks([])
 
-# ________________ figure iteration 2 __________________________________________________________________________________
+# ________________ figure iteration 2 _________________________________________
 fig, ax = plt.subplots(1, 3, figsize=np.array([14.78, 4.8]))
 ax[1].plot(wl, -np.log(su8_100 / bckgnd_100),
            # label=f"{np.round(dt * 100 * 1e3, 2)} ms",
