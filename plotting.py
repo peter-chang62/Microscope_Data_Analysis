@@ -7,7 +7,6 @@ from scipy.integrate import simps
 from images import *
 import os
 import scipy.constants as sc
-import digital_phase_correction as dpc
 
 if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/CLEO_2023/data_to_plot/"
@@ -32,7 +31,7 @@ Nyq_freq = frep * center
 nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
 
-# ______________________________________________________ plotting ______________________________________________________
+# ______________________________________ plotting _____________________________
 wl_ll, wl_ul = 3.25, 3.6
 ind_ll, ind_ul = np.argmin(abs(wl - wl_ul)), np.argmin(abs(wl - wl_ll))
 

@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import scipy.signal as si
 import os
-import scipy.constants as sc
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import digital_phase_correction as dpc
 import td_phase_correct as td
 cr.style_sheet()
@@ -16,7 +14,7 @@ plt.ion()
 
 # %% function defs
 def calculate_snr(data, plot=False):
-    # ______________________________________ calculate background ______________________________________________________
+    # ________________________ calculate background ___________________________
     avg = np.mean(data, 0)
     avg = avg - np.mean(avg)
     ft_avg = dpc.fft(avg).__abs__()
@@ -31,7 +29,7 @@ def calculate_snr(data, plot=False):
     ul = np.argmin(abs(freq - .19547047721757888))
     denom = filtered[ll:ul].copy()
 
-    # ______________________________________ calculate cumulative average ______________________________________________
+    # _______________________ calculate cumulative average ____________________
     x = data[0]
     x = x - np.mean(x)
     ft = dpc.fft(x).__abs__()
@@ -68,22 +66,26 @@ def calculate_snr(data, plot=False):
     return np.c_[t, NOISE], avg, filtered
 
 
-# %% ___________________________________ load data _____________________________________________________________________
+# %% ___________________________________ load data ____________________________
 if os.name == 'posix':
-    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/FreeRunningSpectra/11-09-2022/"
+    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/" \
+        "FreeRunningSpectra/11-09-2022/"
 else:
-    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\FreeRunningSpectra\\11-09-2022/"
+    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope" \
+        "\\FreeRunningSpectra\\11-09-2022/"
 
 read_mode = "r"
 assert read_mode == "r", "if not you will literally overwrite the data file!!"
-bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy", mmap_mode=read_mode)
-su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy", mmap_mode=read_mode)
+bckgnd = np.load(path + "stage1_5116_stage2_8500_phase_corrected.npy",
+                 mmap_mode=read_mode)
+su8 = np.load(path + "stage1_5300_stage2_8970_phase_corrected.npy",
+              mmap_mode=read_mode)
 
 ppifg = len(bckgnd[0])
 center = ppifg // 2
 frep = 1e9
 
-# %% ___________________________________ apodize and re-phase correct __________________________________________________
+# %% ________________ apodize and re-phase correct ____________________________
 # apodize
 apod = 1000
 bckgnd = bckgnd[:, center - apod // 2: center + apod // 2]
@@ -105,7 +107,7 @@ for n, x in enumerate(active_data[:N]):
 # calculate SNR of apodized + phase corrected data
 sigma, avg, filt_avg = calculate_snr(X)
 
-# %% ___________________________________ plotting ______________________________________________________________________
+# %% _______________________ plotting _________________________________________
 plt.figure()
 plt.loglog(sigma[:, 0], sigma[:, 1], '.')
 
