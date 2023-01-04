@@ -71,8 +71,8 @@ if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/" \
         "FreeRunningSpectra/11-09-2022/"
 else:
-    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope" \
-        "\\FreeRunningSpectra\\11-09-2022/"
+    path = r"C:/Users/pchan/SynologyDrive/Research_Projects/Microscope" \
+        "/FreeRunningSpectra/11-09-2022/"
 
 read_mode = "r"
 assert read_mode == "r", "if not you will literally overwrite the data file!!"
