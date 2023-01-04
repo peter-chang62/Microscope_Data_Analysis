@@ -14,7 +14,7 @@ import clipboard_and_style_sheet
 clipboard_and_style_sheet.style_sheet()
 plt.ion()
 
-# %% _________________________________ load the data ___________________________
+# %% _________________________________ load the data __________________________
 path = r"data/Dans_interferograms/"
 data = np.genfromtxt(path + "Data.txt")
 T = np.genfromtxt(path + "t_axis.txt")
@@ -22,11 +22,11 @@ N = np.arange(-len(data[0]) // 2, len(data[0]) // 2)
 ppifg = len(N)
 center = ppifg // 2
 
-# %% _________________________________ phase correction ________________________
+# %% _________________________________ phase correction _______________________
 opt = td.Optimize(data)
 opt.phase_correct(1500)
 
-# %% _______________________________________ plotting __________________________
+# %% _______________________________________ plotting _________________________
 avg = np.mean(opt.CORR, axis=0)
 ft = abs(pc.fft(avg))
 

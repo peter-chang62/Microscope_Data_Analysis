@@ -1,5 +1,6 @@
-"""" optimiztion in the time domain doesn't work! It never gives an answer different from the initial guess,
-even when it's obviously at an unstable maximum. """
+"""" optimiztion in the time domain doesn't work! It never gives an answer
+different from the initial guess, even when it's obviously at an unstable
+maximum. """
 
 import numpy as np
 import scipy.signal as ss
@@ -15,7 +16,8 @@ def shift(x, dt):
     return np.fft.fftshift(np.fft.ifft(ft)).real
 
 
-# apply a phase offset, I've also vetted that this cycles the ceo phase by the expected amount
+# apply a phase offset, I've also vetted that this cycles the ceo phase by
+# the expected amount
 def phi0_shift(x, offst):
     hbt = ss.hilbert(x)
     hbt *= np.exp(1j * offst)
@@ -28,7 +30,8 @@ def error_dt_offst(X, x, x0, zoom=None):
     ppifg = len(x)
     center = ppifg // 2
     y = shift(x, dt)  # shift x by dt
-    y = phi0_shift(y, phi0)  # now apply phase offset to the shifted interferogram
+    y = phi0_shift(y,
+                   phi0)  # now apply phase offset to the shifted interferogram
 
     if zoom is not None:
         return np.mean((x0[center - zoom // 2: center + zoom // 2] -

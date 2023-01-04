@@ -17,7 +17,7 @@ plt.ion()
 # ________________________ load data __________________________________________
 if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope" \
-           r"/FreeRunningSpectra/11-09-2022/ "
+           r"/FreeRunningSpectra/11-09-2022/"
 else:
     path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope" \
            r"\\FreeRunningSpectra\\11-09-2022/ "
