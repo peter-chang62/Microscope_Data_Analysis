@@ -1,7 +1,3 @@
-"""" optimiztion in the time domain doesn't work! It never gives an answer
-different from the initial guess, even when it's obviously at an unstable
-maximum. """
-
 import numpy as np
 import scipy.signal as ss
 import scipy.optimize as so
