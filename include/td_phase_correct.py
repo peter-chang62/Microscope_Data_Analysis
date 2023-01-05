@@ -61,30 +61,52 @@ class Optimize:
         self.data = (data.T / np.max(data, axis=1)).T
         self.data = (data.T - np.mean(data, axis=1)).T
 
-    def error_shift_offst(self, X, n, zoom):
-        return error_dt_offst(X, self.data[n], self.data[0], zoom)
+        self.ppifg = len(self.data[0])
+        self.center = self.ppifg // 2
 
-    def error_offst(self, X, n, zoom):
-        return error_offst(X, self.data[n], self.data[0], zoom)
+        self._zoom = None
+
+    def error_shift_offst(self, X, n):
+        return error_dt_offst(X,
+                              self.CORR[n][self.center - self._zoom // 2:
+                                           self.center + self._zoom // 2],
+                              self.CORR[0][self.center - self._zoom // 2:
+                                           self.center + self._zoom // 2],
+                              None)
+
+    def error_offst(self, X, n):
+        return error_offst(X,
+                           self.CORR[n][self.center - self._zoom // 2:
+                                        self.center + self._zoom // 2],
+                           self.CORR[0][self.center - self._zoom // 2:
+                                        self.center + self._zoom // 2],
+                           None)
 
     def phase_correct(self, zoom):
         offst_with_dt_guess = np.zeros((len(self.data), 2))
-        CORR = self.data.copy()
-        ERROR = np.zeros((len(self.data)))
-        for n, i in enumerate(self.data):
+        self.CORR = self.data.copy()
+        self.ERROR = np.zeros((len(self.data)))
+        self._zoom = zoom
+
+        # in case the shift errors are big, bring all the interferograms'
+        # ceterbursts to within the zoom window by overlapping their maxima
+        # before phase correcting
+        ind_zpd_0 = np.argmax(self.CORR[0])
+        for n, i in enumerate(self.CORR):
+            ind_zpd_n = i.argmax()
+            self.CORR[n] = np.roll(i, ind_zpd_0 - ind_zpd_n)
+
+        for n in range(len(self.CORR)):
             # dt, phi0 = X
             res = so.minimize(fun=self.error_shift_offst,
                               x0=np.array([0, 0]),
-                              args=(n, zoom),
+                              args=(n,),
                               method='Nelder-Mead')
             offst_with_dt_guess[n] = res.x
-            ERROR[n] = res.fun
+            self.ERROR[n] = res.fun
 
-            x = shift(CORR[n], res.x[0])
+            x = shift(self.CORR[n], res.x[0])
             x = phi0_shift(x, res.x[1])
-            CORR[n] = x
+            self.CORR[n] = x
 
             print(res.x)
-
-        self.CORR = CORR
-        self.ERROR = ERROR
