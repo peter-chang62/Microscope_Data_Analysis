@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("include/")
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +10,6 @@ import digital_phase_correction as dpc
 import scipy.optimize as so
 import scipy.interpolate as si
 
-plt.ion()
 cr.style_sheet()
 
 path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
@@ -44,3 +44,7 @@ bckgnd = np.hstack([avg[:center - 5], avg[center + 5:]])
 plt.plot(np.fft.fftshift(np.fft.fftfreq(len(bckgnd))),
          dpc.fft(bckgnd).__abs__())
 plt.plot(np.fft.fftshift(np.fft.fftfreq(len(avg))), dpc.fft(avg).__abs__())
+plt.ylim(0, 1.2e4)
+plt.xlim(0, .4)
+
+plt.show()
