@@ -1,9 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import clipboard_and_style_sheet
+import clipboard_and_style_sheet as cr
 import td_phase_correct as td
 import scipy.signal as ss
 import digital_phase_correction as dpc
+import scipy.optimize as so
+import scipy.interpolate as si
+
+cr.style_sheet()
 
 path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
        "Microscope/FreeRunningSpectra/11-09-2022/"
@@ -18,23 +22,21 @@ N_IFG = len(data)
 data.resize((ppifg * N_IFG,))
 data = data[center:-center]
 data.resize((N_IFG - 1, ppifg))
-data = data[:2000]
+data = data[::50]
 
-opt = td.Optimize(data)
-opt.phase_correct(20)
+# %% __________________________________________________________________________
+# opt = td.Optimize(data[:, center - 10:center + 10])
+# corr = data.copy()
+# opt.phase_correct(corr)
 
-opt_apod = td.Optimize(data[:, center - 1000:center + 1000])
-opt_apod.phase_correct(20)
+# %% __________________________________________________________________________
+subst = data[:, :1000]
+opt = td.Optimize(subst)
+corr = data.copy()
+opt.phase_correct(corr)
 
-avg = np.mean(opt.CORR, 0)
-amp_avg = dpc.fft(avg).__abs__()
-
-avg_apod = np.mean(opt_apod.CORR, 0)
-amp_avg_apod = dpc.fft(avg_apod).__abs__()
-
-freq = np.fft.fftshift(np.fft.fftfreq(len(amp_avg)))
-freq_apod = np.fft.fftshift(np.fft.fftfreq(len(amp_avg_apod)))
-
-plt.figure()
-plt.plot(freq, amp_avg)
-plt.plot(freq_apod, amp_avg_apod)
+avg = np.mean(corr, 0)
+bckgnd = np.hstack([avg[:center - 5], avg[center + 5:]])
+plt.plot(np.fft.fftshift(np.fft.fftfreq(len(bckgnd))),
+         dpc.fft(bckgnd).__abs__())
+plt.plot(np.fft.fftshift(np.fft.fftfreq(len(avg))), dpc.fft(avg).__abs__())
