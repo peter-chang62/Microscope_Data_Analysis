@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("include/")
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,15 +9,17 @@ import scipy.signal as ss
 import digital_phase_correction as dpc
 import scipy.optimize as so
 import scipy.interpolate as si
+import os
 
 plt.ion()
 cr.style_sheet()
 
-# path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
-#        "Microscope/FreeRunningSpectra/11-09-2022/"
-
-path = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope" \
-       r"\FreeRunningSpectra\11-09-2022/"
+if os.name == 'posix':
+    path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
+           "Microscope/FreeRunningSpectra/11-09-2022/"
+else:
+    path = r"C:/Users/pchan/SynologyDrive/Research_Projects/Microscope" \
+           r"/FreeRunningSpectra/11-09-2022/"
 
 data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy",
                mmap_mode='r')
@@ -47,3 +50,5 @@ bckgnd = np.hstack([avg[:center - 5], avg[center + 5:]])
 plt.plot(np.fft.fftshift(np.fft.fftfreq(len(bckgnd))),
          dpc.fft(bckgnd).__abs__())
 plt.plot(np.fft.fftshift(np.fft.fftfreq(len(avg))), dpc.fft(avg).__abs__())
+plt.ylim(0, 1.2e4)
+plt.xlim(0, .4)
