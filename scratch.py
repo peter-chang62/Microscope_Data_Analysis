@@ -9,8 +9,11 @@ import scipy.interpolate as si
 
 cr.style_sheet()
 
-path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
-       "Microscope/FreeRunningSpectra/11-09-2022/"
+# path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
+#        "Microscope/FreeRunningSpectra/11-09-2022/"
+
+path = r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope" \
+       r"\FreeRunningSpectra\11-09-2022/"
 
 data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy",
                mmap_mode='r')
