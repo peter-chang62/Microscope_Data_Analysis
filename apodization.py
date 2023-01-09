@@ -1,5 +1,6 @@
 # %% imports
 import sys
+
 sys.path.append("include/")
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,6 +9,7 @@ import scipy.signal as si
 import os
 import digital_phase_correction as dpc
 import td_phase_correct as td
+
 cr.style_sheet()
 plt.ion()
 
@@ -69,10 +71,10 @@ def calculate_snr(data, plot=False):
 # %% ___________________________________ load data ____________________________
 if os.name == 'posix':
     path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/" \
-        "FreeRunningSpectra/11-09-2022/"
+           "FreeRunningSpectra/11-09-2022/"
 else:
     path = r"C:/Users/pchan/SynologyDrive/Research_Projects/Microscope" \
-        "/FreeRunningSpectra/11-09-2022/"
+           "/FreeRunningSpectra/11-09-2022/"
 
 read_mode = "r"
 assert read_mode == "r", "if not you will literally overwrite the data file!!"
