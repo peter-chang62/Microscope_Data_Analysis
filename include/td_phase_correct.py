@@ -1,15 +1,16 @@
 import numpy as np
 import scipy.signal as ss
 import scipy.optimize as so
+import warnings
 
 
 # shift a signal in time, I've vetted that this gives expected results
 def shift(x, dt):
-    ft = np.fft.fft(np.fft.ifftshift(x))
-    freq = np.fft.fftfreq(len(ft))
+    ft = np.fft.rfft(x)
+    freq = np.fft.rfftfreq(len(x))
     phase = np.exp(1j * 2 * np.pi * freq * dt)
     ft *= phase
-    return np.fft.fftshift(np.fft.ifft(ft)).real
+    return np.fft.irfft(ft).real
 
 
 # apply a phase offset, I've also vetted that this cycles the ceo phase by
@@ -24,8 +25,7 @@ def phi0_shift(x, offst):
 def error_dt_offst(X, x, x0):
     dt, phi0 = X
     y = shift(x, dt)  # shift x by dt
-    y = phi0_shift(y,
-                   phi0)  # now apply phase offset to the shifted interferogram
+    y = phi0_shift(y, phi0)  # now apply phase offset to the shifted ifg
 
     return np.mean((x0 - y) ** 2)
 
@@ -42,8 +42,12 @@ def error_offst(X, x, x0):
 class Optimize:
     def __init__(self, data):
         self.data = data
-        self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
-        self.data = (data.T / np.max(data, axis=1)).T  # normalize
+        if data.size < 2e9:  # if the data size is less than 2 gigabytes
+            self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
+            self.data = (data.T / np.max(data, axis=1)).T  # normalize
+        else:
+            warnings.warn(
+                "The DC offset was not removed due to the size of the file")
 
     def error_shift_offst(self, X, n):
         return error_dt_offst(X, self.data[n], self.data[0])
@@ -51,21 +55,24 @@ class Optimize:
     def error_offst(self, X, n):
         return error_offst(X, self.data[n], self.data[0])
 
-    def phase_correct(self, data_to_shift):
-        offst_with_dt_guess = np.zeros((len(self.data), 2))
-        self.ERROR = np.zeros((len(self.data)))
+    def phase_correct(self, data_to_shift, start_index=0, end_index=None):
+        self.error = np.zeros((len(self.data)))
 
-        for n in range(len(self.data)):
+        if end_index is None:
+            end_index = len(self.data)
+
+        h = 0
+        for n in range(start_index, end_index):
             # dt, phi0 = X
             res = so.minimize(fun=self.error_shift_offst,
                               x0=np.array([0, 0]),
                               args=(n,),
                               method='Nelder-Mead')
-            offst_with_dt_guess[n] = res.x
-            self.ERROR[n] = res.fun
+            self.error[n] = res.fun
 
             x = shift(data_to_shift[n], res.x[0])
             x = phi0_shift(x, res.x[1])
             data_to_shift[n] = x
 
-            print(res.x, len(self.data) - n - 1)
+            print(res.x, end_index - start_index - h - 1)
+            h += 1
