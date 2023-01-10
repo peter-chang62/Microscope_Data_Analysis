@@ -29,7 +29,7 @@ else:
            r"/FreeRunningSpectra/11-09-2022/"
 
 data = np.load(
-    path + "stage1_5300_stage2_8970_53856x74180.npy",
+    path + "stage1_5116_stage2_8500_53856x74180.npy",
     mmap_mode='r')
 
 ppifg = len(data[0])
@@ -46,13 +46,17 @@ rfreq = np.fft.rfftfreq(len(data[0]), 1e-9) * 1e-6
 # %% __________________________________________________________________________
 # filter the data first (using the 1 GHz resolution)
 data_filt = np.load("data/phase_corrected/" +
-                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+                    "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
                     mmap_mode='r+')
-start = (len(data) // 4) * 3
-# end = (len(data) // 4) * 3
-end = len(data)
+step = len(data) // 8
+chunks = np.arange(0, len(data), step)
+chunks[-1] = len(data)
+start = chunks[:-1]
+end = chunks[1:]
+console = 7
+
 h = 0
-for n in range(start, end):
+for n in range(start[console], end[console]):
     ft = np.fft.rfft(data[n])  # make sure to load from data
     w_filt = filt(rfreq, 0, 1, ft, "notch")
     w_filt = filt(rfreq, 31.5, 32.5, w_filt, "notch")
@@ -63,10 +67,13 @@ for n in range(start, end):
 
     t_filt = np.fft.irfft(w_filt)
     data_filt[n] = t_filt
-    print(end - start - h - 1)
+    print(end[console] - start[console] - h - 1)
     h += 1
 
 # %% __________________________________________________________________________
 # now phase correct the filtered data (1 GHz resolution)
 opt = td.Optimize(data_filt[:, center - 50:center + 50])
-opt.phase_correct(data_filt, start_index=start, end_index=end)
+opt.phase_correct(data_filt,
+                  start_index=start[console],
+                  end_index=end[console],
+                  method='Powell')

@@ -55,7 +55,9 @@ class Optimize:
     def error_offst(self, X, n):
         return error_offst(X, self.data[n], self.data[0])
 
-    def phase_correct(self, data_to_shift, start_index=0, end_index=None):
+    def phase_correct(self, data_to_shift, start_index=0, end_index=None,
+                      method='Powell'):
+        # I've noticed Powell has worked best
         self.error = np.zeros((len(self.data)))
 
         if end_index is None:
@@ -67,7 +69,7 @@ class Optimize:
             res = so.minimize(fun=self.error_shift_offst,
                               x0=np.array([0, 0]),
                               args=(n,),
-                              method='Nelder-Mead')
+                              method=method)
             self.error[n] = res.fun
 
             x = shift(data_to_shift[n], res.x[0])
