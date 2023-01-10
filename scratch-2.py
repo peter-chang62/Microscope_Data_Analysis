@@ -11,7 +11,7 @@ import scipy.signal as si
 cr.style_sheet()
 
 data = np.load("data/phase_corrected/"
-               "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+               "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
                mmap_mode='r')
 
 
@@ -77,28 +77,28 @@ _1e4 = calculate_snr(data, apod=int(1e4), plot=False)
 _1e3 = calculate_snr(data, apod=int(1e3), plot=False)
 
 # %% save
-np.save("data/phase_corrected/full.npy", full.sigma)
-np.save("data/phase_corrected/1e4_pts.npy", _1e4.sigma)
-np.save("data/phase_corrected/1e3.npy", _1e3.sigma)
+np.save("data/phase_corrected/bckgnd/full.npy", full.sigma)
+np.save("data/phase_corrected/bckgnd/1e4_pts.npy", _1e4.sigma)
+np.save("data/phase_corrected/bckgnd/1e3_pts.npy", _1e3.sigma)
 
 # %% plot
-plt.figure()
-plt.loglog(full.sigma[:, 0], full.sigma[:, 1], 'o',
-           label="full interferogram")
-plt.plot(_1e4.sigma[:, 0], _1e4.sigma[:, 1], 'o', label="10,000 pt window")
-plt.plot(_1e3.sigma[:, 0], _1e3.sigma[:, 1], 'o', label="1000 pt window")
-plt.xlabel("time (s)")
-plt.ylabel("absorbance noise (a.u.)")
-plt.legend(loc='best')
-
-plt.figure()
-plt.plot(np.fft.rfftfreq(len(full.avg)),
-         np.fft.rfft(full.avg).__abs__(), label="full interferogram")
-plt.plot(np.fft.rfftfreq(len(_1e4.avg)),
-         np.fft.rfft(_1e4.avg).__abs__(), label="10,000 pt window")
-plt.plot(np.fft.rfftfreq(len(_1e3.avg)),
-         np.fft.rfft(_1e3.avg).__abs__(), label="1000 pt window")
-plt.legend(loc='best')
-plt.xlabel("MHz")
-plt.axvline(.10784578053383662, color='k', linestyle='--')
-plt.axvline(.19547047721757888, color='k', linestyle='--')
+# plt.figure()
+# plt.loglog(full.sigma[:, 0], full.sigma[:, 1], 'o',
+#            label="full interferogram")
+# plt.plot(_1e4.sigma[:, 0], _1e4.sigma[:, 1], 'o', label="10,000 pt window")
+# plt.plot(_1e3.sigma[:, 0], _1e3.sigma[:, 1], 'o', label="1000 pt window")
+# plt.xlabel("time (s)")
+# plt.ylabel("absorbance noise (a.u.)")
+# plt.legend(loc='best')
+#
+# plt.figure()
+# plt.plot(np.fft.rfftfreq(len(full.avg)),
+#          np.fft.rfft(full.avg).__abs__(), label="full interferogram")
+# plt.plot(np.fft.rfftfreq(len(_1e4.avg)),
+#          np.fft.rfft(_1e4.avg).__abs__(), label="10,000 pt window")
+# plt.plot(np.fft.rfftfreq(len(_1e3.avg)),
+#          np.fft.rfft(_1e3.avg).__abs__(), label="1000 pt window")
+# plt.legend(loc='best')
+# plt.xlabel("MHz")
+# plt.axvline(.10784578053383662, color='k', linestyle='--')
+# plt.axvline(.19547047721757888, color='k', linestyle='--')
