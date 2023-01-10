@@ -1,4 +1,4 @@
-"this is looking at the output of scratch-2.py"
+"""this is looking at the output of scratch-2.py"""
 
 import sys
 
