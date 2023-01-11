@@ -225,3 +225,5 @@ plt.loglog(t, noise_su8_1e4, 'o', label="10,000 pts")
 plt.loglog(t, noise_su8_1e3, 'o', label="1,000 pts")
 plt.xlabel("t (s)")
 plt.ylabel("absorbance noise")
+
+plt.show()
