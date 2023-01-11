@@ -1,35 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
+from numpy import ma
 
 cr.style_sheet()
 
-x1 = np.load("data/phase_corrected/misc/avg.npy")
-x2 = np.load("data/phase_corrected/misc/avg_filt.npy")
+# together
+list_filter = np.array([[0, 2],
+                        [31, 32.8],
+                        [249.5, 250.5],
+                        [280, 284],
+                        [337, 338],
+                        [436, 437],
+                        [499, 500]])
 
-ppifg = len(x1)
-center = ppifg // 2
-a_x1 = x1[center - 1000:center + 1000]
-a_x2 = x2[center - 1000:center + 1000]
 
-ft_a_x1 = np.fft.rfft(a_x1).__abs__()
-ft_a_x2 = np.fft.rfft(a_x2).__abs__()
+def filt(freq, ll, ul, x, type="bp"):
+    if type == "bp":
+        mask = np.where(np.logical_and(freq > ll, freq < ul), 0, 1)
+    elif type == "notch":
+        mask = np.where(np.logical_or(freq < ll, freq > ul), 0, 1)
 
-ft_a_x1 /= ft_a_x2.max()
-ft_a_x2 /= ft_a_x2.max()
-rfreq = np.fft.rfftfreq(len(a_x1), 1e-9) * 1e-6
+    return ma.array(x, mask=mask)
 
-# %% fig 1
-plt.figure()
-plt.plot(rfreq, ft_a_x1, label="apodized unfiltered")
-plt.plot(rfreq, ft_a_x2, label="apodized filtered")
-plt.ylim(0.0, 1.05)
-plt.xlabel("MHz")
+
+def apply_filter(ft):
+    rfreq = np.fft.rfftfreq((len(ft) - 1) * 2, 1e-9) * 1e-6
+    ft = [filt(rfreq, *i, ft, "notch") for i in list_filter]
+    return ft
+
 
 # %% __________________________________________________________________________
 full = np.load("data/phase_corrected/bckgnd/full.npy")
-_1e4 = np.load("data/phase_corrected/bckgnd/1e4_pts.npy")
-_1e3 = np.load("data/phase_corrected/bckgnd/1e3_pts.npy")
+_1e4 = np.load("data/phase_corrected/bckgnd/1e4_pts_sigma.npy")
+_1e3 = np.load("data/phase_corrected/bckgnd/1e3_pts_sigma.npy")
 
 # fig 2
 plt.figure()
@@ -43,8 +47,8 @@ plt.legend(loc='best')
 
 # %% __________________________________________________________________________
 full = np.load("data/phase_corrected/su8/full.npy")
-_1e4 = np.load("data/phase_corrected/su8/1e4_pts.npy")
-_1e3 = np.load("data/phase_corrected/su8/1e3_pts.npy")
+_1e4 = np.load("data/phase_corrected/su8/1e4_pts_sigma.npy")
+_1e3 = np.load("data/phase_corrected/su8/1e3_pts_sigma.npy")
 
 # fig 3
 plt.figure()
@@ -57,10 +61,24 @@ plt.ylabel("absorbance noise (a.u.)")
 plt.legend(loc='best')
 
 # %% __________________________________________________________________________
-avg = np.load("data/phase_corrected/"
-              "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-              mmap_mode='r')
-avg = np.mean(avg, 0)
+# avg = np.load("data/phase_corrected/"
+#               "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#               mmap_mode='r')
+# x = 0
+# for n, i in enumerate(avg):
+#     ft = np.fft.rfft(i)
+#     x = (x * n + apply_filter(ft)) / (n + 1)
+#     print(len(avg) - n - 1)
+# np.savez_compressed("data/phase_corrected/bckgnd/ft_avg.npz", data=x.data,
+#                     mask=x.mask)
+
+ft_avg = np.load("data/phase_corrected/bckgnd/ft_avg.npz")
+ft_avg = ma.array(**ft_avg)
+avg = np.fft.irfft(ft_avg)
+
+ppifg = len(avg)
+center = ppifg // 2
+
 _1e4_avg = avg[center - int(1e4) // 2: center + int(1e4) // 2]
 _1e3_avg = avg[center - int(1e3) // 2: center + int(1e3) // 2]
 
@@ -78,10 +96,21 @@ plt.axvline(.10784578053383662, color='k', linestyle='--')
 plt.axvline(.19547047721757888, color='k', linestyle='--')
 
 # %% __________________________________________________________________________
-avg = np.load("data/phase_corrected/"
-              "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-              mmap_mode='r')
-avg = np.mean(avg, 0)
+# avg = np.load("data/phase_corrected/"
+#               "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#               mmap_mode='r')
+# x = 0
+# for n, i in enumerate(avg):
+#     ft = np.fft.rfft(i)
+#     x = (x * n + apply_filter(ft)) / (n + 1)
+#     print(len(avg) - n - 1)
+# np.savez_compressed("data/phase_corrected/su8/ft_avg.npz", data=x.data,
+#                     mask=x.mask)
+
+ft_avg = np.load("data/phase_corrected/su8/ft_avg.npz")
+ft_avg = ma.array(**ft_avg)
+avg = np.fft.irfft(ft_avg)
+
 _1e4_avg = avg[center - int(1e4) // 2: center + int(1e4) // 2]
 _1e3_avg = avg[center - int(1e3) // 2: center + int(1e3) // 2]
 
