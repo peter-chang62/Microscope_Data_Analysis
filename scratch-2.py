@@ -30,9 +30,9 @@ def filt(freq, ll, ul, x, type="bp"):
     return ma.array(x, mask=mask)
 
 
-def apply_filter(ft):
+def apply_filter(ft, lst_fltrs=list_filter):
     rfreq = np.fft.rfftfreq((len(ft) - 1) * 2, 1e-9) * 1e-6
-    for f in list_filter:
+    for f in lst_fltrs:
         ft = filt(rfreq, *f, ft, "notch")
 
     return ft
@@ -176,25 +176,41 @@ noise_su8_1e3 = np.load("data/phase_corrected/su8/sigma_1e3.npy")
 dt = 74180 * 1e-9
 t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
 
+# together
+list_filter_plot = list_filter.copy()
+list_filter_plot[:, 0] += -.5
+list_filter_plot[:, 1] += .5
+
+list_filter_plot_2 = list_filter.copy()
+list_filter_plot_2[:, 0] += -1.5
+list_filter_plot_2[:, 1] += 1.5
+
 plt.figure()
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_full) - 1) * 2, 1e-9) * 1e-6,
-         ft_bckgnd_full.__abs__(), label='full')
+         ft_bckgnd_full.__abs__(),
+         label='full')
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e4) - 1) * 2, 1e-9) * 1e-6,
-         ft_bckgnd_1e4.__abs__(), label='10,000 pts')
+         apply_filter(ft_bckgnd_1e4.__abs__(), list_filter_plot),
+         label='10,000 pts')
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e3) - 1) * 2, 1e-9) * 1e-6,
-         ft_bckgnd_1e3.__abs__(), label='1,000 pts')
+         apply_filter(ft_bckgnd_1e3.__abs__(), list_filter_plot_2),
+         label='1,000 pts')
 plt.legend(loc='best')
 plt.xlabel("MHz")
 
 plt.figure()
 plt.plot(np.fft.rfftfreq((len(ft_su8_full) - 1) * 2, 1e-9) * 1e-6,
-         ft_su8_full.__abs__(), label='full')
+         ft_su8_full.__abs__(),
+         label='full')
 plt.plot(np.fft.rfftfreq((len(ft_su8_1e4) - 1) * 2, 1e-9) * 1e-6,
-         ft_su8_1e4.__abs__(), label='10,000 pts')
+         apply_filter(ft_su8_1e4.__abs__(), list_filter_plot),
+         label='10,000 pts')
 plt.plot(np.fft.rfftfreq((len(ft_su8_1e3) - 1) * 2, 1e-9) * 1e-6,
-         ft_su8_1e3.__abs__(), label='1,000 pts')
+         apply_filter(ft_su8_1e3.__abs__(), list_filter_plot_2),
+         label='1,000 pts')
 plt.legend(loc='best')
 plt.xlabel("MHz")
+
 
 plt.figure()
 plt.loglog(t, noise_bckgnd_full, 'o', label="full")
