@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import scipy.signal as si
 from numpy import ma
+from scipy.interpolate import InterpolatedUnivariateSpline
 
 cr.style_sheet()
 
@@ -173,17 +174,14 @@ noise_su8_full = np.load("data/phase_corrected/su8/sigma_full.npy")
 noise_su8_1e4 = np.load("data/phase_corrected/su8/sigma_1e4.npy")
 noise_su8_1e3 = np.load("data/phase_corrected/su8/sigma_1e3.npy")
 
-dt = 74180 * 1e-9
-t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
 # together
 list_filter_plot = list_filter.copy()
 list_filter_plot[:, 0] += -.5
 list_filter_plot[:, 1] += .5
 
 list_filter_plot_2 = list_filter.copy()
-list_filter_plot_2[:, 0] += -1.5
-list_filter_plot_2[:, 1] += 1.5
+list_filter_plot_2[:, 0] += -3
+list_filter_plot_2[:, 1] += 3
 
 plt.figure()
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_full) - 1) * 2, 1e-9) * 1e-6,
@@ -211,6 +209,8 @@ plt.plot(np.fft.rfftfreq((len(ft_su8_1e3) - 1) * 2, 1e-9) * 1e-6,
 plt.legend(loc='best')
 plt.xlabel("MHz")
 
+dt = 74180 * 1e-9
+t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
 
 plt.figure()
 plt.loglog(t, noise_bckgnd_full, 'o', label="full")
@@ -226,4 +226,51 @@ plt.loglog(t, noise_su8_1e3, 'o', label="1,000 pts")
 plt.xlabel("t (s)")
 plt.ylabel("absorbance noise")
 
-plt.show()
+
+# %% __________________________________________________________________________
+# a little hard to say, the averaging isn't that good
+def factor_bckgnd_1e3(t_avg):
+    dt = 74180 * 1e-9
+    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
+
+    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
+    t_new = InterpolatedUnivariateSpline(t,
+                                         noise_bckgnd_1e3 - spl(t_avg)).roots()
+    # return t_avg / t_new
+    return np.mean(t_avg / t_new)
+
+
+def factor_bckgnd_1e4(t_avg):
+    dt = 74180 * 1e-9
+    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
+
+    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
+    t_new = InterpolatedUnivariateSpline(t,
+                                         noise_bckgnd_1e4 - spl(t_avg)).roots()
+    # return t_avg / t_new
+    return np.mean(t_avg / t_new)
+
+
+def factor_su8_1e3(t_avg):
+    dt = 74180 * 1e-9
+    t = np.arange(0, len(noise_su8_full) * dt, dt)
+
+    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
+    t_new = InterpolatedUnivariateSpline(t,
+                                         noise_su8_1e3 - spl(t_avg)).roots()
+    # return t_avg / t_new
+    return np.mean(t_avg / t_new)
+
+
+def factor_su8_1e4(t_avg):
+    dt = 74180 * 1e-9
+    t = np.arange(0, len(noise_su8_full) * dt, dt)
+
+    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
+    t_new = InterpolatedUnivariateSpline(t,
+                                         noise_su8_1e4 - spl(t_avg)).roots()
+    # return t_avg / t_new
+    return np.mean(t_avg / t_new)
+
+# t_avg = np.arange(dt, dt * 13480, dt * 10)
+# hey = [factor_bckgnd_1e3(i) for i in t_avg]
