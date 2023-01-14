@@ -55,13 +55,19 @@ class Optimize:
     def error_offst(self, X, n):
         return error_offst(X, self.data[n], self.data[0])
 
-    def phase_correct(self, data_to_shift, start_index=0, end_index=None,
+    def phase_correct(self,
+                      data_to_shift=None,
+                      overwrite_data_to_shift=True,
+                      start_index=0,
+                      end_index=None,
                       method='Powell'):
         # I've noticed Powell has worked best
         self.error = np.zeros((len(self.data)))
 
         if end_index is None:
             end_index = len(self.data)
+
+        self.avg = 0
 
         h = 0
         for n in range(start_index, end_index):
@@ -74,7 +80,10 @@ class Optimize:
 
             x = shift(data_to_shift[n], res.x[0])
             x = phi0_shift(x, res.x[1])
-            data_to_shift[n] = x
+            if overwrite_data_to_shift:
+                data_to_shift[n] = x
+
+            self.avg = (self.avg * n + x) / (n + 1)
 
             print(res.x, end_index - start_index - h - 1)
             h += 1
