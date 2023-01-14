@@ -1,3 +1,5 @@
+"""old phase correction code using cross correlation + some useful functions """
+
 import numpy as np
 from scipy.signal import windows as wd
 import os
@@ -48,88 +50,6 @@ def deg_to_rad(deg):
 def Number_of_files(path):
     names = [i.name for i in os.scandir(path)]
     return len(names)
-
-
-def get_data(path, N_file):
-    """
-    :param path: path to data folder containing all the segment files
-    :param N_file: which segment file to analyze (starting from 1)
-    :return: data as a 1D array
-    """
-    names = [i.name for i in os.scandir(path)]
-    key = lambda f: int(f.split('LoopCount_')[1].split('_Datetime')[0])
-    names = sorted(names, key=key)
-
-    # load a single data file and throw out the time stamp
-    data = np.fromfile(path + names[N_file], '<h')
-    data = data[:-64]
-
-    return data
-
-
-def get_ind_total_to_throw(data, ppifg):
-    """
-    :param data: data as a 1D array
-    :param ppifg: points per interferogram (int)
-
-    :return:
-    the index that marks the incident shock,
-    the index that marks the reflected shock
-    """
-    center = ppifg // 2
-
-    # skip to the max of the first interferogram, and then ppifg // 2 after that
-    start = data[:ppifg]
-    ind_THREW_OUT = np.argmax(start)
-    data = data[ind_THREW_OUT:]
-    N = len(data) // ppifg
-    data = data[:N * ppifg]
-    data = data[ppifg // 2: - ppifg // 2]
-    N = len(data) // ppifg
-    data = data.reshape(N, ppifg)
-
-    # how do you find the start of the transient?
-    bckgnd = np.copy(data)
-    # remove all the interferograms
-    bckgnd[:, center - 50:center + 50] = 0.0
-    # the first maximum of the baseline gives the incident wave
-    ind_incident = np.argmax(bckgnd.flatten()[:int(3e6)])
-    # clear the incident wave, and look for the reflected one
-    # don't let it look too far, in case there are subsequent shocks from reflection off the far end wall
-    skip = ind_incident + int(1e4)
-    ind_reflected = np.argmax(bckgnd.flatten()[skip:skip + int(2e5)]) + skip
-
-    # skip to the max of the first interferogram, then ppifg // 2 after that, and then add on ind_reflected
-    ind_incident += ind_THREW_OUT + ppifg // 2
-    ind_reflected += ind_THREW_OUT + ppifg // 2
-
-    return ind_incident, ind_reflected
-
-
-def adjust_data_and_reshape(data, ppifg):
-    """
-    :param data:
-    :param ppifg:
-
-    :return: data truncated (both start and end) to an integer number of interferograms and reshaped.
-    because it might be important to know, I also return the number of points I truncated
-    from the start of the data
-    """
-
-    # skip to the max of the first interferogram, and then NEGATIVE or POSITIVE ppifg // 2 after that
-    start = data[:ppifg]
-    ind = np.argmax(abs(start))
-    if ind > ppifg // 2:
-        ind -= ppifg // 2
-    elif ind < ppifg // 2:
-        ind += ppifg // 2
-
-    data = data[ind:]
-    N = len(data) // ppifg
-    data = data[:N * ppifg]
-    N = len(data) // ppifg
-    data = data.reshape(N, ppifg)
-    return data, ind
 
 
 def shift_2d(data, shifts):
