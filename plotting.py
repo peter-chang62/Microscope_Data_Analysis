@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("include/")
 import numpy as np
 import clipboard_and_style_sheet as cr
@@ -9,9 +10,11 @@ import os
 import scipy.constants as sc
 
 if os.name == 'posix':
-    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope/CLEO_2023/data_to_plot/"
+    path = r"/Users/peterchang/SynologyDrive/Research_Projects/Microscope" \
+           r"/CLEO_2023/data_to_plot/"
 else:
-    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope\\CLEO_2023\\data_to_plot/"
+    path = r"C:\\Users\\pchan\\SynologyDrive\\Research_Projects\\Microscope" \
+           r"\\CLEO_2023\\data_to_plot/"
 
 cr.style_sheet()
 plt.ion()
@@ -59,7 +62,8 @@ cmap = 'cividis'
 x_group3_ = x_group3 - x_group3.min()
 ind = np.argmin(abs(x_group3_ - 550))
 fig, ax = plt.subplots(1, 1, dpi=300)
-ax.pcolormesh(x_group3_[ind:], y_group3 - y_group3.min(), i_group3[:, ind:], cmap=cmap)
+ax.pcolormesh(x_group3_[ind:], y_group3 - y_group3.min(), i_group3[:, ind:],
+              cmap=cmap)
 ax.set_xlabel("$\\mathrm{\\mu m}$")
 ax.set_ylabel("$\\mathrm{\\mu m}$")
 cr.square()
