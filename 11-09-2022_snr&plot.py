@@ -40,51 +40,18 @@ def apply_filter(ft, lst_fltrs=list_filter):
 
 
 # %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
-# ppifg = len(data[0])
-# center = ppifg // 2
-# apod = int(1e3)
-# data = data[:, center - apod // 2:center + apod // 2]
-#
-# x = 0
-# for n, i in enumerate(data):
-#     ft = np.fft.rfft(i)
-#     x = (x * n + apply_filter(ft)) / (n + 1)
-#     print(len(data) - n - 1)
-# np.savez_compressed("data/phase_corrected/bckgnd/ft_avg_1e3pts.npz",
-#                     data=x.data,
-#                     mask=x.mask)
-
-# %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
-# ppifg = len(data[0])
-# center = ppifg // 2
-# apod = int(1e4)
-# data = data[:, center - apod // 2:center + apod // 2]
-#
-# x = 0
-# for n, i in enumerate(data):
-#     ft = np.fft.rfft(i)
-#     x = (x * n + apply_filter(ft)) / (n + 1)
-#     print(len(data) - n - 1)
-# np.savez_compressed("data/phase_corrected/su8/ft_avg_1e4pts.npz",
-#                     data=x.data,
-#                     mask=x.mask)
-
-
-# %% __________________________________________________________________________
-def calculate_snr(data, ft_avg, apod=None):
+def calculate_snr(data, apod=None):
     ppifg = len(data[0])
     center = ppifg // 2
 
     if apod is not None:
+        assert isinstance(int, apod), "apod must be an integer"
         data = data[:, center - apod // 2:center + apod // 2]
     freq = np.fft.rfftfreq(len(data[0]))
-    assert len(freq) == len(ft_avg)
+
+    avg = np.mean(data, 0)
+    avg -= np.mean(avg)
+    ft_avg = np.fft.rfft(avg)
 
     ll = np.argmin(abs(freq - .10784578053383662))
     ul = np.argmin(abs(freq - .19547047721757888))
@@ -117,18 +84,10 @@ def calculate_snr(data, ft_avg, apod=None):
 #                "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
 #                mmap_mode='r')
 #
-# avg = np.load("data/phase_corrected/bckgnd/ft_avg_1e3pts.npz")
-# avg = ma.array(**avg)
-# noise_1e3 = calculate_snr(data, avg, int(1e3))
-#
-# avg = np.load("data/phase_corrected/bckgnd/ft_avg_1e4pts.npz")
-# avg = ma.array(**avg)
-# noise_1e4 = calculate_snr(data, avg, int(1e4))
-#
-# avg = np.load("data/phase_corrected/bckgnd/ft_avg_full.npz")
-# avg = ma.array(**avg)
-# noise_full = calculate_snr(data, avg, None)
-#
+# noise_1e3 = calculate_snr(data, int(1e3))
+# noise_1e4 = calculate_snr(data, int(1e4))
+# noise_full = calculate_snr(data, None)
+# 
 # np.save("data/phase_corrected/bckgnd/sigma_full.npy", noise_full)
 # np.save("data/phase_corrected/bckgnd/sigma_1e4.npy", noise_1e4)
 # np.save("data/phase_corrected/bckgnd/sigma_1e3.npy", noise_1e3)
@@ -137,34 +96,42 @@ def calculate_snr(data, ft_avg, apod=None):
 # data = np.load("data/phase_corrected/"
 #                "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #                mmap_mode='r')
-#
-# avg = np.load("data/phase_corrected/su8/ft_avg_1e3pts.npz")
-# avg = ma.array(**avg)
-# noise_1e3 = calculate_snr(data, avg, int(1e3))
-#
-# avg = np.load("data/phase_corrected/su8/ft_avg_1e4pts.npz")
-# avg = ma.array(**avg)
-# noise_1e4 = calculate_snr(data, avg, int(1e4))
-#
-# avg = np.load("data/phase_corrected/su8/ft_avg_full.npz")
-# avg = ma.array(**avg)
-# noise_full = calculate_snr(data, avg, None)
-#
+# 
+# noise_1e3 = calculate_snr(data, int(1e3))
+# noise_1e4 = calculate_snr(data, int(1e4))
+# noise_full = calculate_snr(data, None)
+# 
 # np.save("data/phase_corrected/su8/sigma_full.npy", noise_full)
 # np.save("data/phase_corrected/su8/sigma_1e4.npy", noise_1e4)
 # np.save("data/phase_corrected/su8/sigma_1e3.npy", noise_1e3)
 
 # %% __________________________________________________________________________
-ft_bckgnd_full = ma.array(
-    **np.load("data/phase_corrected/bckgnd/ft_avg_full.npz"))
-ft_bckgnd_1e4 = ma.array(
-    **np.load("data/phase_corrected/bckgnd/ft_avg_1e4pts.npz"))
-ft_bckgnd_1e3 = ma.array(
-    **np.load("data/phase_corrected/bckgnd/ft_avg_1e3pts.npz"))
+# data_bckgnd = np.load("data/phase_corrected/"
+#                       "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#                       mmap_mode='r')
+# data_su8 = np.load("data/phase_corrected/"
+#                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#                    mmap_mode='r')
+# avg_bckgnd = np.mean(data_bckgnd, 0)
+# avg_su8 = np.mean(data_su8, 0)
 
-ft_su8_full = ma.array(**np.load("data/phase_corrected/su8/ft_avg_full.npz"))
-ft_su8_1e4 = ma.array(**np.load("data/phase_corrected/su8/ft_avg_1e4pts.npz"))
-ft_su8_1e3 = ma.array(**np.load("data/phase_corrected/su8/ft_avg_1e3pts.npz"))
+avg_bckgnd = np.load("data/phase_corrected/bckgnd/avg_bckgnd.npy")
+avg_su8 = np.load("data/phase_corrected/su8/avg_su8.npy")
+
+ppifg = len(avg_bckgnd)
+center = ppifg // 2
+
+ft_bckgnd_full = np.fft.rfft(avg_bckgnd)
+ft_bckgnd_1e4 = np.fft.rfft(
+    avg_bckgnd[center - int(1e4) // 2:center + int(1e4) // 2])
+ft_bckgnd_1e3 = np.fft.rfft(
+    avg_bckgnd[center - int(1e3) // 2:center + int(1e3) // 2])
+
+ft_su8_full = np.fft.rfft(avg_su8)
+ft_su8_1e4 = np.fft.rfft(
+    avg_su8[center - int(1e4) // 2:center + int(1e4) // 2])
+ft_su8_1e3 = np.fft.rfft(
+    avg_su8[center - int(1e3) // 2:center + int(1e3) // 2])
 
 noise_bckgnd_full = np.load("data/phase_corrected/bckgnd/sigma_full.npy")
 noise_bckgnd_1e4 = np.load("data/phase_corrected/bckgnd/sigma_1e4.npy")
@@ -185,7 +152,7 @@ list_filter_plot_2[:, 1] += 3
 
 plt.figure()
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_full) - 1) * 2, 1e-9) * 1e-6,
-         ft_bckgnd_full.__abs__(),
+         apply_filter(ft_bckgnd_full.__abs__()),
          label='full')
 plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e4) - 1) * 2, 1e-9) * 1e-6,
          apply_filter(ft_bckgnd_1e4.__abs__(), list_filter_plot),
@@ -198,7 +165,7 @@ plt.xlabel("MHz")
 
 plt.figure()
 plt.plot(np.fft.rfftfreq((len(ft_su8_full) - 1) * 2, 1e-9) * 1e-6,
-         ft_su8_full.__abs__(),
+         apply_filter(ft_su8_full.__abs__()),
          label='full')
 plt.plot(np.fft.rfftfreq((len(ft_su8_1e4) - 1) * 2, 1e-9) * 1e-6,
          apply_filter(ft_su8_1e4.__abs__(), list_filter_plot),

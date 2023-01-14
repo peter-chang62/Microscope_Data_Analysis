@@ -1,3 +1,6 @@
+"""phase correcting the free running spectra taken on 11/09/2022 (4 GB on
+SU-8 and 4 GB on background)"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import digital_phase_correction as dpc

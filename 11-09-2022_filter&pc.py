@@ -1,6 +1,3 @@
-"""It is not as of yet working for stage1_5300_stage2_8970_53856x74180.npy,
-because the phase correction misses on some of them (probably bad minima in
-the optimization)"""
 import sys
 
 sys.path.append("include/")
