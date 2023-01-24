@@ -75,27 +75,76 @@ def calculate_snr(data, apod=None):
     return NOISE
 
 
-# data = np.load( # taken on silicon background
-#     "data/phase_corrected/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# %% __________________________________________________________________________
+# # data = np.load( # taken on silicon background
+# #     "data/phase_corrected/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# #     mmap_mode='r')
+# data = np.load(  # taken on su8
+#     "data/phase_corrected/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #     mmap_mode='r')
-data = np.load(  # taken on su8
-    "data/phase_corrected/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-    mmap_mode='r')
-ppifg = len(data[0])
-center = ppifg // 2
+# ppifg = len(data[0])
+# center = ppifg // 2
+#
+# resolution = np.arange(0, 500 + 10, 10)
+# resolution[0] = 1
+# APOD = (1 / resolution) * ppifg
+# APOD = np.round(APOD).astype(int)
+# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+#
+# APOD = ma.asarray(APOD)
+# APOD[0] = ma.masked
+#
+# SIGMA = np.zeros((len(APOD), len(data)))
+# for n, apod in enumerate(APOD):
+#     SIGMA[n] = calculate_snr(data, apod)
+#     print(f'_____________________{len(APOD) - n - 1}_____________________')
+#
+# np.save("data/phase_corrected/su8/sigma/sigma_background.npy", SIGMA)
 
-resolution = np.arange(0, 500 + 10, 10)
-resolution[0] = 1
-APOD = (1 / resolution * ppifg)
-APOD = np.round(APOD).astype(int)
-APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+# %% __________________________________________________________________________
+sigma_su8 = np.load("data/phase_corrected/su8/sigma/sigma.npy")
+sigma_bckgnd = np.load("data/phase_corrected/bckgnd/sigma/sigma.npy")
+window = np.load("data/phase_corrected/su8/sigma/NPTS.npy")
+ppifg = 74180
 
-APOD = ma.asarray(APOD)
-APOD[0] = ma.masked
 
-SIGMA = np.zeros((len(APOD), len(data)))
-for n, apod in enumerate(APOD):
-    SIGMA[n] = calculate_snr(data, apod)
-    print(f'_____________________{len(APOD) - n - 1}_____________________')
+# create a gif showing how the absorbance noise changes with
+# apodization window
+def gif():
+    fig, ax = plt.subplots(1, 1)
+    save = True
+    for h, i in enumerate(sigma_su8):
+        ax.clear()
+        ax.loglog(sigma_su8[0], 'o', label="1 GHz")
+        ax.loglog(i, 'o', label=f'{np.round(74180 / window[h], 1)} GHz')
+        ax.set_ylim(3e-4, 5e-1)
+        ax.legend(loc='best')
+        if save:
+            plt.savefig(f"fig/{h}.png")
+        else:
+            plt.pause(.05)
+        print(h)
 
-np.save("data/phase_corrected/su8/sigma/sigma_background.npy", SIGMA)
+
+n_ifg = np.arange(1, len(sigma_bckgnd[0]) + 1)
+s_bckgnd_dB = 10 * np.log10(sigma_bckgnd)
+s_su8_dB = 10 * np.log10(sigma_su8)
+
+resolution = window[0] / window
+resolution = np.round(resolution, 0)
+
+fig = plt.figure()
+plt.suptitle("background absorbance noise (dB)")
+plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
+plt.xscale('log')
+plt.xlabel("# interferograms")
+plt.ylabel("resolution (GHz)")
+plt.colorbar()
+
+fig = plt.figure()
+plt.suptitle("su8 absorbance noise (dB)")
+plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
+plt.xscale('log')
+plt.xlabel("# interferograms")
+plt.ylabel("resolution (GHz)")
+plt.colorbar()
