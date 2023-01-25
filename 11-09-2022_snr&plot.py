@@ -70,7 +70,7 @@ def calculate_snr(data, apod=None):
 
         num = x.__abs__()[ll:ul]
         absorption = num / denom
-        absorbance = -np.log10(absorption)
+        absorbance = -np.log(absorption)
         noise = np.std(absorbance)
         NOISE[n] = noise
 
