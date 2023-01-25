@@ -2,6 +2,7 @@ import numpy as np
 import scipy.signal as ss
 import scipy.optimize as so
 import warnings
+from tqdm import tqdm
 
 
 # shift a signal in time, I've vetted that this gives expected results
@@ -70,7 +71,7 @@ class Optimize:
         self.avg = 0
 
         h = 0
-        for n in range(start_index, end_index):
+        for n in tqdm(range(start_index, end_index)):
             # dt, phi0 = X
             res = so.minimize(fun=self.error_shift_offst,
                               x0=np.array([0, 0]),
@@ -85,5 +86,5 @@ class Optimize:
 
             self.avg = (self.avg * n + x) / (n + 1)
 
-            print(res.x, end_index - start_index - h - 1)
+            # print(res.x, end_index - start_index - h - 1) # using tqdm now
             h += 1

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import td_phase_correct as td
+from tqdm import tqdm
 import os
 
 cr.style_sheet()
@@ -77,7 +78,7 @@ end = chunks[1:]
 console = 7
 
 h = 0
-for n in range(start[console], end[console]):
+for n in tqdm(range(start[console], end[console])):
     ft = np.fft.rfft(data[n])  # make sure to load from data
 
     for f in list_filter:
@@ -85,7 +86,7 @@ for n in range(start[console], end[console]):
 
     t_filt = np.fft.irfft(ft)
     data_filt[n] = t_filt
-    print(end[console] - start[console] - h - 1)
+    # print(end[console] - start[console] - h - 1) # using tqdm now
     h += 1
 
 # %% __________________________________________________________________________
