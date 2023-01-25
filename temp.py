@@ -106,25 +106,7 @@ sigma_su8 = np.load("data/phase_corrected/su8/sigma/sigma.npy")
 sigma_bckgnd = np.load("data/phase_corrected/bckgnd/sigma/sigma.npy")
 window = np.load("data/phase_corrected/su8/sigma/NPTS.npy")
 ppifg = 74180
-
-
-# create a gif showing how the absorbance noise changes with
-# apodization window
-def gif():
-    fig, ax = plt.subplots(1, 1)
-    save = True
-    for h, i in enumerate(sigma_su8):
-        ax.clear()
-        ax.loglog(sigma_su8[0], 'o', label="1 GHz")
-        ax.loglog(i, 'o', label=f'{np.round(74180 / window[h], 1)} GHz')
-        ax.set_ylim(3e-4, 5e-1)
-        ax.legend(loc='best')
-        if save:
-            plt.savefig(f"fig/{h}.png")
-        else:
-            plt.pause(.05)
-        print(h)
-
+center = ppifg // 2
 
 n_ifg = np.arange(1, len(sigma_bckgnd[0]) + 1)
 s_bckgnd_dB = 10 * np.log10(sigma_bckgnd)
@@ -133,18 +115,49 @@ s_su8_dB = 10 * np.log10(sigma_su8)
 resolution = window[0] / window
 resolution = np.round(resolution, 0)
 
-fig = plt.figure()
-plt.suptitle("background absorbance noise (dB)")
-plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
-plt.xscale('log')
-plt.xlabel("# interferograms")
-plt.ylabel("resolution (GHz)")
-plt.colorbar()
+# fig = plt.figure()
+# plt.suptitle("background absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
+#
+# fig = plt.figure()
+# plt.suptitle("su8 absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
 
-fig = plt.figure()
-plt.suptitle("su8 absorbance noise (dB)")
-plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
-plt.xscale('log')
-plt.xlabel("# interferograms")
-plt.ylabel("resolution (GHz)")
-plt.colorbar()
+# create a gif showing how the absorbance noise changes with
+# apodization window
+fig, ax = plt.subplots(1, 2, figsize=np.array([10.64, 4.8]))
+avg = np.load("data/phase_corrected/su8/avg_su8.npy")
+freq_full = np.fft.rfftfreq(len(avg))
+s_full = apply_filter(np.fft.rfft(avg).__abs__())
+ind_full = np.logical_and(freq_full > 0.10784578053383662,
+                          freq_full < 0.19547047721757888).nonzero()[0]
+save = False
+for h, w in enumerate(window):
+    x = avg[center - w // 2:center + w // 2]
+    s = apply_filter(np.fft.rfft(x).__abs__())
+    freq = np.fft.rfftfreq(len(x))
+    ind = np.logical_and(freq > 0.10784578053383662,
+                         freq < 0.19547047721757888).nonzero()[0]
+
+    [i.clear() for i in ax]
+    ax[0].plot(freq_full[ind_full], s_full[ind_full])
+    ax[0].plot(freq[ind], s[ind])
+    ax[1].loglog(sigma_su8[0], 'o', label="1 GHz")
+    ax[1].loglog(sigma_su8[h], 'o',
+                 label=f'{np.round(74180 / window[h], 1)} GHz')
+    ax[1].set_ylim(3e-4, 5e-1)
+    ax[1].legend(loc='best')
+    if save:
+        plt.savefig(f'fig/{h}.png')
+    else:
+        plt.pause(.05)
+
+    print(len(window) - h - 1)
