@@ -1,14 +1,8 @@
-"""this is looking at the output of scratch-2.py"""
-
-import sys
-
-sys.path.append("include/")
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import scipy.signal as si
 from numpy import ma
-from scipy.interpolate import InterpolatedUnivariateSpline
 
 cr.style_sheet()
 
@@ -39,14 +33,16 @@ def apply_filter(ft, lst_fltrs=list_filter):
     return ft
 
 
-# %% __________________________________________________________________________
 def calculate_snr(data, apod=None):
     ppifg = len(data[0])
     center = ppifg // 2
 
-    if apod is not None:
-        assert isinstance(int, apod), "apod must be an integer"
+    if not np.any([apod is None, apod == np.nan, ma.is_masked(apod)]):
+        # assert isinstance(apod, (int, np.int64)), "apod must be an integer"
+        print("apodizing data")
         data = data[:, center - apod // 2:center + apod // 2]
+    else:
+        print("NOT apodizing data")
     freq = np.fft.rfftfreq(len(data[0]))
 
     avg = np.mean(data, 0)
@@ -80,164 +76,91 @@ def calculate_snr(data, apod=None):
 
 
 # %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
+# # data = np.load( # taken on silicon background
+# #     "data/phase_corrected/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# #     mmap_mode='r')
+# data = np.load(  # taken on su8
+#     "data/phase_corrected/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#     mmap_mode='r')
+# ppifg = len(data[0])
+# center = ppifg // 2
 #
-# noise_1e3 = calculate_snr(data, int(1e3))
-# noise_1e4 = calculate_snr(data, int(1e4))
-# noise_full = calculate_snr(data, None)
-# 
-# np.save("data/phase_corrected/bckgnd/sigma_full.npy", noise_full)
-# np.save("data/phase_corrected/bckgnd/sigma_1e4.npy", noise_1e4)
-# np.save("data/phase_corrected/bckgnd/sigma_1e3.npy", noise_1e3)
+# resolution = np.arange(0, 500 + 10, 10)
+# resolution[0] = 1
+# APOD = (1 / resolution) * ppifg
+# APOD = np.round(APOD).astype(int)
+# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+#
+# APOD = ma.asarray(APOD)
+# APOD[0] = ma.masked
+#
+# SIGMA = np.zeros((len(APOD), len(data)))
+# for n, apod in enumerate(APOD):
+#     SIGMA[n] = calculate_snr(data, apod)
+#     print(f'_____________________{len(APOD) - n - 1}_____________________')
+#
+# np.save("data/phase_corrected/su8/sigma/sigma.npy", SIGMA)
 
 # %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
-# 
-# noise_1e3 = calculate_snr(data, int(1e3))
-# noise_1e4 = calculate_snr(data, int(1e4))
-# noise_full = calculate_snr(data, None)
-# 
-# np.save("data/phase_corrected/su8/sigma_full.npy", noise_full)
-# np.save("data/phase_corrected/su8/sigma_1e4.npy", noise_1e4)
-# np.save("data/phase_corrected/su8/sigma_1e3.npy", noise_1e3)
-
-# %% __________________________________________________________________________
-# data_bckgnd = np.load("data/phase_corrected/"
-#                       "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-#                       mmap_mode='r')
-# data_su8 = np.load("data/phase_corrected/"
-#                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-#                    mmap_mode='r')
-# avg_bckgnd = np.mean(data_bckgnd, 0)
-# avg_su8 = np.mean(data_su8, 0)
-
-avg_bckgnd = np.load("data/phase_corrected/bckgnd/avg_bckgnd.npy")
-avg_su8 = np.load("data/phase_corrected/su8/avg_su8.npy")
-
-ppifg = len(avg_bckgnd)
+sigma_su8 = np.load("data/phase_corrected/su8/sigma/sigma.npy")
+sigma_bckgnd = np.load("data/phase_corrected/bckgnd/sigma/sigma.npy")
+window = np.load("data/phase_corrected/su8/sigma/NPTS.npy")
+ppifg = 74180
 center = ppifg // 2
 
-ft_bckgnd_full = np.fft.rfft(avg_bckgnd)
-ft_bckgnd_1e4 = np.fft.rfft(
-    avg_bckgnd[center - int(1e4) // 2:center + int(1e4) // 2])
-ft_bckgnd_1e3 = np.fft.rfft(
-    avg_bckgnd[center - int(1e3) // 2:center + int(1e3) // 2])
+n_ifg = np.arange(1, len(sigma_bckgnd[0]) + 1)
+s_bckgnd_dB = 10 * np.log10(sigma_bckgnd)
+s_su8_dB = 10 * np.log10(sigma_su8)
 
-ft_su8_full = np.fft.rfft(avg_su8)
-ft_su8_1e4 = np.fft.rfft(
-    avg_su8[center - int(1e4) // 2:center + int(1e4) // 2])
-ft_su8_1e3 = np.fft.rfft(
-    avg_su8[center - int(1e3) // 2:center + int(1e3) // 2])
+resolution = window[0] / window
+resolution = np.round(resolution, 0)
 
-noise_bckgnd_full = np.load("data/phase_corrected/bckgnd/sigma_full.npy")
-noise_bckgnd_1e4 = np.load("data/phase_corrected/bckgnd/sigma_1e4.npy")
-noise_bckgnd_1e3 = np.load("data/phase_corrected/bckgnd/sigma_1e3.npy")
+# fig = plt.figure()
+# plt.suptitle("background absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
+#
+# fig = plt.figure()
+# plt.suptitle("su8 absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
 
-noise_su8_full = np.load("data/phase_corrected/su8/sigma_full.npy")
-noise_su8_1e4 = np.load("data/phase_corrected/su8/sigma_1e4.npy")
-noise_su8_1e3 = np.load("data/phase_corrected/su8/sigma_1e3.npy")
+# create a gif showing how the absorbance noise changes with
+# apodization window
+fig, ax = plt.subplots(1, 2, figsize=np.array([10.64, 4.8]))
+avg = np.load("data/phase_corrected/bckgnd/avg_bckgnd.npy")
+freq_full = np.fft.rfftfreq(len(avg))
+s_full = apply_filter(np.fft.rfft(avg).__abs__())
+ind_full = np.logical_and(freq_full > 0.10784578053383662,
+                          freq_full < 0.19547047721757888).nonzero()[0]
+save = True
+for h, w in enumerate(window):
+    x = avg[center - w // 2:center + w // 2]
+    s = apply_filter(np.fft.rfft(x).__abs__())
+    freq = np.fft.rfftfreq(len(x))
+    ind = np.logical_and(freq > 0.10784578053383662,
+                         freq < 0.19547047721757888).nonzero()[0]
 
-# together
-list_filter_plot = list_filter.copy()
-list_filter_plot[:, 0] += -.5
-list_filter_plot[:, 1] += .5
+    [i.clear() for i in ax]
+    ax[0].plot(freq_full[ind_full], s_full[ind_full])
+    ax[0].plot(freq[ind], s[ind])
+    ax[1].loglog(sigma_bckgnd[0], 'o', label="1 GHz")
+    ax[1].loglog(sigma_bckgnd[h], 'o',
+                 label=f'{np.round(74180 / window[h], 1)} GHz')
+    ax[1].set_ylim(
+        0.0005,  # bckgnd
+        # 0.0017, # su8
+        0.8)
+    ax[1].legend(loc='best')
+    if save:
+        plt.savefig(f'fig/{h}.png')
+    else:
+        plt.pause(.05)
 
-list_filter_plot_2 = list_filter.copy()
-list_filter_plot_2[:, 0] += -3
-list_filter_plot_2[:, 1] += 3
-
-plt.figure()
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_full) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_full.__abs__()),
-         label='full')
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e4) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_1e4.__abs__(), list_filter_plot),
-         label='10,000 pts')
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e3) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_1e3.__abs__(), list_filter_plot_2),
-         label='1,000 pts')
-plt.legend(loc='best')
-plt.xlabel("MHz")
-
-plt.figure()
-plt.plot(np.fft.rfftfreq((len(ft_su8_full) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_full.__abs__()),
-         label='full')
-plt.plot(np.fft.rfftfreq((len(ft_su8_1e4) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_1e4.__abs__(), list_filter_plot),
-         label='10,000 pts')
-plt.plot(np.fft.rfftfreq((len(ft_su8_1e3) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_1e3.__abs__(), list_filter_plot_2),
-         label='1,000 pts')
-plt.legend(loc='best')
-plt.xlabel("MHz")
-
-dt = 74180 * 1e-9
-t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
-plt.figure()
-plt.loglog(t, noise_bckgnd_full, 'o', label="full")
-plt.loglog(t, noise_bckgnd_1e4, 'o', label="10,000 pts")
-plt.loglog(t, noise_bckgnd_1e3, 'o', label="1,000 pts")
-plt.xlabel("t (s)")
-plt.ylabel("absorbance noise")
-
-plt.figure()
-plt.loglog(t, noise_su8_full, 'o', label="full")
-plt.loglog(t, noise_su8_1e4, 'o', label="10,000 pts")
-plt.loglog(t, noise_su8_1e3, 'o', label="1,000 pts")
-plt.xlabel("t (s)")
-plt.ylabel("absorbance noise")
-
-
-# %% __________________________________________________________________________
-# a little hard to say, the averaging isn't that good
-def factor_bckgnd_1e3(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_bckgnd_1e3 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_bckgnd_1e4(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_bckgnd_1e4 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_su8_1e3(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_su8_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_su8_1e3 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_su8_1e4(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_su8_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_su8_1e4 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-# t_avg = np.arange(dt, dt * 13480, dt * 10)
-# hey = [factor_bckgnd_1e3(i) for i in t_avg]
+    print(len(window) - h - 1)
