@@ -27,7 +27,7 @@ else:
            r"/FreeRunningSpectra/11-09-2022/"
 
 data = np.load(
-    path + "stage1_5300_stage2_8970_53856x74180.npy",
+    path + "stage1_5116_stage2_8500_53856x74180.npy",
     mmap_mode='r')
 
 ppifg = len(data[0])
@@ -42,7 +42,7 @@ rfreq = np.fft.rfftfreq(len(data[0]), 1e-9) * 1e-6  # 0 -> 500 MHz
 # %% __________________________________________________________________________
 # filter the data first (using the 1 GHz resolution)
 data_filt = np.load("data/phase_corrected/" +
-                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+                    "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
                     mmap_mode='r+')
 
 # taken from looking at fft of one interferogram

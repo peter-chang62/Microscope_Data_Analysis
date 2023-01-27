@@ -43,12 +43,15 @@ def error_offst(X, x, x0):
 class Optimize:
     def __init__(self, data):
         self.data = data
-        if data.size < 2e9:  # if the data size is less than 2 gigabytes
-            self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
-            self.data = (data.T / np.max(data, axis=1)).T  # normalize
-        else:
-            warnings.warn(
-                "The DC offset was not removed due to the size of the file")
+
+        # sometimes you pass a portion of the data zoomed into the centerburst
+        # in which case you cannot afford to alter just a portion of the data !!!
+        # if data.size < 2e9:  # if the data size is less than 2 gigabytes
+        #     self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
+        #     self.data = (data.T / np.max(data, axis=1)).T  # normalize
+        # else:
+        #     warnings.warn(
+        #         "The DC offset was not removed due to the size of the file")
 
     def error_shift_offst(self, X, n):
         return error_dt_offst(X, self.data[n], self.data[0])
