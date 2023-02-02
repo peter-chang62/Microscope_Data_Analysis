@@ -19,12 +19,8 @@ def filt(freq, ll, ul, x, type="bp"):
         return np.where(np.logical_or(freq < ll, freq > ul), x, 0.0)
 
 
-if os.name == 'posix':
-    path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
-           "Microscope/FreeRunningSpectra/11-09-2022/"
-else:
-    path = r"C:/Users/pchan/SynologyDrive/Research_Projects/Microscope" \
-           r"/FreeRunningSpectra/11-09-2022/"
+path = r"/Volumes/Extreme SSD/Research_Projects/Microscope" \
+       r"/FreeRunningSpectra/11-09-2022/"
 
 data = np.load(
     path + "stage1_5116_stage2_8500_53856x74180.npy",
@@ -41,7 +37,9 @@ rfreq = np.fft.rfftfreq(len(data[0]), 1e-9) * 1e-6  # 0 -> 500 MHz
 
 # %% __________________________________________________________________________
 # filter the data first (using the 1 GHz resolution)
-data_filt = np.load("data/phase_corrected/" +
+path_save = r"/Volumes/Extreme SSD/Research_Projects/Microscope" \
+            r"/Python_Workspace/data/phase_corrected/"
+data_filt = np.load(path_save +
                     "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
                     mmap_mode='r+')
 

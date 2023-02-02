@@ -75,35 +75,39 @@ def calculate_snr(data, apod=None):
 
 
 # %% __________________________________________________________________________
-# # data = np.load(  # taken on silicon background
-# #     "data/phase_corrected/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+path = r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace" \
+       r"/data/phase_corrected/"
+
+# %% __________________________________________________________________________
+# # data = np.load(  # taken on silicon
+# #     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy.npy",
 # #     mmap_mode='r')
 # data = np.load(  # taken on su8
-#     "data/phase_corrected/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #     mmap_mode='r')
 # ppifg = len(data[0])
 # center = ppifg // 2
-
+#
 # resolution = np.arange(0, 500 + 10, 10)
 # resolution[0] = 1
 # APOD = (1 / resolution) * ppifg
 # APOD = np.round(APOD).astype(int)
 # APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
-
+#
 # APOD = ma.asarray(APOD)
 # APOD[0] = ma.masked
-
+#
 # SIGMA = np.zeros((len(APOD), len(data)))
 # for n, apod in enumerate(APOD):
 #     SIGMA[n] = calculate_snr(data, apod)
 #     print(f'_____________________{len(APOD) - n - 1}_____________________')
-
-# np.save("data/phase_corrected/su8/sigma/sigma.npy", SIGMA)
+#
+# np.save(path + "su8/sigma/sigma.npy", SIGMA)
 
 # %% __________________________________________________________________________
-sigma_su8 = np.load("data/phase_corrected/su8/sigma/sigma.npy")
-sigma_bckgnd = np.load("data/phase_corrected/bckgnd/sigma/sigma.npy")
-window = np.load("data/phase_corrected/su8/sigma/NPTS.npy")
+sigma_su8 = np.load(path + "su8/sigma/sigma.npy")
+sigma_bckgnd = np.load(path + "bckgnd/sigma/sigma.npy")
+window = np.load(path + "su8/sigma/NPTS.npy")
 ppifg = 74180
 center = ppifg // 2
 
