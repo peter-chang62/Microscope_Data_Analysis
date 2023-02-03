@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("include/")
+sys.path.append("../include/")
 import numpy as np
 from tqdm import tqdm
 import os
@@ -51,7 +51,7 @@ opt = td.Optimize(h2co_filt[:, center - 20:center + 20])
 opt.phase_correct(h2co_filt)
 
 avg = np.mean(h2co_filt, 0)
-np.save("check_this_avg_out.npy", avg)
+np.save("../check_this_avg_out.npy", avg)
 old_avg = np.load(path + "PHASE_CORRECTED/h2co_vacuum_bckgnd_avg.npy")
 
 new_ft = np.fft.rfft(avg)

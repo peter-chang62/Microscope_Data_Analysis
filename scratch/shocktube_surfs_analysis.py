@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("include/")
+sys.path.append("../include/")
 import numpy as np
 import os
 import clipboard_and_style_sheet as cr
