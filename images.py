@@ -9,8 +9,9 @@ if os.name == 'nt':
                   r"\\Microscope\\Images/"
 
 else:
-    path_folder = r"/Users/peterchang/SynologyDrive/Research_Projects" \
-                  r"/Microscope/Images/"
+    # path_folder = r"/Users/peterchang/SynologyDrive/Research_Projects" \
+    #               r"/Microscope/Images/"
+    path_folder = r"/Volumes/Extreme SSD/Research_Projects/Microscope/Images/"
 
 cr.style_sheet()
 
