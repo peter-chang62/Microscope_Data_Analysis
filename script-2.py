@@ -5,7 +5,9 @@ import td_phase_correct as td
 from tqdm import tqdm
 import os
 
-path = r"D:\230105_1G113 DATA/"
+# path = r"D:\230105_1G113 DATA/"
+path = r"/Volumes/Extreme SSD/Research_Projects/1G113_Kristina_Chang" \
+       r"/230105_1G113 DATA/"
 names = [i.name for i in os.scandir(path)]
 [names.remove(i) for i in names if not "pc" in i]
 [names.remove(i) for i in names if not "pc" in i]
