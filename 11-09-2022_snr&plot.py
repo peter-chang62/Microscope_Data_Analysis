@@ -105,22 +105,43 @@ path = r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace" \
 # np.save(path + "su8/sigma/sigma.npy", SIGMA)
 
 # %% __________________________________________________________________________
-sigma_su8 = np.load(path + "su8/sigma/sigma.npy")
-sigma_bckgnd = np.load(path + "bckgnd/sigma/sigma.npy")
+s_su8 = np.load(path + "su8/sigma/sigma.npy")
+s_bckgnd = np.load(path + "bckgnd/sigma/sigma.npy")
 window = np.load(path + "su8/sigma/NPTS.npy")
 ppifg = 74180
 center = ppifg // 2
 
-n_ifg = np.arange(1, len(sigma_bckgnd[0]) + 1)
-s_bckgnd_dB = 10 * np.log10(sigma_bckgnd)
-s_su8_dB = 10 * np.log10(sigma_su8)
+n_ifg = np.arange(1, len(s_bckgnd[0]) + 1)
+s_bckgnd_dB = 10 * np.log10(s_bckgnd)
+s_su8_dB = 10 * np.log10(s_su8)
+
+snr_bckgnd_dB = 10 * np.log10(1 / s_bckgnd)
+snr_su8_dB = 10 * np.log10(1 / s_su8)
 
 resolution = window[0] / window
 resolution = np.round(resolution, 0)
 
+# absorbance noise 2D plots
+# fig = plt.figure()
+# plt.suptitle("background absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
+#
+# fig = plt.figure()
+# plt.suptitle("su8 absorbance noise (dB)")
+# plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
+# plt.xscale('log')
+# plt.xlabel("# interferograms")
+# plt.ylabel("resolution (GHz)")
+# plt.colorbar()
+
+# snr 2D plots
 fig = plt.figure()
 plt.suptitle("background absorbance noise (dB)")
-plt.pcolormesh(n_ifg, resolution, s_bckgnd_dB, cmap='jet')
+plt.pcolormesh(n_ifg, resolution, snr_bckgnd_dB, cmap='jet')
 plt.xscale('log')
 plt.xlabel("# interferograms")
 plt.ylabel("resolution (GHz)")
@@ -128,7 +149,7 @@ plt.colorbar()
 
 fig = plt.figure()
 plt.suptitle("su8 absorbance noise (dB)")
-plt.pcolormesh(n_ifg, resolution, s_su8_dB, cmap='jet')
+plt.pcolormesh(n_ifg, resolution, snr_su8_dB, cmap='jet')
 plt.xscale('log')
 plt.xlabel("# interferograms")
 plt.ylabel("resolution (GHz)")
