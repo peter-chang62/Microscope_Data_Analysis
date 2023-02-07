@@ -155,19 +155,28 @@ resolution = np.round(resolution, 0)
 
 # %% __________________________________________________________________________
 # create a gif
-target = "bckgnd"
+target = "su8"
 save = True
 
 if target == "su8":
     avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
                   "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy")
+    data = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                   "/Python_Workspace/data/phase_corrected"
+                   "/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+                   mmap_mode='r')
     snr = snr_su8_dB
 elif target == "bckgnd":
     avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
                   "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd"
                   ".npy")
+    data = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                   "/Python_Workspace/data/phase_corrected"
+                   "/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+                   mmap_mode='r')
     snr = snr_bckgnd_dB
 avg -= np.mean(avg)
+avg_1000 = np.mean(data[:1000], axis=0)
 
 ft_f = np.fft.rfft(avg)
 f_f = np.fft.rfftfreq(avg.size, d=1e-9) * ppifg
@@ -179,9 +188,9 @@ b, a = si.butter(4, .2, "low")
 amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
 
 fig, ax = plt.subplots(1, 2, figsize=np.array([10.98, 4.8]))
-for n, res in enumerate(resolution):
-    npts = window[np.argmin(abs(resolution - res))]
-    avg_a = avg[center - npts // 2:center + npts // 2]
+for n in range(resolution.size):
+    npts = window[n]
+    avg_a = avg_1000[center - npts // 2:center + npts // 2]
 
     ft_a = np.fft.rfft(avg_a)
     f_a = np.fft.rfftfreq(avg_a.size, d=1e-9) * ppifg
@@ -203,7 +212,8 @@ for n, res in enumerate(resolution):
     ax[1].set_xlabel("interferogram #")
     ax[0].set_ylabel("power spectrum (a.u.)")
     ax[1].set_ylabel("SNR (dB)")
-    fig.suptitle(f'{int(res)} GHz resolution')
+    ax[1].axvline(1000, color='r', linestyle='--')
+    fig.suptitle(f'{int(resolution[n])} GHz resolution')
 
     if save:
         plt.savefig(f'fig/{n}.png')
