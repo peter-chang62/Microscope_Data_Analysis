@@ -4,8 +4,8 @@ import clipboard_and_style_sheet as cr
 import scipy.signal as si
 from tqdm import tqdm
 from numpy import ma
+import scipy.constants as sc
 from scipy.interpolate import InterpolatedUnivariateSpline
-from multiprocessing.pool import Pool
 
 cr.style_sheet()
 
@@ -37,7 +37,7 @@ def apply_filter(ft, lst_fltrs=list_filter):
 
 
 def calculate_snr(data, apod=None, avg_f=None):
-    ppifg = len(data[0])
+    ppifg = data[0].size
     center = ppifg // 2
 
     freq_f = np.fft.rfftfreq(len(data[0]))  # 1 GHz frequency axis
@@ -86,53 +86,57 @@ path = r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace" \
        r"/data/phase_corrected/"
 
 # %% __________________________________________________________________________
-# data = np.load(  # taken on silicon
-#     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# # data = np.load(  # taken on silicon
+# #     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# #     mmap_mode='r')
+# # avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+# #               "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd.npy")
+# data = np.load(  # taken on su8
+#     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #     mmap_mode='r')
 # avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
-#               "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd.npy")
-data = np.load(  # taken on su8
-    path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-    mmap_mode='r')
-avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
-              "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy")
-ppifg = len(data[0])
-center = ppifg // 2
-
-resolution = np.arange(0, 500 + 10, 10)
-resolution[0] = 1
-APOD = (1 / resolution) * ppifg
-APOD = np.round(APOD).astype(int)
-APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
-
-APOD = ma.asarray(APOD)
-APOD[0] = ma.masked
-
-SIGMA = np.zeros((len(APOD), len(data)))
-for n, apod in enumerate(APOD):
-    SIGMA[n] = calculate_snr(data, apod, avg)
-    print(f'_____________________{len(APOD) - n - 1}_____________________')
-
-np.save("sigma_su8.npy", SIGMA)
-
-# %% __________________________________________________________________________
-# s_su8 = np.load("sigma_su8.npy")
-# s_bckgnd = np.load("sigma_bckgnd.npy")
-# window = np.load(path + "su8/sigma/NPTS.npy")
-# ppifg = 74180
+#               "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy")
+# ppifg = len(data[0])
 # center = ppifg // 2
 #
-# n_ifg = np.arange(1, len(s_bckgnd[0]) + 1)
-# s_bckgnd_dB = 10 * np.log10(s_bckgnd)
-# s_su8_dB = 10 * np.log10(s_su8)
+# resolution = np.arange(0, 500 + 10, 10)
+# resolution[0] = 1
+# APOD = (1 / resolution) * ppifg
+# APOD = np.round(APOD).astype(int)
+# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
 #
-# snr_bckgnd_dB = 10 * np.log10(1 / s_bckgnd)
-# snr_su8_dB = 10 * np.log10(1 / s_su8)
+# APOD = ma.asarray(APOD)
+# APOD[0] = ma.masked
 #
-# resolution = window[0] / window
-# resolution = np.round(resolution, 0)
+# SIGMA = np.zeros((len(APOD), len(data)))
+# for n, apod in enumerate(APOD):
+#     SIGMA[n] = calculate_snr(data, apod, avg)
+#     print(f'_____________________{len(APOD) - n - 1}_____________________')
 #
-# # snr 2D plots
+# np.save("sigma_su8.npy", SIGMA)
+
+# %% __________________________________________________________________________
+s_su8 = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                "/Python_Workspace/data/phase_corrected/su8/sigma/sigma"
+                ".npy")
+s_bckgnd = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                   "/Python_Workspace/data/phase_corrected/bckgnd/sigma/sigma"
+                   ".npy")
+window = np.load(path + "su8/sigma/NPTS.npy")
+ppifg = 74180
+center = ppifg // 2
+
+n_ifg = np.arange(1, len(s_bckgnd[0]) + 1)
+s_bckgnd_dB = 10 * np.log10(s_bckgnd)
+s_su8_dB = 10 * np.log10(s_su8)
+
+snr_bckgnd_dB = 10 * np.log10(1 / s_bckgnd)
+snr_su8_dB = 10 * np.log10(1 / s_su8)
+
+resolution = window[0] / window
+resolution = np.round(resolution, 0)
+
+# snr 2D plots
 # fig = plt.figure()
 # plt.suptitle("background absorbance noise (dB)")
 # plt.pcolormesh(n_ifg, resolution, snr_bckgnd_dB, cmap='jet')
@@ -148,3 +152,60 @@ np.save("sigma_su8.npy", SIGMA)
 # plt.xlabel("# interferograms")
 # plt.ylabel("resolution (GHz)")
 # plt.colorbar()
+
+# %% __________________________________________________________________________
+# create a gif
+target = "bckgnd"
+save = True
+
+if target == "su8":
+    avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                  "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy")
+    snr = snr_su8_dB
+elif target == "bckgnd":
+    avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
+                  "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd"
+                  ".npy")
+    snr = snr_bckgnd_dB
+avg -= np.mean(avg)
+
+ft_f = np.fft.rfft(avg)
+f_f = np.fft.rfftfreq(avg.size, d=1e-9) * ppifg
+f_ll, f_ul = .10784578053383662, .19547047721757888
+f_ll = f_ll * ppifg * 1e9 + f_f[-1] * 2
+f_ul = f_ul * ppifg * 1e9 + f_f[-1] * 2
+f_f += f_f[-1] * 2  # 3rd Nyquist window
+b, a = si.butter(4, .2, "low")
+amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
+
+fig, ax = plt.subplots(1, 2, figsize=np.array([10.98, 4.8]))
+for n, res in enumerate(resolution):
+    npts = window[np.argmin(abs(resolution - res))]
+    avg_a = avg[center - npts // 2:center + npts // 2]
+
+    ft_a = np.fft.rfft(avg_a)
+    f_a = np.fft.rfftfreq(avg_a.size, d=1e-9) * ppifg
+    f_a += f_a[-1] * 2  # 3rd Nyquist window
+    wl_a = sc.c / f_a
+    amp_ft_f_filt_gridded = InterpolatedUnivariateSpline(f_f, amp_ft_f_filt)
+    amp_ft_f_filt_interp = amp_ft_f_filt_gridded(f_a)
+
+    [i.clear() for i in ax]
+    ax[0].plot(wl_a * 1e6, amp_ft_f_filt_interp, label="background")
+    ax[0].plot(wl_a * 1e6, abs(ft_a), label="signal")
+    ax[0].axvline(sc.c * 1e6 / f_ll, color='r', linestyle='--')
+    ax[0].axvline(sc.c * 1e6 / f_ul, color='r', linestyle='--')
+    ax[1].semilogx(n_ifg, snr[0], 'o')
+    ax[1].semilogx(n_ifg, snr[n], 'o')
+
+    ax[0].legend(loc='best')
+    ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+    ax[1].set_xlabel("interferogram #")
+    ax[0].set_ylabel("power spectrum (a.u.)")
+    ax[1].set_ylabel("SNR (dB)")
+    fig.suptitle(f'{int(res)} GHz resolution')
+
+    if save:
+        plt.savefig(f'fig/{n}.png')
+    else:
+        plt.pause(.1)
