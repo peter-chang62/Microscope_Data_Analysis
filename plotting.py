@@ -1,13 +1,13 @@
 import sys
 
 sys.path.append("include/")
-import numpy as np
-import clipboard_and_style_sheet as cr
-import matplotlib.pyplot as plt
-from scipy.integrate import simps
-from images import *
-import os
 import scipy.constants as sc
+import os
+from images import *
+from scipy.integrate import simps
+import matplotlib.pyplot as plt
+import clipboard_and_style_sheet as cr
+import numpy as np
 
 cr.style_sheet()
 plt.ion()
@@ -27,7 +27,7 @@ Nyq_freq = frep * center
 nu = np.linspace(0, Nyq_freq, center) + Nyq_freq * 2
 wl = sc.c / nu * 1e6
 
-# ______________________________________ plotting _____________________________
+# %% ______________________________________ plotting __________________________
 wl_ll, wl_ul = 3.25, 3.6
 ind_ll, ind_ul = np.argmin(abs(wl - wl_ul)), np.argmin(abs(wl - wl_ll))
 
