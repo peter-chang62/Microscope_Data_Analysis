@@ -6,6 +6,7 @@ from tqdm import tqdm
 from numpy import ma
 import scipy.constants as sc
 from scipy.interpolate import InterpolatedUnivariateSpline
+import os
 
 cr.style_sheet()
 
@@ -86,55 +87,52 @@ def calculate_snr(data, apod=None, avg_f=None):
 
 
 # %%
-path = (
-    r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace"
-    r"/data/phase_corrected/"
-)
+if os.name == "nt":
+    path = (
+        r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope/"
+        r"Python_Workspace\data\phase_corrected/"
+    )
+else:
+    path = (
+        r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace"
+        r"/data/phase_corrected/"
+    )
 
 # %%
-# # data = np.load(  # taken on silicon
-# #     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-# #     mmap_mode='r')
-# # avg = np.load("/Volumes/Extreme SSD/Research_Projects/Microscope"
-# #               "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd.npy")
-# data = np.load(  # taken on su8
-#     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+# data = np.load(  # taken on silicon
+#     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
 #     mmap_mode="r",
 # )
-# avg = np.load(
-#     "/Volumes/Extreme SSD/Research_Projects/Microscope"
-#     "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy"
-# )
-# ppifg = len(data[0])
-# center = ppifg // 2
+# avg = np.load(path + "bckgnd/avg_bckgnd.npy")
 
-# resolution = np.arange(0, 500 + 10, 10)
-# resolution[0] = 1
-# APOD = (1 / resolution) * ppifg
-# APOD = np.round(APOD).astype(int)
-# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+data = np.load(  # taken on su8
+    path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+    mmap_mode="r",
+)
+avg = np.load(path + "su8/avg_su8.npy")
 
-# APOD = ma.asarray(APOD)
-# APOD[0] = ma.masked
+ppifg = len(data[0])
+center = ppifg // 2
 
-# SIGMA = np.zeros((len(APOD), len(data)))
-# for n, apod in enumerate(APOD):
-#     SIGMA[n] = calculate_snr(data, apod, avg)
-#     print(f"_____________________{len(APOD) - n - 1}_____________________")
+resolution = np.arange(0, 500 + 10, 10)
+resolution[0] = 1
+APOD = (1 / resolution) * ppifg
+APOD = np.round(APOD).astype(int)
+APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
 
-# np.save("sigma_su8.npy", SIGMA)
+APOD = ma.asarray(APOD)
+APOD[0] = ma.masked
+
+SIGMA = np.zeros((len(APOD), len(data)))
+for n, apod in enumerate(APOD):
+    SIGMA[n] = calculate_snr(data, apod, avg)
+    print(f"_____________________{len(APOD) - n - 1}_____________________")
+
+np.save(path + "su8/sigma/sigma.npy", SIGMA)
 
 # %%
-s_su8 = np.load(
-    "/Volumes/Extreme SSD/Research_Projects/Microscope"
-    "/Python_Workspace/data/phase_corrected/su8/sigma/sigma"
-    ".npy"
-)
-s_bckgnd = np.load(
-    "/Volumes/Extreme SSD/Research_Projects/Microscope"
-    "/Python_Workspace/data/phase_corrected/bckgnd/sigma/sigma"
-    ".npy"
-)
+s_su8 = np.load(path + "su8/sigma/sigma.npy")
+s_bckgnd = np.load(path + "bckgnd/sigma/sigma.npy")
 window = np.load(path + "su8/sigma/NPTS.npy")
 ppifg = 74180
 center = ppifg // 2
@@ -172,27 +170,16 @@ target = "su8"
 save = False
 
 if target == "su8":
-    avg = np.load(
-        "/Volumes/Extreme SSD/Research_Projects/Microscope"
-        "/Python_Workspace/data/phase_corrected/su8/avg_su8.npy"
-    )
+    avg = np.load(path + "su8/avg_su8.npy")
     data = np.load(
-        "/Volumes/Extreme SSD/Research_Projects/Microscope"
-        "/Python_Workspace/data/phase_corrected"
-        "/stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+        path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
         mmap_mode="r",
     )
     snr = snr_su8_dB
 elif target == "bckgnd":
-    avg = np.load(
-        "/Volumes/Extreme SSD/Research_Projects/Microscope"
-        "/Python_Workspace/data/phase_corrected/bckgnd/avg_bckgnd"
-        ".npy"
-    )
+    avg = np.load(path + "bckgnd/avg_bckgnd" ".npy")
     data = np.load(
-        "/Volumes/Extreme SSD/Research_Projects/Microscope"
-        "/Python_Workspace/data/phase_corrected"
-        "/stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+        path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
         mmap_mode="r",
     )
     snr = snr_bckgnd_dB
