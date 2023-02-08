@@ -9,3 +9,5 @@ __pycache__/
 .DS_Store
 
 ~$validating_shocktube_analysis.pptx
+
+.spyproject/
