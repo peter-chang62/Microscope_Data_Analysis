@@ -99,36 +99,38 @@ else:
     )
 
 # %%
-# data = np.load(  # taken on silicon
-#     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# =============================================================================
+# # data = np.load(  # taken on silicon
+# #     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+# #     mmap_mode="r",
+# # )
+# # avg = np.load(path + "bckgnd/avg_bckgnd.npy")
+# 
+# data = np.load(  # taken on su8
+#     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #     mmap_mode="r",
 # )
-# avg = np.load(path + "bckgnd/avg_bckgnd.npy")
-
-data = np.load(  # taken on su8
-    path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-    mmap_mode="r",
-)
-avg = np.load(path + "su8/avg_su8.npy")
-
-ppifg = len(data[0])
-center = ppifg // 2
-
-resolution = np.arange(0, 500 + 10, 10)
-resolution[0] = 1
-APOD = (1 / resolution) * ppifg
-APOD = np.round(APOD).astype(int)
-APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
-
-APOD = ma.asarray(APOD)
-APOD[0] = ma.masked
-
-SIGMA = np.zeros((len(APOD), len(data)))
-for n, apod in enumerate(APOD):
-    SIGMA[n] = calculate_snr(data, apod, avg)
-    print(f"_____________________{len(APOD) - n - 1}_____________________")
-
-np.save(path + "su8/sigma/sigma.npy", SIGMA)
+# avg = np.load(path + "su8/avg_su8.npy")
+# 
+# ppifg = len(data[0])
+# center = ppifg // 2
+# 
+# resolution = np.arange(0, 500 + 10, 10)
+# resolution[0] = 1
+# APOD = (1 / resolution) * ppifg
+# APOD = np.round(APOD).astype(int)
+# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+# 
+# APOD = ma.asarray(APOD)
+# APOD[0] = ma.masked
+# 
+# SIGMA = np.zeros((len(APOD), len(data)))
+# for n, apod in enumerate(APOD):
+#     SIGMA[n] = calculate_snr(data, apod, avg)
+#     print(f"_____________________{len(APOD) - n - 1}_____________________")
+# 
+# np.save(path + "su8/sigma/sigma.npy", SIGMA)
+# =============================================================================
 
 # %%
 s_su8 = np.load(path + "su8/sigma/sigma.npy")
