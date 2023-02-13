@@ -1,3 +1,4 @@
+# %% package imports
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
@@ -10,6 +11,7 @@ import os
 
 cr.style_sheet()
 
+# %% global variables
 # together
 list_filter = np.array(
     [
@@ -23,7 +25,7 @@ list_filter = np.array(
     ]
 )
 
-
+# %% function defs
 def filt(freq, ll, ul, x, type="bp"):
     if type == "bp":
         mask = np.where(np.logical_and(freq > ll, freq < ul), 0, 1)
@@ -105,30 +107,30 @@ else:
 # #     mmap_mode="r",
 # # )
 # # avg = np.load(path + "bckgnd/avg_bckgnd.npy")
-# 
+#
 # data = np.load(  # taken on su8
 #     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
 #     mmap_mode="r",
 # )
 # avg = np.load(path + "su8/avg_su8.npy")
-# 
+#
 # ppifg = len(data[0])
 # center = ppifg // 2
-# 
+#
 # resolution = np.arange(0, 500 + 10, 10)
 # resolution[0] = 1
 # APOD = (1 / resolution) * ppifg
 # APOD = np.round(APOD).astype(int)
 # APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
-# 
+#
 # APOD = ma.asarray(APOD)
 # APOD[0] = ma.masked
-# 
+#
 # SIGMA = np.zeros((len(APOD), len(data)))
 # for n, apod in enumerate(APOD):
 #     SIGMA[n] = calculate_snr(data, apod, avg)
 #     print(f"_____________________{len(APOD) - n - 1}_____________________")
-# 
+#
 # np.save(path + "su8/sigma/sigma.npy", SIGMA)
 # =============================================================================
 
@@ -166,66 +168,65 @@ plt.xlabel("# interferograms")
 plt.ylabel("resolution (GHz)")
 plt.colorbar()
 
-# %%
-# create a gif
-target = "su8"
-save = False
+# %% # create a gif
+# target = "su8"
+# save = False
 
-if target == "su8":
-    avg = np.load(path + "su8/avg_su8.npy")
-    data = np.load(
-        path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-        mmap_mode="r",
-    )
-    snr = snr_su8_dB
-elif target == "bckgnd":
-    avg = np.load(path + "bckgnd/avg_bckgnd" ".npy")
-    data = np.load(
-        path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-        mmap_mode="r",
-    )
-    snr = snr_bckgnd_dB
-avg -= np.mean(avg)
-avg_1000 = np.mean(data[:1000], axis=0)
+# if target == "su8":
+#     avg = np.load(path + "su8/avg_su8.npy")
+#     data = np.load(
+#         path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#         mmap_mode="r",
+#     )
+#     snr = snr_su8_dB
+# elif target == "bckgnd":
+#     avg = np.load(path + "bckgnd/avg_bckgnd" ".npy")
+#     data = np.load(
+#         path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#         mmap_mode="r",
+#     )
+#     snr = snr_bckgnd_dB
+# avg -= np.mean(avg)
+# avg_1000 = np.mean(data[:1000], axis=0)
 
-ft_f = np.fft.rfft(avg)
-f_f = np.fft.rfftfreq(avg.size, d=1e-9) * ppifg
-f_ll, f_ul = 0.10784578053383662, 0.19547047721757888
-f_ll = f_ll * ppifg * 1e9 + f_f[-1] * 2
-f_ul = f_ul * ppifg * 1e9 + f_f[-1] * 2
-f_f += f_f[-1] * 2  # 3rd Nyquist window
-b, a = si.butter(4, 0.2, "low")
-amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
+# ft_f = np.fft.rfft(avg)
+# f_f = np.fft.rfftfreq(avg.size, d=1e-9) * ppifg
+# f_ll, f_ul = 0.10784578053383662, 0.19547047721757888
+# f_ll = f_ll * ppifg * 1e9 + f_f[-1] * 2
+# f_ul = f_ul * ppifg * 1e9 + f_f[-1] * 2
+# f_f += f_f[-1] * 2  # 3rd Nyquist window
+# b, a = si.butter(4, 0.2, "low")
+# amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
 
-fig, ax = plt.subplots(1, 2, figsize=np.array([10.98, 4.8]))
-for n in range(resolution.size):
-    npts = window[n]
-    avg_a = avg_1000[center - npts // 2 : center + npts // 2]
+# fig, ax = plt.subplots(1, 2, figsize=np.array([10.98, 4.8]))
+# for n in range(resolution.size):
+#     npts = window[n]
+#     avg_a = avg_1000[center - npts // 2 : center + npts // 2]
 
-    ft_a = np.fft.rfft(avg_a)
-    f_a = np.fft.rfftfreq(avg_a.size, d=1e-9) * ppifg
-    f_a += f_a[-1] * 2  # 3rd Nyquist window
-    wl_a = sc.c / f_a
-    amp_ft_f_filt_gridded = InterpolatedUnivariateSpline(f_f, amp_ft_f_filt)
-    amp_ft_f_filt_interp = amp_ft_f_filt_gridded(f_a)
+#     ft_a = np.fft.rfft(avg_a)
+#     f_a = np.fft.rfftfreq(avg_a.size, d=1e-9) * ppifg
+#     f_a += f_a[-1] * 2  # 3rd Nyquist window
+#     wl_a = sc.c / f_a
+#     amp_ft_f_filt_gridded = InterpolatedUnivariateSpline(f_f, amp_ft_f_filt)
+#     amp_ft_f_filt_interp = amp_ft_f_filt_gridded(f_a)
 
-    [i.clear() for i in ax]
-    ax[0].plot(wl_a * 1e6, amp_ft_f_filt_interp, label="background")
-    ax[0].plot(wl_a * 1e6, abs(ft_a), label="signal")
-    ax[0].axvline(sc.c * 1e6 / f_ll, color="r", linestyle="--")
-    ax[0].axvline(sc.c * 1e6 / f_ul, color="r", linestyle="--")
-    ax[1].semilogx(n_ifg, snr[0], "o")
-    ax[1].semilogx(n_ifg, snr[n], "o")
+#     [i.clear() for i in ax]
+#     ax[0].plot(wl_a * 1e6, amp_ft_f_filt_interp, label="background")
+#     ax[0].plot(wl_a * 1e6, abs(ft_a), label="signal")
+#     ax[0].axvline(sc.c * 1e6 / f_ll, color="r", linestyle="--")
+#     ax[0].axvline(sc.c * 1e6 / f_ul, color="r", linestyle="--")
+#     ax[1].semilogx(n_ifg, snr[0], "o")
+#     ax[1].semilogx(n_ifg, snr[n], "o")
 
-    ax[0].legend(loc="best")
-    ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-    ax[1].set_xlabel("interferogram #")
-    ax[0].set_ylabel("power spectrum (a.u.)")
-    ax[1].set_ylabel("SNR (dB)")
-    ax[1].axvline(1000, color="r", linestyle="--")
-    fig.suptitle(f"{int(resolution[n])} GHz resolution")
+#     ax[0].legend(loc="best")
+#     ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+#     ax[1].set_xlabel("interferogram #")
+#     ax[0].set_ylabel("power spectrum (a.u.)")
+#     ax[1].set_ylabel("SNR (dB)")
+#     ax[1].axvline(1000, color="r", linestyle="--")
+#     fig.suptitle(f"{int(resolution[n])} GHz resolution")
 
-    if save:
-        plt.savefig(f"fig/{n}.png")
-    else:
-        plt.pause(0.1)
+#     if save:
+#         plt.savefig(f"fig/{n}.png")
+#     else:
+#         plt.pause(0.1)
