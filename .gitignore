@@ -11,3 +11,5 @@ __pycache__/
 ~$validating_shocktube_analysis.pptx
 
 .spyproject/
+
+.vscode/

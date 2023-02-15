@@ -96,17 +96,17 @@ if os.name == "nt":
     )
 else:
     path = (
-        r"/Volumes/Extreme SSD/Research_Projects/Microscope/Python_Workspace"
+        r"/Volumes/Peter SSD/Research_Projects/Microscope/Python_Workspace"
         r"/data/phase_corrected/"
     )
 
 # %%
 # =============================================================================
-# # data = np.load(  # taken on silicon
-# #     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-# #     mmap_mode="r",
-# # )
-# # avg = np.load(path + "bckgnd/avg_bckgnd.npy")
+# data = np.load(  # taken on silicon
+#     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#     mmap_mode="r",
+# )
+# avg = np.load(path + "bckgnd/avg_bckgnd.npy")
 #
 # data = np.load(  # taken on su8
 #     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
