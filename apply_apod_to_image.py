@@ -6,7 +6,7 @@ from scipy.integrate import simpson
 from tqdm import tqdm
 import scipy.constants as sc
 import os
-from include import digital_phase_correction as dpc
+from include import digital_phase_correction as dpc  # better way to important I think
 
 cr.style_sheet()
 
