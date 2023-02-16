@@ -13,3 +13,5 @@ __pycache__/
 .spyproject/
 
 .vscode/
+
+.ipynb_checkpoints/

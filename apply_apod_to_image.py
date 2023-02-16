@@ -6,6 +6,7 @@ from scipy.integrate import simpson
 from tqdm import tqdm
 import scipy.constants as sc
 import os
+from include import digital_phase_correction as dpc
 
 cr.style_sheet()
 
@@ -143,3 +144,43 @@ plt.plot(wl_a, absorbance_a[13, 27])
 [plt.axvline(i, color="r") for i in [wl_ll, wl_ul]]
 plt.ylim(0.6, 1.9)
 plt.xlim(3.2, 3.65)
+
+# %% double check
+if os.name == "nt":
+    path = (
+        r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope/"
+        r"Python_Workspace\data\phase_corrected/"
+    )
+else:
+    path = (
+        r"/Volumes/Peter SSD/Research_Projects/Microscope/Python_Workspace"
+        r"/data/phase_corrected/"
+    )
+
+avg = np.load(path + "bckgnd/avg_bckgnd.npy", mmap_mode="r")
+ft = dpc.rfft(avg)
+
+p = np.arctan2(ft.imag, ft.real)
+ft_zero_phase = ft * np.exp(-1j * p)
+t_zero_phase = dpc.irfft(ft_zero_phase)
+
+ppifg = 74180
+center = ppifg // 2
+window = 74180 // 100
+
+t_a = avg[center - window // 2 : center + window // 2]
+t_a_zero_phase = t_zero_phase[center - window // 2 : center + window // 2]
+
+ft_a = dpc.rfft(t_a)
+ft_a_zero_phase = dpc.rfft(t_a_zero_phase)
+
+plt.figure()
+plt.plot(t_a, label="original")
+plt.plot(t_a_zero_phase, label="phase zeroed")
+plt.legend(loc="best")
+
+plt.figure()
+plt.plot(abs(ft_a), label="original")
+plt.plot(abs(ft_a_zero_phase), label="phase zeroed")
+plt.plot(abs(ft_a) - abs(ft_a_zero_phase), label="difference")
+plt.legend(loc="best")
