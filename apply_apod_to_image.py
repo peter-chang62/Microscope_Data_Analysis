@@ -78,7 +78,7 @@ def smallest_bar():
     return x, y, s
 
 
-# %%
+# %% load data & filter & calculate apodized spectra
 x, y, s = num_4()
 shape = s.shape
 s = s.reshape((s.shape[0] * s.shape[1], s.shape[2]))
@@ -95,14 +95,10 @@ t_a = t[:, :, center - window // 2 : center + window // 2]
 s_a = np.fft.rfft(np.fft.fftshift(t_a, axes=-1), axis=-1)
 s_a = abs(s_a)
 
-# %%
+# %% unapodized image
 absorption = s / s[0, 0]
 absorbance = -np.log(absorption)
 
-absorption_a = s_a / s_a[0, 0]
-absorbance_a = -np.log(absorption_a)
-
-# %%
 nu = np.fft.rfftfreq(ppifg - 1, 1e-9) * ppifg
 nu += nu[-1] * 2
 wl = sc.c * 1e6 / nu
@@ -113,11 +109,14 @@ img = simpson(absorbance[:, :, ind_ll:ind_ul])
 img -= img.min()
 img *= -1
 
-# %%
+# %% apodized image
 nu_a = np.fft.rfftfreq(window, 1e-9) * ppifg
 nu_a += nu_a[-1] * 2
 wl_a = sc.c * 1e6 / nu_a
 ind_ll_a, ind_ul_a = np.argmin(abs(wl_a - wl_ul)), np.argmin(abs(wl_a - wl_ll))
+
+absorption_a = s_a / s_a[0, 0]
+absorbance_a = -np.log(absorption_a)
 
 img_a = simpson(absorbance_a[:, :, ind_ll_a:ind_ul_a])
 img_a -= img_a.min()
@@ -145,7 +144,7 @@ plt.plot(wl_a, absorbance_a[13, 27])
 plt.ylim(0.6, 1.9)
 plt.xlim(3.2, 3.65)
 
-# %% double check
+# %% double check that the above method was valid!
 if os.name == "nt":
     path = (
         r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope/"
@@ -157,23 +156,29 @@ else:
         r"/data/phase_corrected/"
     )
 
+# load average and take its fft
 avg = np.load(path + "bckgnd/avg_bckgnd.npy", mmap_mode="r")
-ft = dpc.rfft(avg)
+ft = dpc.rfft(avg)  # take fft
 
+# calculate phase and create an fft with phase = 0
 p = np.arctan2(ft.imag, ft.real)
 ft_zero_phase = ft * np.exp(-1j * p)
 t_zero_phase = dpc.irfft(ft_zero_phase)
 
+# apodization window
 ppifg = 74180
 center = ppifg // 2
 window = 74180 // 100
 
+# get apodized original data, and the apodized interferogram whose whose fft
+# has zero phase
 t_a = avg[center - window // 2 : center + window // 2]
 t_a_zero_phase = t_zero_phase[center - window // 2 : center + window // 2]
 
-ft_a = dpc.rfft(t_a)
-ft_a_zero_phase = dpc.rfft(t_a_zero_phase)
+ft_a = dpc.rfft(t_a)  # fft of apodized data
+ft_a_zero_phase = dpc.rfft(t_a_zero_phase)  # fft of apodized zero phase data
 
+# plot results!
 plt.figure()
 plt.plot(t_a, label="original")
 plt.plot(t_a_zero_phase, label="phase zeroed")
