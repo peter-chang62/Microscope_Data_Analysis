@@ -1,16 +1,14 @@
-import sys
-
-sys.path.append("include/")
+# %% package imports
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
-import td_phase_correct as td
+from include import td_phase_correct as td
 from tqdm import tqdm
 import os
 
 cr.style_sheet()
 
-
+# %% function defs
 def filt(freq, ll, ul, x, type="bp"):
     if type == "bp":
         return np.where(np.logical_and(freq > ll, freq < ul), x, 0.0)
@@ -19,6 +17,7 @@ def filt(freq, ll, ul, x, type="bp"):
         return np.where(np.logical_or(freq < ll, freq > ul), x, 0.0)
 
 
+# %%
 path = (
     r"/Volumes/Extreme SSD/Research_Projects/Microscope"
     r"/FreeRunningSpectra/11-09-2022/"

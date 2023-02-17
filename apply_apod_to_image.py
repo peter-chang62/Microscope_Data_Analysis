@@ -91,6 +91,7 @@ resolution = 100
 ppifg = 74180
 center = ppifg // 2
 window = int(np.round(ppifg / resolution))
+
 t_a = t[:, :, center - window // 2 : center + window // 2]
 s_a = np.fft.rfft(np.fft.fftshift(t_a, axes=-1), axis=-1)
 s_a = abs(s_a)
@@ -156,6 +157,7 @@ else:
         r"/data/phase_corrected/"
     )
 
+# %%
 # load average and take its fft
 avg = np.load(path + "bckgnd/avg_bckgnd.npy", mmap_mode="r")
 ft = dpc.rfft(avg)  # take fft
@@ -189,3 +191,58 @@ plt.plot(abs(ft_a), label="original")
 plt.plot(abs(ft_a_zero_phase), label="phase zeroed")
 plt.plot(abs(ft_a) - abs(ft_a_zero_phase), label="difference")
 plt.legend(loc="best")
+
+# %% the images didn't really change, additional testing!
+data_bckgnd = np.load(  # taken on silicon
+    path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+    mmap_mode="r",
+)
+
+data_su8 = np.load(  # taken on silicon
+    path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+    mmap_mode="r",
+)
+
+N_avg = 100
+avg_bckgnd = np.mean(data_bckgnd[:N_avg], axis=0)
+avg_su8 = np.mean(data_su8[:N_avg], axis=0)
+
+RESOLUTION = np.arange(1, 100)
+AREA = np.zeros(len(RESOLUTION))
+plot = True
+save = False
+if plot:
+    fig, ax = plt.subplots(1, 1)
+for n, r in enumerate(tqdm(RESOLUTION)):
+    ppifg = 74180
+    center = ppifg // 2
+    window = int(np.round(ppifg / r))
+
+    wl_ll, wl_ul = 3.25, 3.6
+    nu_a = np.fft.rfftfreq(window, 1e-9) * ppifg
+    nu_a += nu_a[-1] * 2
+    wl_a = sc.c * 1e6 / nu_a
+    ind_ll_a, ind_ul_a = np.argmin(abs(wl_a - wl_ul)), np.argmin(abs(wl_a - wl_ll))
+
+    ft_bckgnd = dpc.rfft(avg_bckgnd[center - window // 2 : center + window // 2])
+    ft_su8 = dpc.rfft(avg_su8[center - window // 2 : center + window // 2])
+
+    absorption = abs(ft_su8) / abs(ft_bckgnd)
+    absorbance = -np.log(absorption)
+    # make sure you provide a frequency axis, or else the area won't be the
+    # same since the number of points change but it would assume dx=1
+    AREA[n] = simpson(absorbance[ind_ll_a:ind_ul_a], x=nu_a[ind_ll_a:ind_ul_a])
+
+    if plot:
+        ax.clear()
+        ax.plot(wl_a[ind_ll_a:ind_ul_a], absorbance[ind_ll_a:ind_ul_a])
+        if save:
+            plt.savefig(f"fig/{n}.png")
+        else:
+            plt.pause(0.1)
+
+fig = plt.figure(figsize=np.array([8.34, 5.3]))
+plt.plot(AREA, "o")
+plt.xlabel("resolution (GHz)")
+plt.ylabel("integrated absorbance (a.u.)")
+plt.title("Integrated Absorbance vs. Resolution (100 Averages)")
