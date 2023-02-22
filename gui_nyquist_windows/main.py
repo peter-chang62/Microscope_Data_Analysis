@@ -39,18 +39,16 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         self.error_window = ErrorWindow()
 
-        self.plot_window_optical = pw.PlotWindow(self.le_xmin,
-                                                 self.le_xmax,
-                                                 self.le_ymin,
-                                                 self.le_ymax,
-                                                 self.gv)
-        self.plot_window_rf = pw.PlotWindow(self.le_xmin_2,
-                                            self.le_xmax_2,
-                                            self.le_ymin_2,
-                                            self.le_ymax_2,
-                                            self.gv_2)
+        self.plot_window_optical = pw.PlotWindow(
+            self.le_xmin, self.le_xmax, self.le_ymin, self.le_ymax, self.gv
+        )
+        self.plot_window_rf = pw.PlotWindow(
+            self.le_xmin_2, self.le_xmax_2, self.le_ymin_2, self.le_ymax_2, self.gv_2
+        )
         self.lr = pg.LinearRegionItem()
-        self.lr_nyquist = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
+        self.lr_nyquist = pg.LinearRegionItem(
+            pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1)
+        )
         self.lr.setBrush(pg.mkBrush(color=qtg.QColor(255, 0, 0, 255 // 2)))
         self.lr_nyquist.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 255 // 4)))
         self.lr.setMovable(False)
@@ -61,7 +59,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lr_rf.setMovable(False)
         self.plot_window_rf.plotwidget.addItem(self.lr_rf)
 
-        self.lr_f0 = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
+        self.lr_f0 = pg.LinearRegionItem(
+            pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1)
+        )
         self.lr_f0.setMovable(False)
         self.lr_f0.setBrush(pg.mkBrush(color=qtg.QColor(0, 0, 0, 0)))
         self.plot_window_rf.plotwidget.addItem(self.lr_f0)
@@ -217,7 +217,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
     def update_dfrep_from_le(self):
         dfrep = int(self.le_dfrep.text())
         if not min_dfrep <= dfrep <= 1e5:
-            raise_error(self.error_window, f"delta frep must be {min_dfrep} <= dfrep <= 100,000")
+            raise_error(
+                self.error_window, f"delta frep must be {min_dfrep} <= dfrep <= 100,000"
+            )
             self.le_dfrep.setText(str(self.dfrep))
             return
         self.dfrep = dfrep
@@ -234,7 +236,9 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         N_diff = int(N - len(self.region_list))
         if N_diff > 0:  # N_diff is positive -> add region items
             for n in range(N_diff):
-                lr = pg.LinearRegionItem(pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1))
+                lr = pg.LinearRegionItem(
+                    pen=pg.mkPen(color=qtg.QColor(0, 0, 0, 255), width=1)
+                )
                 lr.setBrush(self.lr_nyquist.brush)
                 lr.setMovable(False)
 
@@ -270,7 +274,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lr_rf.setRegion(abs(region * 1e-6))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = qt.QApplication([])
     gui = Gui()
     app.exec()
