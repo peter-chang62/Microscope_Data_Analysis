@@ -59,6 +59,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
 
         self.lr_rf = pg.LinearRegionItem()
         self.lr_rf.setMovable(False)
+
         self.plot_window_rf.plotwidget.addItem(self.lr_rf)
 
         self.lr_f0 = pg.LinearRegionItem(
@@ -149,8 +150,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             raise_error(self.error_window, "min wavelength must be >0")
             return
         elif wl_min >= self.wl_max * 1e6:
-            raise_error(self.error_window,
-                        "min wavelength must be < max wavelength")
+            raise_error(self.error_window, "min wavelength must be < max wavelength")
             self.le_min_wl.setText(str(self.wl_min * 1e6))
             return
         self.wl_min = wl_min * 1e-6
@@ -165,8 +165,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             raise_error(self.error_window, "max wavelength must be >0")
             return
         elif wl_max <= self.wl_min * 1e6:
-            raise_error(self.error_window,
-                        "max wavelength must be > min wavelength")
+            raise_error(self.error_window, "max wavelength must be > min wavelength")
             self.le_max_wl.setText(str(self.wl_max * 1e6))
             return
         self.wl_max = wl_max * 1e-6
@@ -274,6 +273,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         vf_rf = self.nu_max / compression
         dist = vf_rf - self.frep / 2
         N_trans = np.ceil(dist / self.frep)
+
         region = np.array([vi_rf, vf_rf]) - N_trans * self.frep
         self.lr_rf.setRegion(abs(region * 1e-6))
 
