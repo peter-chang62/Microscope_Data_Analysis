@@ -7,3 +7,11 @@ __pycache__/
 /data/
 
 .DS_Store
+
+~$validating_shocktube_analysis.pptx
+
+.spyproject/
+
+.vscode/
+
+.ipynb_checkpoints/

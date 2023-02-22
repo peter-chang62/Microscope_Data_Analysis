@@ -2,68 +2,125 @@ import numpy as np
 import scipy.signal as ss
 import matplotlib.pyplot as plt
 
-try:
-    import mkl_fft  # a faster fft
-except:
-    mkl_fft = np.fft  # otherwise just use numpy's fft
+
+normalize = lambda x: x / np.max(np.abs(x))
 
 
-def fft(x, axis=None):
+def rfft(x, axis=None):
     """
-    calculates the 1D fft of the numpy array x
-    if x is not 1D you need to specify the axis
-    """
+    Parameters
+    ----------
+    x : numpy array
+        array on which to perform an fft.
+    axis : int, optional
+        axis over which to perform the fft. The default is None which is
+        equivalent to axis=0
+    Returns
+    -------
+    fft: numpy array
+        fourier transform of x.
 
+    """
     if axis is None:
-        return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x)))
+        return np.fft.rfft(np.fft.fftshift(x))
     else:
-        return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+        return np.fft.rfft(np.fft.fftshift(x, axes=axis), axis=axis)
 
 
-def ifft(x, axis=None):
+def irfft(x, axis=None):
     """
-    calculates the 1D ifft of the numpy array x
-    if x is not 1D you need to specify the axis
-    """
+    Parameters
+    ----------
+    x : numpy array
+        array on which to perform an ifft.
+    axis : int, optional
+        axis over which to perform the ifft. The default is None which is
+        equivalent to axis=0
+    Returns
+    -------
+    fft: numpy array
+        fourier transform of x.
 
+    """
     if axis is None:
-        return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x)))
+        return np.fft.ifftshift(np.fft.irfft(x))
     else:
-        return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+        return np.fft.ifftshift(np.fft.irfft(x, axis=axis), axes=axis)
 
 
-def normalize(vec):
-    return vec / np.max(abs(vec))
+# useful for plotting and determining good apodization window
+# to fit spectral phase
+def get_phase(dat, N_apod, plot=True):
+    """
+    Parameters
+    ----------
+    dat : 1D numpy array
+        one interferogram
+    N_apod : int
+        apodization window.
+    plot : boolean, optional
+        plot the phase and amplitude. The default is True.
 
-
-# useful for plotting in order to determine good apodization window
-# and frequency window to fit spectral phase
-def get_phase(dat, N_apod, plot=True, ax=None, ax2=None):
+    Returns
+    -------
+    freq : 1D numpy array
+        frequency axis (-.5 to .5).
+    phase : 1D numpy array
+        phase in radians.
+    spectrum: 1D numpy array
+        spectrum
+    """
     ppifg = len(dat)
     center = ppifg // 2
-    ft = fft(dat[center - N_apod // 2: center + N_apod // 2])
-    phase = np.unwrap(np.arctan2(ft.imag, ft.real))
-    freq = np.fft.fftshift(np.fft.fftfreq(len(phase)))
+    zoom = dat[center - N_apod // 2 : center + N_apod // 2]
+    fft = rfft(zoom)
+    phase = np.unwrap(np.arctan2(fft.imag, fft.real))
+    freq = np.fft.rfftfreq(len(zoom))
 
     if plot:
-        if ax is None:
-            fig, ax = plt.subplots(1, 1)
-        if ax2 is None:
-            ax2 = ax.twinx()
-        ax.plot(freq, phase, '.-')
-        ax2.plot(freq, ft.__abs__(), '.-', color='k')
-    return freq, phase, ft.__abs__(), ax, ax2
+        plt.figure()
+        plt.plot(freq, normalize(phase), ".-")
+        plt.plot(freq, normalize(fft.__abs__()), ".-")
+    return freq, phase, fft.__abs__()
 
 
-# modifies the ft array in place
-def apply_t0_shift(pdiff, freq, ft):
+def apply_t0_shift(pdiff, freq, fft):
+    """
+    Parameters
+    ----------
+    pdiff : Nx2 numpy array
+        array that contains the linear fit coefficients of the fft phase.
+    freq : 1D numpy array
+        frequency axis that corresonds to pdiff. If pdiff is calculated from
+        get_pdiff then the frequency axis runs from -.5 to .5
+    fft : 2D numpy array
+        2D numpy array with fft's of interferograms one each row.
+
+    Returns
+    -------
+    None.
+
+    """
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
-    ft[:] *= np.exp(1j * freq * pdiff[:, 0][:, np.newaxis])
+    fft[:] *= np.exp(1j * freq * pdiff[:, 0][:, np.newaxis])
 
 
-# modifies the hbt array in place
 def apply_phi0_shift(pdiff, hbt):
+    """
+
+    Parameters
+    ----------
+    pdiff : Nx2 numpy array
+        array that contains the linear fit coefficients of the fft phase.
+    hbt : 2D numpy array
+        hilbert transform of interferograms on each row.
+
+    Returns
+    -------
+    None.
+
+    """
     # the polynomial fits the spectral phase in radians,
     # so the factor of 2 pi is already there
     hbt[:] *= np.exp(1j * pdiff[:, 1][:, np.newaxis])
@@ -71,26 +128,38 @@ def apply_phi0_shift(pdiff, hbt):
 
 def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
     """
-    :param data: 2D array of IFG's, row column order
-    :param ppifg: int, length of each interferogram
-    :param ll_freq: lower frequency limit for spectral phase fit, given on -.5 to .5 scale
-    :param ul_freq: upper frequency limit for spectral phase fit, given on -.5 to .5 scale
-    :param Nzoom: the apodization window for the IFG, don't worry about f0 since you are fitting the spectral phase,
-    not doing a cross-correlation, you need to apodize or else your SNR isn't good enough to have a good fit, so
-    plot it first before specifying this parameter, generally 200 is pretty good
-    :return: pdiff, polynomial coefficients, higher order first
+    Parameters
+    ----------
+    data : 2D array
+        array of IFG's, row column order.
+    ll_freq : float
+        lower frequency limit for spectral phase fit, given on -.5 to .5 scale.
+    ul_freq : float
+        upper frequency limit for spectral phase fit, given on -.5 to .5 scale.
+    Nzoom : integer, optional
+        the apodization window. You need to apodize or else your SNR isn't good
+        enough to have a good fit, so plot it first before specifying this
+        parameter, generally 200 is pretty goodThe default is 200.
+    Returns
+    -------
+    pdiff : 2D array
+        polynomial coefficients for linear phase fit, given higher order first.
     """
 
+    # apodize the data and subtract constant offset
     center = len(data[0]) // 2
-    zoom = data[:, center - Nzoom // 2:center + Nzoom // 2]
+    zoom = data[:, center - Nzoom // 2 : center + Nzoom // 2]
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
-    # not fftshifted
-    ft = fft(zoom, 1)
-    freq = np.fft.fftshift(np.fft.fftfreq(len(ft[0])))
+    # if looking at things in the frequency domain, note that rfft takes an
+    # fftshifted input, and returns an already ifftshifted output. The latter
+    # occurs from the fact that it only returns the positive frequency side of
+    # the fft
+    fft = rfft(zoom, 1)
+    freq = np.fft.rfftfreq(len(zoom[0]))
     ll, ul = np.argmin(abs(freq - ll_freq)), np.argmin(abs(freq - ul_freq))
 
-    phase = np.unwrap(np.arctan2(ft.imag, ft.real))
+    phase = np.unwrap(np.arctan2(fft.imag, fft.real))
     phase = phase.T  # column order for polynomial fitting
     p = np.polyfit(freq[ll:ul], phase[ll:ul], 1).T
     pdiff = p[0] - p
@@ -98,16 +167,32 @@ def get_pdiff(data, ll_freq, ul_freq, Nzoom=200):
     return pdiff
 
 
-# modifies the data array in place
-def apply_t0_and_phi0_shift(pdiff, data):
-    freq = np.fft.fftshift(np.fft.fftfreq(len(data[0])))
-    ft = fft(data, 1)
-    apply_t0_shift(pdiff, freq, ft)
-    td = ifft(ft, 1).real
+def apply_t0_and_phi0_shift(pdiff, data, return_new=False):
+    """
+    Parameters
+    ----------
+    pdiff : Nx2 numpy array
+        array that contains the linear fit coefficients of the fft phase.
+    data : 2D numpy array
+        1 interferogram per row.
+    return_new: boolean, optional
+        if True, then a new phase corrected array is returned. otherwise, data
+        is altered in place
 
-    # td is the linear phase corrected time domain data
-    hbt = ss.hilbert(td)  # take hilbert transform of the linear phase corrected time domain data
-    apply_phi0_shift(pdiff, hbt)  # multiply by constant phase offset
-    hbt = hbt.real  # just take the real (no inverse)
+    Returns
+    -------
+    None.
+    """
+    freq = np.fft.rfftfreq(len(data[0]))
+    fft = rfft(data, 1)
+    apply_t0_shift(pdiff, freq, fft)
+    td = irfft(fft, 1)
 
-    data[:] = hbt.real
+    hbt = ss.hilbert(td)
+    apply_phi0_shift(pdiff, hbt)
+    hbt = hbt.real
+
+    if return_new:
+        return hbt
+    else:
+        data[:] = hbt

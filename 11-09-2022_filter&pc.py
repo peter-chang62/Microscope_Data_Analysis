@@ -1,15 +1,14 @@
-import sys
-
-sys.path.append("include/")
+# %% package imports
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
-import td_phase_correct as td
+from include import td_phase_correct as td
+from tqdm import tqdm
 import os
 
 cr.style_sheet()
 
-
+# %% function defs
 def filt(freq, ll, ul, x, type="bp"):
     if type == "bp":
         return np.where(np.logical_and(freq > ll, freq < ul), x, 0.0)
@@ -18,16 +17,13 @@ def filt(freq, ll, ul, x, type="bp"):
         return np.where(np.logical_or(freq < ll, freq > ul), x, 0.0)
 
 
-if os.name == 'posix':
-    path = "/Users/peterchang/SynologyDrive/Research_Projects/" \
-           "Microscope/FreeRunningSpectra/11-09-2022/"
-else:
-    path = r"C:/Users/pchan/SynologyDrive/Research_Projects/Microscope" \
-           r"/FreeRunningSpectra/11-09-2022/"
+# %%
+path = (
+    r"/Volumes/Extreme SSD/Research_Projects/Microscope"
+    r"/FreeRunningSpectra/11-09-2022/"
+)
 
-data = np.load(
-    path + "stage1_5300_stage2_8970_53856x74180.npy",
-    mmap_mode='r')
+data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy", mmap_mode="r")
 
 ppifg = len(data[0])
 center = ppifg // 2
@@ -38,11 +34,16 @@ data = data[center:-center]
 data.resize((N_IFG - 1, ppifg))
 rfreq = np.fft.rfftfreq(len(data[0]), 1e-9) * 1e-6  # 0 -> 500 MHz
 
-# %% __________________________________________________________________________
+# %%
 # filter the data first (using the 1 GHz resolution)
-data_filt = np.load("data/phase_corrected/" +
-                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-                    mmap_mode='r+')
+path_save = (
+    r"/Volumes/Extreme SSD/Research_Projects/Microscope"
+    r"/Python_Workspace/data/phase_corrected/"
+)
+data_filt = np.load(
+    path_save + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+    mmap_mode="r+",
+)
 
 # taken from looking at fft of one interferogram
 # list_filter = np.array([[0, 2],
@@ -61,13 +62,17 @@ data_filt = np.load("data/phase_corrected/" +
 #                         [499, 500]])
 
 # together
-list_filter = np.array([[0, 2],
-                        [31, 32.8],
-                        [249.5, 250.5],
-                        [280, 284],
-                        [337, 338],
-                        [436, 437],
-                        [499, 500]])
+list_filter = np.array(
+    [
+        [0, 2],
+        [31, 32.8],
+        [249.5, 250.5],
+        [280, 284],
+        [337, 338],
+        [436, 437],
+        [499, 500],
+    ]
+)
 
 step = len(data) // 8
 chunks = np.arange(0, len(data), step)
@@ -77,7 +82,7 @@ end = chunks[1:]
 console = 7
 
 h = 0
-for n in range(start[console], end[console]):
+for n in tqdm(range(start[console], end[console])):
     ft = np.fft.rfft(data[n])  # make sure to load from data
 
     for f in list_filter:
@@ -85,13 +90,15 @@ for n in range(start[console], end[console]):
 
     t_filt = np.fft.irfft(ft)
     data_filt[n] = t_filt
-    print(end[console] - start[console] - h - 1)
+    # print(end[console] - start[console] - h - 1) # using tqdm now
     h += 1
 
-# %% __________________________________________________________________________
+# %%
 # now phase correct the filtered data (1 GHz resolution)
-opt = td.Optimize(data_filt[:, center - 50:center + 50])
-opt.phase_correct(data_filt,
-                  start_index=start[console],
-                  end_index=end[console],
-                  method='Powell')
+opt = td.Optimize(data_filt[:, center - 50 : center + 50])
+opt.phase_correct(
+    data_filt,
+    start_index=start[console],
+    end_index=end[console],
+    method="Powell",
+)

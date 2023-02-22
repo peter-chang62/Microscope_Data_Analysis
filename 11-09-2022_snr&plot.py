@@ -1,27 +1,31 @@
-"""this is looking at the output of scratch-2.py"""
-
-import sys
-
-sys.path.append("include/")
+# %% package imports
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import scipy.signal as si
+from tqdm import tqdm
 from numpy import ma
+import scipy.constants as sc
 from scipy.interpolate import InterpolatedUnivariateSpline
+import os
 
 cr.style_sheet()
 
+# %% global variables
 # together
-list_filter = np.array([[0, 2],
-                        [31, 32.8],
-                        [249.5, 250.5],
-                        [280, 284],
-                        [337, 338],
-                        [436, 437],
-                        [499, 500]])
+list_filter = np.array(
+    [
+        [0, 2],
+        [31, 32.8],
+        [249.5, 250.5],
+        [280, 284],
+        [337, 338],
+        [436, 437],
+        [499, 500],
+    ]
+)
 
-
+# %% function defs
 def filt(freq, ll, ul, x, type="bp"):
     if type == "bp":
         mask = np.where(np.logical_and(freq > ll, freq < ul), 0, 1)
@@ -39,205 +43,190 @@ def apply_filter(ft, lst_fltrs=list_filter):
     return ft
 
 
-# %% __________________________________________________________________________
-def calculate_snr(data, apod=None):
-    ppifg = len(data[0])
+def calculate_snr(data, apod=None, avg_f=None):
+    ppifg = data[0].size
     center = ppifg // 2
 
-    if apod is not None:
-        assert isinstance(int, apod), "apod must be an integer"
-        data = data[:, center - apod // 2:center + apod // 2]
-    freq = np.fft.rfftfreq(len(data[0]))
+    freq_f = np.fft.rfftfreq(len(data[0]))  # 1 GHz frequency axis
 
-    avg = np.mean(data, 0)
-    avg -= np.mean(avg)
-    ft_avg = np.fft.rfft(avg)
+    if avg_f is None:
+        avg_f = np.mean(data, 0)
+        avg_f -= np.mean(avg_f)
+    ft_f = np.fft.rfft(avg_f)
 
-    ll = np.argmin(abs(freq - .10784578053383662))
-    ul = np.argmin(abs(freq - .19547047721757888))
+    if not np.any([apod is None, apod == np.nan, ma.is_masked(apod)]):
+        print("apodizing data")
+        data = data[:, center - apod // 2 : center + apod // 2]
+    else:
+        print("NOT apodizing data")
+    freq_a = np.fft.rfftfreq(len(data[0]))  # apodized frequency axis
 
-    b, a = si.butter(4, .2, "low")
-    ft_avg_filt = si.filtfilt(b, a, ft_avg.__abs__())
-    denom = ft_avg_filt[ll:ul]
+    b, a = si.butter(4, 0.2, "low")
+    amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
+    # interpolate 1 GHz spectrum onto the coarser frequency axis
+    amp_ft_f_filt_gridded = InterpolatedUnivariateSpline(freq_f, amp_ft_f_filt)
+    amp_ft_f_filt_interp = amp_ft_f_filt_gridded(freq_a)
+    # look at signal range of interest
+    ll_a = np.argmin(abs(freq_a - 0.10784578053383662))
+    ul_a = np.argmin(abs(freq_a - 0.19547047721757888))
+    denom_f = amp_ft_f_filt_interp[ll_a:ul_a]
 
     x = 0
     NOISE = np.zeros(len(data))
-    for n, i in enumerate(data):
+    for n, i in enumerate(tqdm(data)):
         i = i - np.mean(i)
 
         ft = np.fft.rfft(i)
         x = (x * n + apply_filter(ft)) / (n + 1)
 
-        num = x.__abs__()[ll:ul]
-        absorption = num / denom
-        absorbance = -np.log10(absorption)
+        num = x.__abs__()[ll_a:ul_a]
+        absorption = num / denom_f
+        absorbance = -np.log(absorption)
         noise = np.std(absorbance)
         NOISE[n] = noise
-
-        print(len(data) - n - 1)
 
     return NOISE
 
 
-# %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
+# %%
+if os.name == "nt":
+    path = (
+        r"C:\Users\pchan\SynologyDrive\Research_Projects\Microscope/"
+        r"Python_Workspace\data\phase_corrected/"
+    )
+else:
+    path = (
+        r"/Volumes/Peter SSD/Research_Projects/Microscope/Python_Workspace"
+        r"/data/phase_corrected/"
+    )
+
+# %%
+# =============================================================================
+# data = np.load(  # taken on silicon
+#     path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#     mmap_mode="r",
+# )
+# avg = np.load(path + "bckgnd/avg_bckgnd.npy")
 #
-# noise_1e3 = calculate_snr(data, int(1e3))
-# noise_1e4 = calculate_snr(data, int(1e4))
-# noise_full = calculate_snr(data, None)
-# 
-# np.save("data/phase_corrected/bckgnd/sigma_full.npy", noise_full)
-# np.save("data/phase_corrected/bckgnd/sigma_1e4.npy", noise_1e4)
-# np.save("data/phase_corrected/bckgnd/sigma_1e3.npy", noise_1e3)
+# data = np.load(  # taken on su8
+#     path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#     mmap_mode="r",
+# )
+# avg = np.load(path + "su8/avg_su8.npy")
+#
+# ppifg = len(data[0])
+# center = ppifg // 2
+#
+# resolution = np.arange(0, 500 + 10, 10)
+# resolution[0] = 1
+# APOD = (1 / resolution) * ppifg
+# APOD = np.round(APOD).astype(int)
+# APOD = np.where(APOD % 2 == 0, APOD, APOD + 1)
+#
+# APOD = ma.asarray(APOD)
+# APOD[0] = ma.masked
+#
+# SIGMA = np.zeros((len(APOD), len(data)))
+# for n, apod in enumerate(APOD):
+#     SIGMA[n] = calculate_snr(data, apod, avg)
+#     print(f"_____________________{len(APOD) - n - 1}_____________________")
+#
+# np.save(path + "su8/sigma/sigma.npy", SIGMA)
+# =============================================================================
 
-# %% __________________________________________________________________________
-# data = np.load("data/phase_corrected/"
-#                "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-#                mmap_mode='r')
-# 
-# noise_1e3 = calculate_snr(data, int(1e3))
-# noise_1e4 = calculate_snr(data, int(1e4))
-# noise_full = calculate_snr(data, None)
-# 
-# np.save("data/phase_corrected/su8/sigma_full.npy", noise_full)
-# np.save("data/phase_corrected/su8/sigma_1e4.npy", noise_1e4)
-# np.save("data/phase_corrected/su8/sigma_1e3.npy", noise_1e3)
-
-# %% __________________________________________________________________________
-# data_bckgnd = np.load("data/phase_corrected/"
-#                       "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
-#                       mmap_mode='r')
-# data_su8 = np.load("data/phase_corrected/"
-#                    "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
-#                    mmap_mode='r')
-# avg_bckgnd = np.mean(data_bckgnd, 0)
-# avg_su8 = np.mean(data_su8, 0)
-
-avg_bckgnd = np.load("data/phase_corrected/bckgnd/avg_bckgnd.npy")
-avg_su8 = np.load("data/phase_corrected/su8/avg_su8.npy")
-
-ppifg = len(avg_bckgnd)
+# %%
+s_su8 = np.load(path + "su8/sigma/sigma.npy")
+s_bckgnd = np.load(path + "bckgnd/sigma/sigma.npy")
+window = np.load(path + "su8/sigma/NPTS.npy")
+ppifg = 74180
 center = ppifg // 2
 
-ft_bckgnd_full = np.fft.rfft(avg_bckgnd)
-ft_bckgnd_1e4 = np.fft.rfft(
-    avg_bckgnd[center - int(1e4) // 2:center + int(1e4) // 2])
-ft_bckgnd_1e3 = np.fft.rfft(
-    avg_bckgnd[center - int(1e3) // 2:center + int(1e3) // 2])
+n_ifg = np.arange(1, len(s_bckgnd[0]) + 1)
+s_bckgnd_dB = 10 * np.log10(s_bckgnd)
+s_su8_dB = 10 * np.log10(s_su8)
 
-ft_su8_full = np.fft.rfft(avg_su8)
-ft_su8_1e4 = np.fft.rfft(
-    avg_su8[center - int(1e4) // 2:center + int(1e4) // 2])
-ft_su8_1e3 = np.fft.rfft(
-    avg_su8[center - int(1e3) // 2:center + int(1e3) // 2])
+snr_bckgnd_dB = 10 * np.log10(1 / s_bckgnd)
+snr_su8_dB = 10 * np.log10(1 / s_su8)
 
-noise_bckgnd_full = np.load("data/phase_corrected/bckgnd/sigma_full.npy")
-noise_bckgnd_1e4 = np.load("data/phase_corrected/bckgnd/sigma_1e4.npy")
-noise_bckgnd_1e3 = np.load("data/phase_corrected/bckgnd/sigma_1e3.npy")
+resolution = window[0] / window
+resolution = np.round(resolution, 0)
 
-noise_su8_full = np.load("data/phase_corrected/su8/sigma_full.npy")
-noise_su8_1e4 = np.load("data/phase_corrected/su8/sigma_1e4.npy")
-noise_su8_1e3 = np.load("data/phase_corrected/su8/sigma_1e3.npy")
+# snr 2D plots
+fig = plt.figure()
+plt.suptitle("background absorbance noise (dB)")
+plt.pcolormesh(n_ifg, resolution, snr_bckgnd_dB, cmap="jet")
+plt.xscale("log")
+plt.xlabel("# interferograms")
+plt.ylabel("resolution (GHz)")
+plt.colorbar()
 
-# together
-list_filter_plot = list_filter.copy()
-list_filter_plot[:, 0] += -.5
-list_filter_plot[:, 1] += .5
+fig = plt.figure()
+plt.suptitle("su8 absorbance noise (dB)")
+plt.pcolormesh(n_ifg, resolution, snr_su8_dB, cmap="jet")
+plt.xscale("log")
+plt.xlabel("# interferograms")
+plt.ylabel("resolution (GHz)")
+plt.colorbar()
 
-list_filter_plot_2 = list_filter.copy()
-list_filter_plot_2[:, 0] += -3
-list_filter_plot_2[:, 1] += 3
+# %% # create a gif
+# target = "su8"
+# save = False
 
-plt.figure()
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_full) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_full.__abs__()),
-         label='full')
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e4) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_1e4.__abs__(), list_filter_plot),
-         label='10,000 pts')
-plt.plot(np.fft.rfftfreq((len(ft_bckgnd_1e3) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_bckgnd_1e3.__abs__(), list_filter_plot_2),
-         label='1,000 pts')
-plt.legend(loc='best')
-plt.xlabel("MHz")
+# if target == "su8":
+#     avg = np.load(path + "su8/avg_su8.npy")
+#     data = np.load(
+#         path + "stage1_5300_stage2_8970_53856x74180_phase_corrected.npy",
+#         mmap_mode="r",
+#     )
+#     snr = snr_su8_dB
+# elif target == "bckgnd":
+#     avg = np.load(path + "bckgnd/avg_bckgnd" ".npy")
+#     data = np.load(
+#         path + "stage1_5116_stage2_8500_53856x74180_phase_corrected.npy",
+#         mmap_mode="r",
+#     )
+#     snr = snr_bckgnd_dB
+# avg -= np.mean(avg)
+# avg_1000 = np.mean(data[:1000], axis=0)
 
-plt.figure()
-plt.plot(np.fft.rfftfreq((len(ft_su8_full) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_full.__abs__()),
-         label='full')
-plt.plot(np.fft.rfftfreq((len(ft_su8_1e4) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_1e4.__abs__(), list_filter_plot),
-         label='10,000 pts')
-plt.plot(np.fft.rfftfreq((len(ft_su8_1e3) - 1) * 2, 1e-9) * 1e-6,
-         apply_filter(ft_su8_1e3.__abs__(), list_filter_plot_2),
-         label='1,000 pts')
-plt.legend(loc='best')
-plt.xlabel("MHz")
+# ft_f = np.fft.rfft(avg)
+# f_f = np.fft.rfftfreq(avg.size, d=1e-9) * ppifg
+# f_ll, f_ul = 0.10784578053383662, 0.19547047721757888
+# f_ll = f_ll * ppifg * 1e9 + f_f[-1] * 2
+# f_ul = f_ul * ppifg * 1e9 + f_f[-1] * 2
+# f_f += f_f[-1] * 2  # 3rd Nyquist window
+# b, a = si.butter(4, 0.2, "low")
+# amp_ft_f_filt = si.filtfilt(b, a, abs(ft_f))  # filter 1 GHz spectrum
 
-dt = 74180 * 1e-9
-t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
+# fig, ax = plt.subplots(1, 2, figsize=np.array([10.98, 4.8]))
+# for n in range(resolution.size):
+#     npts = window[n]
+#     avg_a = avg_1000[center - npts // 2 : center + npts // 2]
 
-plt.figure()
-plt.loglog(t, noise_bckgnd_full, 'o', label="full")
-plt.loglog(t, noise_bckgnd_1e4, 'o', label="10,000 pts")
-plt.loglog(t, noise_bckgnd_1e3, 'o', label="1,000 pts")
-plt.xlabel("t (s)")
-plt.ylabel("absorbance noise")
+#     ft_a = np.fft.rfft(avg_a)
+#     f_a = np.fft.rfftfreq(avg_a.size, d=1e-9) * ppifg
+#     f_a += f_a[-1] * 2  # 3rd Nyquist window
+#     wl_a = sc.c / f_a
+#     amp_ft_f_filt_gridded = InterpolatedUnivariateSpline(f_f, amp_ft_f_filt)
+#     amp_ft_f_filt_interp = amp_ft_f_filt_gridded(f_a)
 
-plt.figure()
-plt.loglog(t, noise_su8_full, 'o', label="full")
-plt.loglog(t, noise_su8_1e4, 'o', label="10,000 pts")
-plt.loglog(t, noise_su8_1e3, 'o', label="1,000 pts")
-plt.xlabel("t (s)")
-plt.ylabel("absorbance noise")
+#     [i.clear() for i in ax]
+#     ax[0].plot(wl_a * 1e6, amp_ft_f_filt_interp, label="background")
+#     ax[0].plot(wl_a * 1e6, abs(ft_a), label="signal")
+#     ax[0].axvline(sc.c * 1e6 / f_ll, color="r", linestyle="--")
+#     ax[0].axvline(sc.c * 1e6 / f_ul, color="r", linestyle="--")
+#     ax[1].semilogx(n_ifg, snr[0], "o")
+#     ax[1].semilogx(n_ifg, snr[n], "o")
 
+#     ax[0].legend(loc="best")
+#     ax[0].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+#     ax[1].set_xlabel("interferogram #")
+#     ax[0].set_ylabel("power spectrum (a.u.)")
+#     ax[1].set_ylabel("SNR (dB)")
+#     ax[1].axvline(1000, color="r", linestyle="--")
+#     fig.suptitle(f"{int(resolution[n])} GHz resolution")
 
-# %% __________________________________________________________________________
-# a little hard to say, the averaging isn't that good
-def factor_bckgnd_1e3(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_bckgnd_1e3 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_bckgnd_1e4(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_bckgnd_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_bckgnd_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_bckgnd_1e4 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_su8_1e3(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_su8_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_su8_1e3 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-
-def factor_su8_1e4(t_avg):
-    dt = 74180 * 1e-9
-    t = np.arange(0, len(noise_su8_full) * dt, dt)
-
-    spl = InterpolatedUnivariateSpline(t, noise_su8_full)
-    t_new = InterpolatedUnivariateSpline(t,
-                                         noise_su8_1e4 - spl(t_avg)).roots()
-    # return t_avg / t_new
-    return np.mean(t_avg / t_new)
-
-# t_avg = np.arange(dt, dt * 13480, dt * 10)
-# hey = [factor_bckgnd_1e3(i) for i in t_avg]
+#     if save:
+#         plt.savefig(f"fig/{n}.png")
+#     else:
+#         plt.pause(0.1)

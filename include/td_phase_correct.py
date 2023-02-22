@@ -2,6 +2,7 @@ import numpy as np
 import scipy.signal as ss
 import scipy.optimize as so
 import warnings
+from tqdm import tqdm
 
 
 # shift a signal in time, I've vetted that this gives expected results
@@ -42,12 +43,16 @@ def error_offst(X, x, x0):
 class Optimize:
     def __init__(self, data):
         self.data = data
-        if data.size < 2e9:  # if the data size is less than 2 gigabytes
-            self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
-            self.data = (data.T / np.max(data, axis=1)).T  # normalize
-        else:
-            warnings.warn(
-                "The DC offset was not removed due to the size of the file")
+
+        # sometimes you pass a portion of the data zoomed into the
+        # centerburst in which case you cannot afford to alter just a
+        # portion of the data !!!
+        # if data.size < 2e9:  # if the data size is less than 2 gigabytes
+        #     self.data = (data.T - np.mean(data, axis=1)).T  # remove DC offset
+        #     self.data = (data.T / np.max(data, axis=1)).T  # normalize
+        # else:
+        #     warnings.warn(
+        #         "The DC offset was not removed due to the size of the file")
 
     def error_shift_offst(self, X, n):
         return error_dt_offst(X, self.data[n], self.data[0])
@@ -70,7 +75,7 @@ class Optimize:
         self.avg = 0
 
         h = 0
-        for n in range(start_index, end_index):
+        for n in tqdm(range(start_index, end_index)):
             # dt, phi0 = X
             res = so.minimize(fun=self.error_shift_offst,
                               x0=np.array([0, 0]),
@@ -85,5 +90,5 @@ class Optimize:
 
             self.avg = (self.avg * n + x) / (n + 1)
 
-            print(res.x, end_index - start_index - h - 1)
+            # print(res.x, end_index - start_index - h - 1) # using tqdm now
             h += 1

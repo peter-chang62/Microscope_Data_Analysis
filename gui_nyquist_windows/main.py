@@ -1,7 +1,9 @@
-"""From having worked with scripting for a while now, I think I would actually like to have an interactive GUI for
-the purpose of figuring out the lock window. Specifically, I would like to be able to visualize where the spectrum
-would fall inside the nyquist window in both the optical domain, and in the DCS frequency domain, and be able to see
-where the f0's would fall """
+"""From having worked with scripting for a while now, I think I would
+actually like to have an interactive GUI for the purpose of figuring out the
+lock window. Specifically, I would like to be able to visualize where the
+spectrum would fall inside the nyquist window in both the optical domain,
+and in the DCS frequency domain, and be able to see where the f0's would
+fall"""
 
 import threading
 import numpy as np
@@ -147,12 +149,13 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             raise_error(self.error_window, "min wavelength must be >0")
             return
         elif wl_min >= self.wl_max * 1e6:
-            raise_error(self.error_window, "min wavelength must be < max wavelength")
+            raise_error(self.error_window,
+                        "min wavelength must be < max wavelength")
             self.le_min_wl.setText(str(self.wl_min * 1e6))
             return
         self.wl_min = wl_min * 1e-6
 
-        # _____________________________________ updates based on min wavelength ________________________________________
+        # _____________________ updates based on min wavelength _______________
         self.set_scrollbar_max()
         self.update_rf_plot()
 
@@ -162,12 +165,13 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             raise_error(self.error_window, "max wavelength must be >0")
             return
         elif wl_max <= self.wl_min * 1e6:
-            raise_error(self.error_window, "max wavelength must be > min wavelength")
+            raise_error(self.error_window,
+                        "max wavelength must be > min wavelength")
             self.le_max_wl.setText(str(self.wl_max * 1e6))
             return
         self.wl_max = wl_max * 1e-6
 
-        # _____________________________________ updates based on max wavelength ________________________________________
+        # __________________________ updates based on max wavelength __________
         self.set_scrollbar_max()
         self.update_rf_plot()
 
@@ -179,7 +183,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             self.le_f01.setText(str(self.f01 * 1e-6))
         self.f01 = f01
 
-        # _____________________________________ updates to run when updating f01 _______________________________________
+        # _____________________ updates to run when updating f01 ______________
         self.lr_f0.setRegion([self.f01 * 1e-6, self.f02 * 1e-6])
 
     def update_f02(self):
@@ -190,7 +194,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             self.le_f02.setText(str(self.f02 * 1e-6))
         self.f02 = f02
 
-        # _____________________________________ updates to run when updating f02 _______________________________________
+        # _________________________ updates to run when updating f02 __________
         self.lr_f0.setRegion([self.f01 * 1e-6, self.f02 * 1e-6])
 
     def update_frep(self):
@@ -202,7 +206,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
             return
         self.frep = frep
 
-        # _____________________________________ updates based on frep __________________________________________________
+        # ________________________ updates based on frep ______________________
         self.set_scrollbar_max()
         self.update_nyquist()
 
@@ -210,7 +214,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.lcd.display(self.verticalScrollBar.value())
         self.dfrep = self.verticalScrollBar.value()
 
-        # _____________________________________ updates based on delta frep_____________________________________________
+        # _____________________ updates based on delta frep____________________
         self.set_scrollbar_max()
         self.update_nyquist()
 
@@ -225,7 +229,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         self.dfrep = dfrep
         self.verticalScrollBar.setValue(self.dfrep)
 
-        # _____________________________________ updates based on delta frep_____________________________________________
+        # __________________ updates based on delta frep_______________________
         self.update_nyquist()
 
     def update_nyquist(self):
@@ -252,7 +256,7 @@ class Gui(qt.QMainWindow, Ui_MainWindow):
         for n, lr in enumerate(self.region_list):
             lr.setRegion(np.array([0, bandwidth_THz]) + bandwidth_THz * n)
 
-        # ______________________________________ updates to run whenever running update_nyquist ________________________
+        # _______________ updates to run whenever running update_nyquist ______
         self.update_rf_plot()
 
     def update_rf_plot(self):
