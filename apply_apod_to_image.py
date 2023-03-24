@@ -209,7 +209,7 @@ avg_su8 = np.mean(data_su8[:N_avg], axis=0)
 
 RESOLUTION = np.arange(1, 100)
 AREA = np.zeros(len(RESOLUTION))
-plot = True
+plot = False
 save = False
 if plot:
     fig, ax = plt.subplots(1, 1)

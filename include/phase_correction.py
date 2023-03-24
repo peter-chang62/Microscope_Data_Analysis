@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 try:
     import mkl_fft
-except:
+except ImportError:
     mkl_fft = np.fft
 
 
@@ -20,7 +20,9 @@ def fft(x, axis=None):
     if axis is None:
         return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x)))
     else:
-        return np.fft.fftshift(mkl_fft.fft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+        return np.fft.fftshift(
+            mkl_fft.fft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis
+        )
 
 
 def ifft(x, axis=None):
@@ -32,7 +34,9 @@ def ifft(x, axis=None):
     if axis is None:
         return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x)))
     else:
-        return np.fft.fftshift(mkl_fft.ifft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis)
+        return np.fft.fftshift(
+            mkl_fft.ifft(np.fft.ifftshift(x, axes=axis), axis=axis), axes=axis
+        )
 
 
 def normalize(vec):
@@ -77,7 +81,7 @@ def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
     center = len(data[0]) // 2
 
     # zoomed in data
-    zoom = data[:, center - (N_zoom + 0): center + (N_zoom + 1)].astype(float)
+    zoom = data[:, center - (N_zoom + 0) : center + (N_zoom + 1)].astype(float)
     zoom = (zoom.T - np.mean(zoom, 1)).T
 
     # appodize to remove f0, use a window of size 50
@@ -98,7 +102,7 @@ def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
     fft_zoom = fft(zoom_appod, 1)
     ref = fft_zoom[0]
     fft_zoom *= np.conj(ref)
-    fft_zoom = np.pad(fft_zoom, ([0, 0], [2 ** 10, 2 ** 10]), constant_values=0.0)
+    fft_zoom = np.pad(fft_zoom, ([0, 0], [2**10, 2**10]), constant_values=0.0)
     fft_zoom = ifft(fft_zoom, 1)
     ind = np.argmax(fft_zoom, axis=1) - len(fft_zoom[0]) // 2
     shift = ind * len(zoom[0]) / len(fft_zoom[0])
@@ -115,10 +119,10 @@ def t0_correct_via_cross_corr(data, N_zoom=50, plot=True):
 
         # check the phase correction
         fig, ax = plt.subplots(1, 2, figsize=np.array([11.9, 4.8]))
-        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[:50]]
-        [ax[1].plot(i[center - 100:center + 100]) for i in phase_corr[-50:]]
-        [ax[0].plot(i[center - 100:center + 100]) for i in data[:50]]
-        [ax[0].plot(i[center - 100:center + 100]) for i in data[-50:]]
+        [ax[1].plot(i[center - 100 : center + 100]) for i in phase_corr[:50]]
+        [ax[1].plot(i[center - 100 : center + 100]) for i in phase_corr[-50:]]
+        [ax[0].plot(i[center - 100 : center + 100]) for i in data[:50]]
+        [ax[0].plot(i[center - 100 : center + 100]) for i in data[-50:]]
         ax[0].set_title("un corrected")
         ax[1].set_title("corrected")
 
