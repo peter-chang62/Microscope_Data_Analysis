@@ -25,6 +25,7 @@ list_filter = np.array(
     ]
 )
 
+
 # %% function defs
 def filt(freq, ll, ul, x, type="bp"):
     if type == "bp":
