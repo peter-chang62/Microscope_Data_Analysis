@@ -20,9 +20,12 @@ wl_grid = 299792458.0 / v_grid * 1e6
 # %%
 (ind_dcs,) = np.logical_and(3.03 < wl_grid, wl_grid < 3.65).nonzero()
 (ind_reddy,) = np.logical_and(3.03 < wl, wl < 3.65).nonzero()
-plt.figure()
-plt.plot(wl[ind_reddy], data[:, 1280 // 2, 1280 // 2][ind_reddy])
-plt.plot(wl_grid[ind_dcs], absrbnc[ind_dcs])
-plt.ylim(0, .4)
-plt.xlabel("wavelength ($\\mathrm{\\mu m}$)")
-plt.tight_layout()
+fig, ax = plt.subplots(1, 1)
+ax.plot(wl[ind_reddy], data[:, 1280 // 2, 1280 // 2][ind_reddy])
+ax.plot(wl_grid[ind_dcs], absrbnc[ind_dcs])
+conversion = lambda x: 1e4 / x
+ax2 = ax.secondary_xaxis("top", functions=(conversion, conversion))
+ax2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+ax.set_ylim(0, 0.4)
+ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+fig.tight_layout()
