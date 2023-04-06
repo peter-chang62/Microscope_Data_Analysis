@@ -134,7 +134,7 @@ s_t = np.load("temp/s_total.npy", mmap_mode="r")
 ppifg = 77760
 center = ppifg // 2
 
-resolution = 100  # GHz
+resolution = 50  # GHz
 apod = int(np.round(ppifg / resolution))
 if apod % 2 == 1:
     apod += 1
@@ -172,3 +172,19 @@ ax[1].set_title("peak 2 height")
 ax[2].imshow(i_3)
 ax[2].set_title("integrating over peak 1")
 fig.tight_layout()
+
+# %% diagnose
+# (ind,) = np.logical_and(3.1927 < wl_grid, wl_grid < 3.6914).nonzero()
+# fig, ax = plt.subplots(1, 1)
+# save = False
+# for _, n in enumerate(tqdm(ind)):
+#     ax.clear()
+#     ax.set_title(
+#         "$\\mathrm{\\lambda}=$" + f"{np.round(wl_grid[n], 2)}" + " $\\mathrm{\\mu m}$"
+#     )
+#     ax.imshow(img[:, :, n])
+#     fig.tight_layout()
+#     if save:
+#         plt.savefig(f"fig/{n}.png")
+#     else:
+#         plt.pause(0.05)
