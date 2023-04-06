@@ -2,12 +2,18 @@ import numpy as np
 import clipboard_and_style_sheet as cr
 import matplotlib.pyplot as plt
 
-path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
+# path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
+path = r"temp/OvarianFTIR/"
 data = np.fromfile(path + "D1", "<f")
 
 data.shape = (394, 1280, 1280)
 wnum = np.genfromtxt(path + "D1.hdr", skip_header=18, skip_footer=1, delimiter=",")
 wl = 1e4 / wnum
+
+wnum_resolution = np.mean(np.diff(wnum))
+c = 299792458
+cm = 1e-2
+freq_resolution = wnum_resolution * c / cm
 
 dcs_bckgnd = abs(np.fft.rfft(np.fft.ifftshift(np.load("avg_off_bio_sample.npy"))))
 dcs_bio = abs(np.fft.rfft(np.fft.ifftshift(np.load("avg_on_bio_sample.npy"))))

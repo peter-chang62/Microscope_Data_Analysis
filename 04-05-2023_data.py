@@ -1,3 +1,4 @@
+# %% package imports
 import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
@@ -99,36 +100,47 @@ s_t = np.load("temp/s_total.npy", mmap_mode="r")
 # ax[1].plot(freq[ind], absorbance[ind])
 
 # ---------- total image
+# ppifg = 77760
+# center = ppifg // 2
+
+# resolution = 100  # GHz
+# apod = int(np.round(ppifg / resolution))
+# if apod % 2 == 1:
+#     apod += 1
+
+# img = np.zeros((s_t.shape[0], s_t.shape[1], len(np.fft.rfftfreq(apod))))
+# shape_img = img.shape
+# shape_s = s_t.shape
+
+# t_bckgnd = np.fft.fftshift(np.fft.irfft(s_t[-1, -1]))
+# t_b = t_bckgnd[center - apod // 2 : center + apod // 2]
+# ft_b = abs(np.fft.rfft(np.fft.ifftshift(t_b)))
+
+# s_t.resize(s_t.shape[0] * s_t.shape[1], s_t.shape[2])
+# img.resize(img.shape[0] * img.shape[1], img.shape[2])
+# for n, s in enumerate(tqdm(s_t)):
+#     t = np.fft.fftshift(np.fft.irfft(s))
+#     t = t[center - apod // 2 : center + apod // 2]
+#     ft = abs(np.fft.rfft(np.fft.ifftshift(t)))
+#     absorbance = np.log(ft_b / ft)
+#     img[n] = absorbance
+
+# img.resize(*shape_img)
+# s_t.resize(*shape_s)
+
+# np.save("temp/img_absorbance_100GHz.npy", img)
+
+# %% ---------------------- plotting ------------------------------------------
 ppifg = 77760
 center = ppifg // 2
 
-resolution = 1  # GHz
+resolution = 100  # GHz
 apod = int(np.round(ppifg / resolution))
 if apod % 2 == 1:
     apod += 1
+img = np.load(f"temp/img_absorbance_{resolution}GHz.npy")
 
-img = np.zeros((s_t.shape[0], s_t.shape[1], len(np.fft.rfftfreq(apod))))
-shape_img = img.shape
-shape_s = s_t.shape
-
-t_bckgnd = np.fft.fftshift(np.fft.irfft(s_t[-1, -1]))
-t_b = t_bckgnd[center - apod // 2 : center + apod // 2]
-ft_b = abs(np.fft.rfft(np.fft.ifftshift(t_b)))
-
-s_t.resize(s_t.shape[0] * s_t.shape[1], s_t.shape[2])
-img.resize(img.shape[0] * img.shape[1], img.shape[2])
-for n, s in enumerate(tqdm(s_t)):
-    t = np.fft.fftshift(np.fft.irfft(s))
-    t = t[center - apod // 2 : center + apod // 2]
-    ft = abs(np.fft.rfft(np.fft.ifftshift(t)))
-    absorbance = np.log(ft_b / ft)
-    img[n] = absorbance
-
-img.resize(*shape_img)
-s_t.resize(*shape_s)
-
-
-nu_grid = np.fft.rfftfreq(len(t), d=1e-9) * ppifg
+nu_grid = np.fft.rfftfreq(apod, d=1e-9) * ppifg
 nu_grid += nu_grid[-1] * 2
 wl_grid = 299792458 / nu_grid * 1e6
 wnum_grid = 1e4 / wl_grid
@@ -145,18 +157,18 @@ ax.set_ylabel("absorbance")
 fig.tight_layout()
 
 # %%
-# freq = np.fft.rfftfreq(len(t))
-# i_1 = img[:, :, np.argmin(abs(freq - 0.12471))]
-# i_2 = img[:, :, np.argmin(abs(freq - 0.09845))]
-# i_3 = simpson(
-#     img[:, :, np.argmin(abs(freq - 0.11647)) : np.argmin(abs(freq - 0.13521))], axis=-1
-# )
+freq = np.fft.rfftfreq(apod)
+i_1 = img[:, :, np.argmin(abs(freq - 0.12471))]
+i_2 = img[:, :, np.argmin(abs(freq - 0.09845))]
+i_3 = simpson(
+    img[:, :, np.argmin(abs(freq - 0.11647)) : np.argmin(abs(freq - 0.13521))], axis=-1
+)
 
-# fig, ax = plt.subplots(1, 3, figsize=np.array([12.59, 4.8]))
-# ax[0].imshow(i_1)
-# ax[0].set_title("peak 1 height")
-# ax[1].imshow(i_2)
-# ax[1].set_title("peak 2 height")
-# ax[2].imshow(i_3)
-# ax[2].set_title("integrating over peak 1")
-# fig.tight_layout()
+fig, ax = plt.subplots(1, 3, figsize=np.array([12.59, 4.8]))
+ax[0].imshow(i_1)
+ax[0].set_title("peak 1 height")
+ax[1].imshow(i_2)
+ax[1].set_title("peak 2 height")
+ax[2].imshow(i_3)
+ax[2].set_title("integrating over peak 1")
+fig.tight_layout()
