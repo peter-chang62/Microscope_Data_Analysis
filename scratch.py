@@ -71,8 +71,22 @@ plt.title(
 plt.imshow(data[ind_match])
 
 # %% convolve
+# ---------- what's the real scan rate?
+
+# ==================================
+# You achieve the same effect if you just convolve it with a window of ones by
+# the way. However, the image really just "blurs", it doesn't get smoother.
+# That's likely something you would know if you were familiar with image
+# processing.
+# ==================================
+
+vel = 5 * 8  # 5 um / pixel * 8 pixels / second
+tau = 500 * ppifg / 1e9
+blur = vel * tau
+sptl_rsltn = 5 + blur
+
 img_ftir = data[ind_match].copy()
-step = int(np.ceil(5 / (1000 / 1280)))
+step = int(np.ceil(sptl_rsltn / (1000 / 1280)))
 size = np.asarray(img_ftir.shape) // step
 img = np.zeros(size)
 i = 0
@@ -90,7 +104,7 @@ plt.title(
     "$\\mathrm{\\lambda}=$"
     + f"{np.round(wl[ind_match], 2)}"
     + " $\\mathrm{\\mu m}$"
-    + "\n FTIR reference convolved to 5 $\\mathrm{\\mu m}$ resolution"
+    + "\n FTIR reference convolved to 6.56 $\\mathrm{\\mu m}$ resolution"
 )
 plt.imshow(img)
 plt.tight_layout()
