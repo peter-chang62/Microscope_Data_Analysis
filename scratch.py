@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.signal import convolve
 
-# path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
-path = r"temp/OvarianFTIR/"
+path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
+# path = r"temp/OvarianFTIR/"
 data = np.fromfile(path + "D1", "<f")
 
 data.shape = (394, 1280, 1280)
@@ -46,17 +46,17 @@ wl_grid = 299792458.0 / v_grid * 1e6
 wnum_grid = 1e4 / wl_grid
 
 # %%
-# (ind_dcs,) = np.logical_and(3.03 < wl_grid, wl_grid < 3.65).nonzero()
-# (ind_reddy,) = np.logical_and(3.03 < wl, wl < 3.65).nonzero()
-# fig, ax = plt.subplots(1, 1)
-# ax.plot(wl[ind_reddy], data[:, 1280 // 2, 1280 // 2][ind_reddy], ".-")
-# ax.plot(wl_grid[ind_dcs], absrbnc[ind_dcs])
-# conversion = lambda x: 1e4 / x
-# ax2 = ax.secondary_xaxis("top", functions=(conversion, conversion))
-# ax2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
-# ax.set_ylim(0, 0.4)
-# ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-# fig.tight_layout()
+(ind_dcs,) = np.logical_and(3.03 < wl_grid, wl_grid < 3.65).nonzero()
+(ind_reddy,) = np.logical_and(3.03 < wl, wl < 3.65).nonzero()
+fig, ax = plt.subplots(1, 1)
+ax.plot(wl[ind_reddy], data[:, 1280 // 2, 1280 // 2][ind_reddy], ".-")
+ax.plot(wl_grid[ind_dcs], absrbnc[ind_dcs])
+conversion = lambda x: 1e4 / x
+ax2 = ax.secondary_xaxis("top", functions=(conversion, conversion))
+ax2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+ax.set_ylim(0, 0.4)
+ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+fig.tight_layout()
 
 # %%
 (ind,) = np.logical_and(2890 < wnum_grid, wnum_grid < 2950).nonzero()
@@ -80,13 +80,13 @@ plt.imshow(data[ind_match])
 # processing.
 # ==================================
 
-vel = 5 * 8  # 5 um / pixel * 8 pixels / second
+vel = 5 * 12  # 5 um / pixel * 8 pixels / second
 tau = 500 * ppifg / 1e9
 blur = vel * tau
 sptl_rsltn = 5 + blur
 
 img_ftir = data[ind_match].copy()
-step = int(np.ceil(sptl_rsltn / (1000 / 1280)))
+step = int(np.round(sptl_rsltn / (1000 / 1280)))
 size = np.asarray(img_ftir.shape) // step
 img = np.zeros(size)
 i = 0
@@ -104,7 +104,7 @@ plt.title(
     "$\\mathrm{\\lambda}=$"
     + f"{np.round(wl[ind_match], 2)}"
     + " $\\mathrm{\\mu m}$"
-    + "\n FTIR reference convolved to 6.56 $\\mathrm{\\mu m}$ resolution"
+    + "\n FTIR reference convolved to 7 $\\mathrm{\\mu m}$ resolution"
 )
 plt.imshow(img)
 plt.tight_layout()
