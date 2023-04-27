@@ -87,7 +87,7 @@ import mkl_fft
 
 # %% ----- plotting
 # path = r"D:\\Microscope\\Images\\04-20-2023/"
-path = r"E:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
+path = r"H:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
 coarse = np.load(path + "img_10um_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
@@ -129,7 +129,7 @@ nu = np.fft.rfftfreq(apod, d=1e-3) * ppifg
 nu += nu[-1] * 2
 wl = 299792458 / nu
 (ind,) = np.logical_and(3.25 < wl, wl < 3.65).nonzero()
-ax_p.plot(wl[ind], abs_fine[::-1, ::-1][85, 24][ind])
+ax_p.plot(wl[ind], abs_fine[::-1, ::-1][50, 153][ind])
 ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
 ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
@@ -139,3 +139,4 @@ fig_p.tight_layout()
 # %% ----- save all figures
 fig_c.savefig("fig_commit/coarse_usaf.png", dpi=300, transparent=True)
 fig_f.savefig("fig_commit/fine_usaf.png", dpi=300, transparent=True)
+fig_p.savefig("fig_commit/pixel_usaf.png", dpi=300, transparent=True)
