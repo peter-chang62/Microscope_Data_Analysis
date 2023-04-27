@@ -86,14 +86,13 @@ import mkl_fft
 # np.save(path + "img_stacked_10GHz.npy", fine_apod)
 
 # %% ----- plotting
-path = r"D:\\Microscope\\Images\\04-20-2023/"
+# path = r"D:\\Microscope\\Images\\04-20-2023/"
+path = r"E:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
 coarse = np.load(path + "img_10um_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
-coarse /= coarse[0, 0]
-fine /= fine[0, 0]
-coarse = -np.log(coarse)
-fine = -np.log(fine)
+abs_coarse = -np.log(coarse / coarse[0, 0])
+abs_fine = -np.log(fine / fine[0, 0])
 
 ppifg = 77760
 center = ppifg // 2
@@ -102,21 +101,41 @@ v_p = 10
 factor = 1 + v_p * tau_p
 
 # %%
-fig_c, ax_c = plt.subplots(1, 1, num="coarse")
+fig_c, ax_c = plt.subplots(1, 1)
 y = np.arange(coarse.shape[0]) * 10 / factor
 x = np.arange(coarse.shape[1]) * 10
-ax_c.pcolormesh(y, x, simpson(coarse[:, :, 100:300]).T[::-1, ::-1], cmap="cividis")
+ax_c.pcolormesh(y, x, simpson(abs_coarse[:, :, 100:300]).T[::-1, ::-1], cmap="cividis")
 ax_c.set_aspect("equal")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
 fig_c.tight_layout()
 
 # %%
-fig_f, ax_f = plt.subplots(1, 1, num="fine")
+fig_f, ax_f = plt.subplots(1, 1)
 y = np.arange(fine.shape[0]) * 1.75 / factor
 x = np.arange(fine.shape[1]) * 1.75
-ax_f.pcolormesh(x, y, simpson(fine[:, :, 100:300][::-1, ::-1]), cmap="cividis")
+ax_f.pcolormesh(x, y, simpson(abs_fine[:, :, 100:300][::-1, ::-1]), cmap="cividis")
 ax_f.set_aspect("equal")
 ax_f.set_xlabel("$\\mathrm{\\mu m}$")
 ax_f.set_ylabel("$\\mathrm{\\mu m}$")
 fig_f.tight_layout()
+
+# %%
+fig_p, ax_p = plt.subplots(1, 1)
+resolution = 50
+apod = ppifg // resolution
+apod = apod if apod % 2 == 0 else apod + 1
+nu = np.fft.rfftfreq(apod, d=1e-3) * ppifg
+nu += nu[-1] * 2
+wl = 299792458 / nu
+(ind,) = np.logical_and(3.25 < wl, wl < 3.65).nonzero()
+ax_p.plot(wl[ind], abs_fine[::-1, ::-1][85, 24][ind])
+ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
+ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+ax_p.set_ylabel("absorbance")
+fig_p.tight_layout()
+
+# %% ----- save all figures
+fig_c.savefig("fig_commit/coarse_usaf.png", dpi=300, transparent=True)
+fig_f.savefig("fig_commit/fine_usaf.png", dpi=300, transparent=True)

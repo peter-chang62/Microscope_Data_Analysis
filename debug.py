@@ -1,14 +1,22 @@
-import numpy as np
-import clipboard_and_style_sheet as cr
+import io
 import matplotlib.pyplot as plt
 
-path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
-data = np.fromfile(path + "D1", "<f")
+# from PySide2.QtGui import QGuiApplication, QImage
+from PyQt5.QtGui import QGuiApplication, QImage, QColor
+from PyQt5.Qt import Qt
+from PyQt5.QtCore import QByteArray
+import numpy as np
 
-data.shape = (394, 1280, 1280)
-wnum = np.genfromtxt(path + "D1.hdr", skip_header=18, skip_footer=1, delimiter=",")
-wl = 1e4 / wnum
+# generate an image to copy to clipboard
+fig = plt.figure()
+plt.plot(np.random.random(1000))
 
-plt.figure()
-plt.plot(wl, data[:, 1280 // 2, 1280 // 2])
-plt.xlim(3, 5)
+# store the image in a buffer using savefig(), this has the
+# advantage of applying all the default savefig parameters
+# such as background color; those would be ignored if you simply
+# grab the canvas using Qt
+temp_path = "fig/clipboard.png"
+fig.savefig(temp_path, format="png", dpi=300, transparent=True)
+image = QImage(temp_path, format="png")
+image = image.convertToFormat(QImage.Format_ARGB32)
+QGuiApplication.clipboard().setImage(image)

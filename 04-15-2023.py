@@ -97,7 +97,8 @@ import mkl_fft
 #     r"C:\\Users\\fastdaq\\SynologyDrive\\Research_Projects"
 #     + r"\\Microscope\\Images\\04-15-2023\\"
 # )
-path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+# path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+path = r"E:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
 coarse = np.load(path + "coarse/img_stacked_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
@@ -119,7 +120,7 @@ ax_c.pcolormesh(x, y, simpson(coarse[:, :, 140:240], axis=-1), cmap="cividis")
 ax_c.set_aspect("equal")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
-ax_c.set_title("integrated absorbance at 7.33 $\\mathrm{\\mu m}$ spatial sampling")
+# ax_c.set_title("integrated absorbance at 7.33 $\\mathrm{\\mu m}$ spatial sampling")
 fig_c.tight_layout()
 
 # %%
@@ -130,7 +131,7 @@ ax_f.pcolormesh(x, y, simpson(fine[:, :, 140:240], axis=-1), cmap="cividis")
 ax_f.set_aspect("equal")
 ax_f.set_xlabel("$\\mathrm{\\mu m}$")
 ax_f.set_ylabel("$\\mathrm{\\mu m}$")
-ax_f.set_title("integrated absorbance at 1.76 $\\mathrm{\\mu m}$ spatial sampling")
+# ax_f.set_title("integrated absorbance at 1.76 $\\mathrm{\\mu m}$ spatial sampling")
 fig_f.tight_layout()
 
 # %%
@@ -143,9 +144,11 @@ wl = 299792458 / nu
 fig_p, ax_p = plt.subplots(1, 1)
 (ind,) = np.logical_and(3.35 < wl, wl < 3.55).nonzero()
 ax_p.plot(wl[ind], fine[0, -1][ind])
+ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
+ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p.set_ylabel("absorbance")
-ax_p.set_title("absorbance at 50 GHz")
+# ax_p.set_title("Absorbance at 50 GHz")
 fig_p.tight_layout()
 
 # %% --------------------------- background stream ----------------------------
@@ -239,7 +242,8 @@ fig_p.tight_layout()
 #     FT_avg[n] = abs(mkl_fft.rfft_numpy(np.fft.ifftshift(T)))
 
 # %% ----- plotting
-path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+# path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+path = r"E:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
 FT_avg = np.load(path + "bckgnd_stream_fft_running_average.npy")
 ppifg = 77760
 center = ppifg // 2
@@ -268,11 +272,14 @@ ax_s.plot(
     FT_avg[-1][FT_avg[-1] > 100] / FT_avg[-1].max(),
     ".",
     markersize=1,
-    label="25700 averages",
+    label="25,700 averages",
 )
+ax_s_2 = ax_s.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
+ax_s_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_s.set_ylabel("power spectral density")
 ax_s.set_ylim(ymax=2)
+# ax_s.set_title("Dual Comb Spectrum")
 legend = ax_s.legend(loc="best", markerscale=10)
 fig_s.tight_layout()
 
@@ -281,4 +288,12 @@ fig_snr, ax_snr = plt.subplots(1, 1)
 ax_snr.loglog(np.arange(int(1e4)) * t_ifg, 1 / snr[: int(1e4)], "o")
 ax_snr.set_xlabel("time (s)")
 ax_snr.set_ylabel("snr")
+# ax_snr.set_title("SNR")
 fig_snr.tight_layout()
+
+# %% ----- save all figures!
+fig_c.savefig("fig_commit/coarse.png", dpi=300, transparent=True)
+fig_f.savefig("fig_commit/fine.png", dpi=300, transparent=True)
+fig_p.savefig("fig_commit/pixel.png", dpi=300, transparent=True)
+fig_s.savefig("fig_commit/stream.png", dpi=300, transparent=True)
+fig_snr.savefig("fig_commit/snr.png", dpi=300, transparent=True)
