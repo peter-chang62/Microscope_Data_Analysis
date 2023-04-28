@@ -87,7 +87,8 @@ import mkl_fft
 
 # %% ----- plotting
 # path = r"D:\\Microscope\\Images\\04-20-2023/"
-path = r"H:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
+# path = r"H:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
+path = r"E:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
 coarse = np.load(path + "img_10um_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
@@ -109,6 +110,12 @@ ax_c.set_aspect("equal")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
 fig_c.tight_layout()
+np.savez(
+    "fig_commit/plot_data/coarse_usaf.npz",
+    x=y,
+    y=x,
+    data=simpson(abs_coarse[:, :, 100:300]).T[::-1, ::-1],
+)
 
 # %%
 fig_f, ax_f = plt.subplots(1, 1)
@@ -119,6 +126,12 @@ ax_f.set_aspect("equal")
 ax_f.set_xlabel("$\\mathrm{\\mu m}$")
 ax_f.set_ylabel("$\\mathrm{\\mu m}$")
 fig_f.tight_layout()
+np.savez(
+    "fig_commit/plot_data/fine_usaf.npz",
+    x=x,
+    y=y,
+    data=simpson(abs_fine[:, :, 100:300][::-1, ::-1]),
+)
 
 # %%
 fig_p, ax_p = plt.subplots(1, 1)
@@ -135,6 +148,11 @@ ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p.set_ylabel("absorbance")
 fig_p.tight_layout()
+np.savez(
+    "fig_commit/plot_data/pixel_usaf.npz",
+    x=wl[ind],
+    y=abs_fine[::-1, ::-1][50, 153][ind],
+)
 
 # %% ----- save all figures
 fig_c.savefig("fig_commit/coarse_usaf.png", dpi=300, transparent=True)

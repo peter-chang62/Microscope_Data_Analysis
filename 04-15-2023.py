@@ -122,6 +122,9 @@ ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
 # ax_c.set_title("integrated absorbance at 7.33 $\\mathrm{\\mu m}$ spatial sampling")
 fig_c.tight_layout()
+np.savez(
+    "fig_commit/plot_data/coarse.npz", x=x, y=y, data=simpson(coarse[:, :, 140:240])
+)
 
 # %%
 fig_f, ax_f = plt.subplots(1, 1)
@@ -133,6 +136,7 @@ ax_f.set_xlabel("$\\mathrm{\\mu m}$")
 ax_f.set_ylabel("$\\mathrm{\\mu m}$")
 # ax_f.set_title("integrated absorbance at 1.76 $\\mathrm{\\mu m}$ spatial sampling")
 fig_f.tight_layout()
+np.savez("fig_commit/plot_data/fine.npz", x=x, y=y, data=simpson(fine[:, :, 140:240]))
 
 # %%
 resolution = 50
@@ -150,6 +154,7 @@ ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p.set_ylabel("absorbance")
 # ax_p.set_title("Absorbance at 50 GHz")
 fig_p.tight_layout()
+np.savez("fig_commit/plot_data/pixel.npz", x=wl[ind], y=fine[0, -1][ind])
 
 # %% --------------------------- background stream ----------------------------
 # path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
@@ -282,6 +287,12 @@ ax_s.set_ylim(ymax=2)
 # ax_s.set_title("Dual Comb Spectrum")
 legend = ax_s.legend(loc="best", markerscale=10)
 fig_s.tight_layout()
+np.savez(
+    "fig_commit/plot_data/stream.npz",
+    x=wl[FT_avg[-1] > 100],
+    y1=FT_avg[0][FT_avg[-1] > 100] / FT_avg[-1].max(),
+    y2=FT_avg[-1][FT_avg[-1] > 100] / FT_avg[-1].max(),
+)
 
 # %%
 fig_snr, ax_snr = plt.subplots(1, 1)
@@ -290,6 +301,11 @@ ax_snr.set_xlabel("time (s)")
 ax_snr.set_ylabel("snr")
 # ax_snr.set_title("SNR")
 fig_snr.tight_layout()
+np.savez(
+    "fig_commit/plot_data/snr.npz",
+    x=np.arange(int(1e4)) * t_ifg,
+    y=1 / snr[: int(1e4)],
+)
 
 # %% ----- save all figures!
 fig_c.savefig("fig_commit/coarse.png", dpi=300, transparent=True)
