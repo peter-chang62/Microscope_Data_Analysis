@@ -21,17 +21,23 @@ center = ppifg // 2
 # ft[-step:] = 0
 # (ind,) = (abs(ft) > threshold).nonzero()
 
+# You made a mistake with using step instead of dh (so you overwrote step to
+# 250) when you processed the data. I've fixed it here but I didn't rerun it.
+# This is because the f0 beat notes were away from the spectrum to begin with
+# (you used a large Nyquist window for this data run). So, I didn't throw out
+# any part of the spectrum with the larger filter windows!
+
 # h = 0
-# step = 250
+# dh = 250
 # while h < len(data):
-#     ft = mkl_fft.rfft_numpy(np.fft.ifftshift(data[h : h + step], axes=1), axis=1)
+#     ft = mkl_fft.rfft_numpy(np.fft.ifftshift(data[h : h + dh], axes=1), axis=1)
 #     for i in ind:
 #         if i < step:
 #             ft[:, :step] = 0
 #         else:
 #             ft[:, i - step : i + step] = 0
-#     data[h : h + step] = np.fft.fftshift(mkl_fft.irfft_numpy(ft))
-#     h += step
+#     data[h : h + dh] = np.fft.fftshift(mkl_fft.irfft_numpy(ft))
+#     h += dh
 #     print(len(data) - h)
 
 # np.save("temp.npy", data)
