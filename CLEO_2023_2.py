@@ -1,3 +1,7 @@
+"""
+static cell data processing
+"""
+
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 import numpy as np
