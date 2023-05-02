@@ -17,7 +17,7 @@ center = ppifg // 2
 # nu += nu[-1] * 2
 # wl = 299792458 / nu
 # norm = stream[-1].max()
-# fig_s, ax_s = plt.subplots(1, 1)
+# fig_s, ax_s = plt.su(1, 1)
 # ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
 # ind[-1] = len(stream) - 1
 # ind[0] = 0
@@ -156,3 +156,11 @@ ax_cont.plot(supercontinuum[:, 0], supercontinuum[:, 1])
 ax_cont.get_yaxis().set_visible(False)
 ax_cont.set_xlabel("wavelength (nm)")
 fig_cont.tight_layout()
+
+# %% ----- static cell
+fig_stat, ax_stat = plt.subplots(1, 1)
+static_cell = np.load("fig_commit/plot_data/static_cell.npy")
+ax_stat.plot(static_cell[:, 0], static_cell[:, 1] / static_cell[:, 1].max())
+ax_stat.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax_stat.set_ylabel("power spectral density")
+fig_stat.tight_layout()
