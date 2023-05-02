@@ -146,3 +146,13 @@ ax_p_usaf_2 = ax_p_usaf.secondary_xaxis(
 )
 ax_p_usaf_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 fig_p_usaf.tight_layout()
+
+# %%
+supercontinuum = np.genfromtxt(
+    "fig_commit/plot_data/Spectrum_Stitched_Together_wl_nm.txt"
+)
+fig_cont, ax_cont = plt.subplots(1, 1)
+ax_cont.plot(supercontinuum[:, 0], supercontinuum[:, 1])
+ax_cont.get_yaxis().set_visible(False)
+ax_cont.set_xlabel("wavelength (nm)")
+fig_cont.tight_layout()
