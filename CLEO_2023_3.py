@@ -22,8 +22,8 @@ ppifg = 74180
 center = ppifg // 2
 
 # %% -----
-data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy")
-# data = np.load(path + "stage1_5300_stage2_8970_53856x74180.npy")
+# data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy")
+data = np.load(path + "stage1_5300_stage2_8970_53856x74180.npy")
 shape = data.shape
 data.resize(data.size)
 data = data[center:-center]
@@ -80,3 +80,19 @@ for n in tqdm(range(len(index) - 1)):
         p += (f - f_c) ** m * np.c_[coeff]
     ft *= np.exp(-1j * p)
     data[index[n] : index[n + 1]] = irfft(ft)
+
+avg = np.mean(data, axis=0)
+ft = abs(rfft(avg))
+ind = np.array(
+    [
+        [0, 30],
+        [18530, 18560],
+        [20890, 20915],
+        [20517, 20535],
+        [34720, 34740],
+        [37080, 37100],
+    ]
+)
+
+for i in ind:
+    ft[i[0] : i[1]] = np.nan
