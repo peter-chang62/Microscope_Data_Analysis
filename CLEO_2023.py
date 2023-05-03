@@ -180,3 +180,13 @@ ax_stat_zoom.plot(
 )
 ax_stat_zoom.axis(False)
 fig_stat_zoom.tight_layout()
+
+# %% ----- on and off su8
+fig_su8, ax_su8 = plt.subplots(1, 1, figsize=np.array([3.69, 2.71]))
+bckgnd_su8 = np.load("fig_commit/plot_data/bckgnd_for_su8.npy")
+su8 = np.load("fig_commit/plot_data/su8.npy")
+ax_su8.plot(bckgnd_su8[:, 0], bckgnd_su8[:, 1] / np.nanmax(bckgnd_su8[:, 1]))
+ax_su8.plot(su8[:, 0], su8[:, 1] / np.nanmax(bckgnd_su8[:, 1]))
+ax_su8.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax_su8.set_ylabel("power spectral density")
+fig_su8.tight_layout()
