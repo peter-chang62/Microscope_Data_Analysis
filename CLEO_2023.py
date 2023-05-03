@@ -13,30 +13,35 @@ center = ppifg // 2
 #     + r"Images/04-15-2023/bckgnd_stream_fft_running_average.npy",
 #     mmap_mode="r",
 # )
-# nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
-# nu += nu[-1] * 2
-# wl = 299792458 / nu
-# norm = stream[-1].max()
-# fig_s, ax_s = plt.su(1, 1)
-# ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
-# ind[-1] = len(stream) - 1
-# ind[0] = 0
-# ind = np.append(np.arange(9), ind[ind > 8])
-# t = np.round(ind * ppifg * 1e3 / 1e9, 2)
-# save = True
-# for n, ft in enumerate(tqdm(stream[ind])):
-#     ax_s.clear()
-#     ax_s.plot(wl[stream[-1] > 100], ft[stream[-1] > 100] / norm, ".", markersize=1)
-#     # ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-#     # ax_s.set_ylabel("power spectral density")
-#     # ax_s.set_title(f"{t[n]} ms")
-#     ax_s.axis(False)
-#     ax_s.set_ylim(ymax=1.5)
-#     fig_s.tight_layout()
-#     if save:
-#         plt.savefig(f"fig/{n}.png", dpi=300, transparent=True)
-#     else:
-#         plt.pause(0.05)
+stream = np.load(
+    r"/media/peterchang/Peter SSD/Research_Projects/Microscope/"
+    + r"Images/04-15-2023/bckgnd_stream_fft_running_average.npy",
+    mmap_mode="r",
+)
+nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
+nu += nu[-1] * 2
+wl = 299792458 / nu
+norm = np.nanmax(stream[-1])
+fig_s, ax_s = plt.subplots(1, 1)
+ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
+ind[-1] = len(stream) - 1
+ind[0] = 0
+ind = np.append(np.arange(9), ind[ind > 8])
+t = np.round(ind * ppifg * 1e3 / 1e9, 2)
+save = False
+for n, ft in enumerate(tqdm(stream[ind])):
+    ax_s.clear()
+    ax_s.plot(wl[stream[-1] > 100], ft[stream[-1] > 100] / norm, ".", markersize=1)
+    # ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+    # ax_s.set_ylabel("power spectral density")
+    # ax_s.set_title(f"{t[n]} ms")
+    ax_s.axis(False)
+    ax_s.set_ylim(ymax=1.5)
+    fig_s.tight_layout()
+    if save:
+        plt.savefig(f"fig/{n}.png", dpi=300, transparent=True)
+    else:
+        plt.pause(0.05)
 
 # %% ----- coarse
 figsize = np.array([4.64, 3.63])
@@ -73,23 +78,23 @@ ax_s_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 fig_s.tight_layout()
 
 # %% ----- interferogram train
-train = np.load(
-    r"/Volumes/Peter SSD/Research_Projects/Microscope/"
-    + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
-    mmap_mode="r",
-)
-train = train[:25].copy()
-shape = train.shape
-train.resize(train.size)
-train = train[center:-center]
-train.resize((shape[0] - 1, shape[1]))
-t = np.arange(train.size) * 1e-3
+# train = np.load(
+#     r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+#     + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
+#     mmap_mode="r",
+# )
+# train = train[:25].copy()
+# shape = train.shape
+# train.resize(train.size)
+# train = train[center:-center]
+# train.resize((shape[0] - 1, shape[1]))
+# t = np.arange(train.size) * 1e-3
 
-fig_t, ax_t = plt.subplots(1, 1, figsize=np.array([4.63, 1.43]))
-ax_t.plot(t, train.flatten())
-ax_t.set_xlabel("time ($\\mathrm{\\mu s}$)")
-ax_t.get_yaxis().set_visible(False)
-fig_t.tight_layout()
+# fig_t, ax_t = plt.subplots(1, 1, figsize=np.array([4.63, 1.43]))
+# ax_t.plot(t, train.flatten())
+# ax_t.set_xlabel("time ($\\mathrm{\\mu s}$)")
+# ax_t.get_yaxis().set_visible(False)
+# fig_t.tight_layout()
 
 # %% ----- snr
 snr = np.load("fig_commit/plot_data/snr.npz")
@@ -170,6 +175,8 @@ fig_stat.tight_layout()
 fig_stat_zoom, ax_stat_zoom = plt.subplots(1, 1)
 static_cell = np.load("fig_commit/plot_data/static_cell.npy")
 (ind,) = np.logical_and(4.385 < static_cell[:, 0], static_cell[:, 0] < 4.404).nonzero()
-ax_stat_zoom.plot(static_cell[:, 0][ind], static_cell[:, 1][ind] / static_cell[:, 1].max())
+ax_stat_zoom.plot(
+    static_cell[:, 0][ind], static_cell[:, 1][ind] / static_cell[:, 1].max()
+)
 ax_stat_zoom.axis(False)
 fig_stat_zoom.tight_layout()
