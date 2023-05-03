@@ -42,7 +42,7 @@ f_MHz = f / (ppifg * 1e-9) * 1e-6
 df_MHz = f_MHz[1] - f_MHz[0]
 ind_d1KHz = int(np.round(1e3 / (df_MHz * 1e6)))
 ind_100KHz = abs(f_MHz - 0.1).argmin()
-ind_d1GHz = int(1 // (f[1] - f[0]))
+ind_d1GHz = int(1 / (f[1] - f[0]))
 
 for n, i in enumerate(tqdm(data)):
     ft = rfft(i)
@@ -89,4 +89,9 @@ for n, x in enumerate(tqdm(data)):
     avg = (avg * n + x) / (n + 1)
     running_avg[n] = abs(rfft(avg))
 
-np.save(path + "bckgnd_stream_fft_running_average.npy", running_avg)
+# %% -----
+# np.save(path + "bckgnd_stream_fft_running_average.npy", running_avg)
+stream = np.load(path + "bckgnd_stream_fft_running_average.npy")
+absorb = stream[:, 4669:17646]
+absorb = -np.log(absorb / absorb[-1])
+snr = np.std(absorb, axis=1)
