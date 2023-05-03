@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 from tqdm import tqdm
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+
 
 ppifg = 77760
 center = ppifg // 2
@@ -51,6 +53,19 @@ ax_c.pcolormesh(coarse["x"], coarse["y"], coarse["data"], cmap="cividis")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
 ax_c.set_aspect("equal")
+
+# scalebar
+scalebar = AnchoredSizeBar(
+    ax_c.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "upper left",
+    frameon=False,
+    color="w",
+    size_vertical=5,
+)
+ax_c.add_artist(scalebar)
+
 fig_c.tight_layout()
 
 # %% ----- fine
@@ -61,6 +76,18 @@ ax_f.pcolormesh(fine["x"], fine["y"], fine["data"], cmap="cividis")
 # ax_f.set_ylabel("$\\mathrm{\\mu m}$")
 ax_f.axis(False)
 ax_f.set_aspect("equal")
+
+scalebar = AnchoredSizeBar(
+    ax_f.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "upper left",
+    frameon=False,
+    color="w",
+    size_vertical=5,
+)
+ax_f.add_artist(scalebar)
+
 fig_f.tight_layout()
 
 # %% ----- stream
