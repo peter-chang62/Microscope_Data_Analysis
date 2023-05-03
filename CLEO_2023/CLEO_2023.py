@@ -62,7 +62,7 @@ scalebar = AnchoredSizeBar(
     ax_c.transData,
     100,
     "100 $\\mathrm{\\mu m}}$",
-    "upper left",
+    "upper right",
     frameon=False,
     color="w",
     size_vertical=5,
@@ -87,7 +87,7 @@ scalebar = AnchoredSizeBar(
     "upper left",
     frameon=False,
     color="w",
-    size_vertical=5,
+    size_vertical=5 / 1.75,
 )
 ax_f.add_artist(scalebar)
 
@@ -160,6 +160,19 @@ ax_c_usaf.plot(coarse_usaf["x"][81], coarse_usaf["y"][113], "o", color="C3")
 ax_c_usaf.set_aspect("equal")
 ax_c_usaf.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c_usaf.set_ylabel("$\\mathrm{\\mu m}$")
+
+# scalebar
+scalebar = AnchoredSizeBar(
+    ax_c_usaf.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "upper left",
+    frameon=False,
+    color="w",
+    size_vertical=5,
+)
+ax_c_usaf.add_artist(scalebar)
+
 fig_c_usaf.tight_layout()
 
 # %% ----- fine usaf
@@ -170,6 +183,18 @@ ax_f_usaf.set_aspect("equal")
 ax_f_usaf.set_xlabel("$\\mathrm{\\mu m}$")
 ax_f_usaf.set_ylabel("$\\mathrm{\\mu m}$")
 ax_f_usaf.axis(False)
+
+scalebar = AnchoredSizeBar(
+    ax_f_usaf.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "lower left",
+    frameon=False,
+    color="w",
+    size_vertical=5 / 1.75,
+)
+ax_f_usaf.add_artist(scalebar)
+
 fig_f_usaf.tight_layout()
 
 # %% ---- pixel usaf
