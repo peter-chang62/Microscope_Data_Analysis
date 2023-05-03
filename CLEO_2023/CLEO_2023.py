@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 ppifg = 77760
 center = ppifg // 2
+figsize = np.array([4.64, 3.63])
 
 # %% ----- stream
 # stream = np.load(
@@ -44,8 +45,6 @@ for n, ft in enumerate(tqdm(stream[ind])):
         plt.pause(0.05)
 
 # %% ----- coarse
-figsize = np.array([4.64, 3.63])
-
 coarse = np.load("fig_commit/plot_data/coarse.npz")
 fig_c, ax_c = plt.subplots(1, 1, figsize=figsize)
 ax_c.pcolormesh(coarse["x"], coarse["y"], coarse["data"], cmap="cividis")
@@ -190,3 +189,13 @@ ax_su8.plot(su8["x"], su8["y"] / np.nanmax(bckgnd_su8["y"]))
 ax_su8.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_su8.set_ylabel("power spectral density")
 fig_su8.tight_layout()
+
+# %% ----- on and off bio sample
+fig_bio, ax_bio = plt.subplots(1, 1, figsize=np.array([3.69, 2.71]))
+bckgnd_bio = np.load("../fig_commit/plot_data/bckgnd_for_bio.npz")
+bio = np.load("../fig_commit/plot_data/bio.npz")
+ax_bio.plot(bckgnd_bio["x"], bckgnd_bio["y"] / np.nanmax(bio["y"]))
+ax_bio.plot(bio["x"], bio["y"] / np.nanmax(bio["y"]))
+ax_bio.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax_bio.set_ylabel("power spectral density")
+fig_bio.tight_layout()
