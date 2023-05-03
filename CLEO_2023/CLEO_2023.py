@@ -8,44 +8,44 @@ ppifg = 77760
 center = ppifg // 2
 figsize = np.array([4.64, 3.63])
 
-# %% ----- stream
+# %% ----- stream -> I've moved this over to bio_static_reprocess.py
+# # stream = np.load(
+# #     r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+# #     + r"Images/04-15-2023/bckgnd_stream_fft_running_average.npy",
+# #     mmap_mode="r",
+# # )
 # stream = np.load(
-#     r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+#     r"/media/peterchang/Peter SSD/Research_Projects/Microscope/"
 #     + r"Images/04-15-2023/bckgnd_stream_fft_running_average.npy",
 #     mmap_mode="r",
 # )
-stream = np.load(
-    r"/media/peterchang/Peter SSD/Research_Projects/Microscope/"
-    + r"Images/04-15-2023/bckgnd_stream_fft_running_average.npy",
-    mmap_mode="r",
-)
-nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
-nu += nu[-1] * 2
-wl = 299792458 / nu
-norm = np.nanmax(stream[-1])
-fig_s, ax_s = plt.subplots(1, 1)
-ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
-ind[-1] = len(stream) - 1
-ind[0] = 0
-ind = np.append(np.arange(9), ind[ind > 8])
-t = np.round(ind * ppifg * 1e3 / 1e9, 2)
-save = False
-for n, ft in enumerate(tqdm(stream[ind])):
-    ax_s.clear()
-    ax_s.plot(wl[stream[-1] > 100], ft[stream[-1] > 100] / norm, ".", markersize=1)
-    # ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-    # ax_s.set_ylabel("power spectral density")
-    # ax_s.set_title(f"{t[n]} ms")
-    ax_s.axis(False)
-    ax_s.set_ylim(ymax=1)
-    fig_s.tight_layout()
-    if save:
-        plt.savefig(f"fig/{n}.png", dpi=300, transparent=True)
-    else:
-        plt.pause(0.05)
+# nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
+# nu += nu[-1] * 2
+# wl = 299792458 / nu
+# norm = np.nanmax(stream[-1])
+# fig_s, ax_s = plt.subplots(1, 1)
+# ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
+# ind[-1] = len(stream) - 1
+# ind[0] = 0
+# ind = np.append(np.arange(9), ind[ind > 8])
+# t = np.round(ind * ppifg * 1e3 / 1e9, 2)
+# save = False
+# for n, ft in enumerate(tqdm(stream[ind])):
+#     ax_s.clear()
+#     ax_s.plot(wl[stream[-1] > 100], ft[stream[-1] > 100] / norm, ".", markersize=1)
+#     # ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+#     # ax_s.set_ylabel("power spectral density")
+#     # ax_s.set_title(f"{t[n]} ms")
+#     ax_s.axis(False)
+#     ax_s.set_ylim(ymax=1)
+#     fig_s.tight_layout()
+#     if save:
+#         plt.savefig(f"fig/{n}.png", dpi=300, transparent=True)
+#     else:
+#         plt.pause(0.05)
 
 # %% ----- coarse
-coarse = np.load("fig_commit/plot_data/coarse.npz")
+coarse = np.load("../fig_commit/plot_data/coarse.npz")
 fig_c, ax_c = plt.subplots(1, 1, figsize=figsize)
 ax_c.pcolormesh(coarse["x"], coarse["y"], coarse["data"], cmap="cividis")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
@@ -54,7 +54,7 @@ ax_c.set_aspect("equal")
 fig_c.tight_layout()
 
 # %% ----- fine
-fine = np.load("fig_commit/plot_data/fine.npz")
+fine = np.load("../fig_commit/plot_data/fine.npz")
 fig_f, ax_f = plt.subplots(1, 1, figsize=figsize)
 ax_f.pcolormesh(fine["x"], fine["y"], fine["data"], cmap="cividis")
 # ax_f.set_xlabel("$\\mathrm{\\mu m}$")
@@ -64,7 +64,7 @@ ax_f.set_aspect("equal")
 fig_f.tight_layout()
 
 # %% ----- stream
-stream = np.load("fig_commit/plot_data/stream.npz")
+stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
 ax_s.plot(stream["x"], stream["y1"], ".", markersize=1, label="single shot")
 ax_s.plot(stream["x"], stream["y2"], ".", markersize=1, label="25,700 averages")
@@ -96,7 +96,7 @@ fig_s.tight_layout()
 # fig_t.tight_layout()
 
 # %% ----- snr
-snr = np.load("fig_commit/plot_data/snr.npz")
+snr = np.load("../fig_commit/plot_data/snr.npz")
 fig_snr, ax_snr = plt.subplots(1, 1, figsize=figsize)
 ax_snr.loglog(snr["x"], snr["y"], "o")
 ax_snr.set_xlabel("time (s)")
@@ -109,7 +109,7 @@ ax_snr_2.set_xlabel("# of averaged spectra")
 fig_snr.tight_layout()
 
 # %% ----- pixel
-pixel = np.load("fig_commit/plot_data/pixel.npz")
+pixel = np.load("../fig_commit/plot_data/pixel.npz")
 fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
 ax_p.plot(pixel["x"], pixel["y"])
 ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
@@ -120,7 +120,7 @@ fig_p.tight_layout()
 
 # %% ----- coarse usaf
 fig_c_usaf, ax_c_usaf = plt.subplots(1, 1)
-coarse_usaf = np.load("fig_commit/plot_data/coarse_usaf.npz")
+coarse_usaf = np.load("../fig_commit/plot_data/coarse_usaf.npz")
 ax_c_usaf.pcolormesh(
     coarse_usaf["x"], coarse_usaf["y"], coarse_usaf["data"], cmap="cividis"
 )
@@ -131,7 +131,7 @@ fig_c_usaf.tight_layout()
 
 # %% ----- fine usaf
 fig_f_usaf, ax_f_usaf = plt.subplots(1, 1)
-fine_usaf = np.load("fig_commit/plot_data/fine_usaf.npz")
+fine_usaf = np.load("../fig_commit/plot_data/fine_usaf.npz")
 ax_f_usaf.pcolormesh(fine_usaf["x"], fine_usaf["y"], fine_usaf["data"], cmap="cividis")
 ax_f_usaf.set_aspect("equal")
 ax_f_usaf.set_xlabel("$\\mathrm{\\mu m}$")
@@ -141,7 +141,7 @@ fig_f_usaf.tight_layout()
 
 # %% ---- pixel usaf
 fig_p_usaf, ax_p_usaf = plt.subplots(1, 1, figsize=figsize)
-pixel_usaf = np.load("fig_commit/plot_data/pixel_usaf.npz")
+pixel_usaf = np.load("../fig_commit/plot_data/pixel_usaf.npz")
 ax_p_usaf.plot(pixel_usaf["x"], pixel_usaf["y"])
 ax_p_usaf.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_usaf.set_ylabel("absorbance")
@@ -153,7 +153,7 @@ fig_p_usaf.tight_layout()
 
 # %%
 supercontinuum = np.genfromtxt(
-    "fig_commit/plot_data/Spectrum_Stitched_Together_wl_nm.txt"
+    "../fig_commit/plot_data/Spectrum_Stitched_Together_wl_nm.txt"
 )
 fig_cont, ax_cont = plt.subplots(1, 1)
 ax_cont.plot(supercontinuum[:, 0], supercontinuum[:, 1])
@@ -163,7 +163,7 @@ fig_cont.tight_layout()
 
 # %% ----- static cell
 fig_stat, ax_stat = plt.subplots(1, 1)
-static_cell = np.load("fig_commit/plot_data/static_cell.npy")
+static_cell = np.load("../fig_commit/plot_data/static_cell.npy")
 ax_stat.plot(static_cell[:, 0], static_cell[:, 1] / static_cell[:, 1].max())
 ax_stat.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_stat.set_ylabel("power spectral density")
@@ -172,7 +172,7 @@ ax_stat.spines["top"].set_visible(False)
 fig_stat.tight_layout()
 
 fig_stat_zoom, ax_stat_zoom = plt.subplots(1, 1)
-static_cell = np.load("fig_commit/plot_data/static_cell.npy")
+static_cell = np.load("../fig_commit/plot_data/static_cell.npy")
 (ind,) = np.logical_and(4.385 < static_cell[:, 0], static_cell[:, 0] < 4.404).nonzero()
 ax_stat_zoom.plot(
     static_cell[:, 0][ind], static_cell[:, 1][ind] / static_cell[:, 1].max()
@@ -182,8 +182,8 @@ fig_stat_zoom.tight_layout()
 
 # %% ----- on and off su8
 fig_su8, ax_su8 = plt.subplots(1, 1, figsize=np.array([3.69, 2.71]))
-bckgnd_su8 = np.load("fig_commit/plot_data/bckgnd_for_su8.npz")
-su8 = np.load("fig_commit/plot_data/su8.npz")
+bckgnd_su8 = np.load("../fig_commit/plot_data/bckgnd_for_su8.npz")
+su8 = np.load("../fig_commit/plot_data/su8.npz")
 ax_su8.plot(bckgnd_su8["x"], bckgnd_su8["y"] / np.nanmax(bckgnd_su8["y"]))
 ax_su8.plot(su8["x"], su8["y"] / np.nanmax(bckgnd_su8["y"]))
 ax_su8.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
