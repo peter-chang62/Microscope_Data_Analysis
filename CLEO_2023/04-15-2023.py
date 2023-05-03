@@ -98,7 +98,8 @@ import mkl_fft
 #     + r"\\Microscope\\Images\\04-15-2023\\"
 # )
 # path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
-path = r"E:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+# path = r"E:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
+path = r"/media/peterchang/Peter SSD/Research_Projects/Microscope/Images/04-15-2023/"
 coarse = np.load(path + "coarse/img_stacked_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
@@ -147,14 +148,19 @@ nu += nu[-1] * 2
 wl = 299792458 / nu
 fig_p, ax_p = plt.subplots(1, 1)
 (ind,) = np.logical_and(3.35 < wl, wl < 3.55).nonzero()
-ax_p.plot(wl[ind], fine[0, -1][ind])
+ax_p.plot(wl[ind], coarse[139, 154][ind])
+ax_p.plot(wl[ind], coarse[167, 266][ind])
 ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
 ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p.set_ylabel("absorbance")
-# ax_p.set_title("Absorbance at 50 GHz")
 fig_p.tight_layout()
-np.savez("fig_commit/plot_data/pixel.npz", x=wl[ind], y=fine[0, -1][ind])
+np.savez(
+    "../fig_commit/plot_data/pixel.npz",
+    x=wl[ind],
+    y1=coarse[139, 154][ind],
+    y2=coarse[167, 266][ind],
+)
 
 # %% --------------------------- background stream ----------------------------
 # path = r"H:\\Research_Projects\\Microscope\\Images\\04-15-2023/"
