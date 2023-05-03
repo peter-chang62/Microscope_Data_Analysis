@@ -28,7 +28,7 @@ ind[-1] = len(stream) - 1
 ind[0] = 0
 ind = np.append(np.arange(9), ind[ind > 8])
 t = np.round(ind * ppifg * 1e3 / 1e9, 2)
-save = False
+save = True
 for n, ft in enumerate(tqdm(stream[ind])):
     ax_s.clear()
     ax_s.plot(wl[stream[-1] > 100], ft[stream[-1] > 100] / norm, ".", markersize=1)
@@ -36,7 +36,7 @@ for n, ft in enumerate(tqdm(stream[ind])):
     # ax_s.set_ylabel("power spectral density")
     # ax_s.set_title(f"{t[n]} ms")
     ax_s.axis(False)
-    ax_s.set_ylim(ymax=1.5)
+    ax_s.set_ylim(ymax=1)
     fig_s.tight_layout()
     if save:
         plt.savefig(f"fig/{n}.png", dpi=300, transparent=True)
