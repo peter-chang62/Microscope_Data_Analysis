@@ -88,7 +88,8 @@ import mkl_fft
 # %% ----- plotting
 # path = r"D:\\Microscope\\Images\\04-20-2023/"
 # path = r"H:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
-path = r"E:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
+# path = r"E:\\Research_Projects\\Microscope\\Images\\04-20-2023/"
+path = r"/media/peterchang/Peter SSD/Research_Projects/Microscope/Images/04-20-2023/"
 coarse = np.load(path + "img_10um_50GHz.npy")
 fine = np.load(path + "fine/img_stacked_50GHz.npy")
 
@@ -110,12 +111,12 @@ ax_c.set_aspect("equal")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c.set_ylabel("$\\mathrm{\\mu m}$")
 fig_c.tight_layout()
-np.savez(
-    "fig_commit/plot_data/coarse_usaf.npz",
-    x=y,
-    y=x,
-    data=simpson(abs_coarse[:, :, 100:300]).T[::-1, ::-1],
-)
+# np.savez(
+#     "fig_commit/plot_data/coarse_usaf.npz",
+#     x=y,
+#     y=x,
+#     data=simpson(abs_coarse[:, :, 100:300]).T[::-1, ::-1],
+# )
 
 # %%
 fig_f, ax_f = plt.subplots(1, 1)
@@ -142,16 +143,18 @@ nu = np.fft.rfftfreq(apod, d=1e-3) * ppifg
 nu += nu[-1] * 2
 wl = 299792458 / nu
 (ind,) = np.logical_and(3.25 < wl, wl < 3.65).nonzero()
-ax_p.plot(wl[ind], abs_fine[::-1, ::-1][50, 153][ind])
+ax_p.plot(wl[ind], abs_coarse[::-1, ::-1][39, 64][ind])
+ax_p.plot(wl[ind], abs_coarse[::-1, ::-1][81, 113][ind])
 ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
 ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p.set_ylabel("absorbance")
 fig_p.tight_layout()
 np.savez(
-    "fig_commit/plot_data/pixel_usaf.npz",
+    "../fig_commit/plot_data/pixel_usaf.npz",
     x=wl[ind],
-    y=abs_fine[::-1, ::-1][50, 153][ind],
+    y1=abs_coarse[::-1, ::-1][39, 64][ind],
+    y2=abs_coarse[::-1, ::-1][81, 113][ind],
 )
 
 # %% ----- save all figures
