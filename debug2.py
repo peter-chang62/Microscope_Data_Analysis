@@ -89,4 +89,9 @@ for n, x in enumerate(tqdm(data)):
     avg = (avg * n + x) / (n + 1)
     running_avg[n] = abs(rfft(avg))
 
-np.save(path + "bckgnd_stream_fft_running_average.npy", running_avg)
+# %% -----
+# np.save(path + "bckgnd_stream_fft_running_average.npy", running_avg)
+stream = np.load(path + "bckgnd_stream_fft_running_average.npy")
+absorb = stream[:, 4669:17646]
+absorb = -np.log(absorb / absorb[-1])
+snr = np.std(absorb, axis=1)
