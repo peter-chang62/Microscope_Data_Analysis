@@ -86,21 +86,37 @@ apod = apod.astype(int)
 
 # np.save("SNR_2D.npy", SNR)
 
-# %% ----- look at the results!
-snr = np.load("SNR_2D.npy")
+# %% ----- gif showing how the snr increases with apodization
+run = np.load("run.npy", mmap_mode="r")
+run_bio = np.load("run_sample.npy", mmap_mode="r")
+t = run[500].copy()
+t_b = run_bio[500].copy()
+t[np.isnan(t)] = 0
+t_b[np.isnan(t_b)] = 0
 
-resolution = ppifg / apod
-n = np.arange(snr.shape[1]) + 1
+t = irfft(t)
+t_b = irfft(t_b)
+save = True
+fig, ax = plt.subplots(1, 1)
+for n, a in enumerate(tqdm(apod)):
+    ft = abs(rfft(t[center - a // 2 : center + a // 2]))
+    ft_b = abs(rfft(t_b[center - a // 2 : center + a // 2]))
+    absorb = -np.log(ft_b / ft)
 
-plt.figure()
-plt.pcolormesh(n, resolution, snr, cmap="cividis")
-plt.xscale("log")
-plt.yscale("log")
-plt.ylabel("resolution (GHz)")
-plt.xlabel("# of averages")
-plt.tight_layout()
+    f = np.fft.rfftfreq(a, d=1e-3) * ppifg
+    f += f[-1] * 2
+    wl = 299792458 / f
+    (ind,) = np.logical_and(3.34 < wl, wl < 3.577).nonzero()
 
+    ax.clear()
+    ax.plot(wl[ind], absorb[ind])
+    ax.set_ylim(0.17062564355116486 - 0.07, 0.2977848306378814 + 0.07)
+    ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+    ax.set_ylabel("absorbance")
+    ax.set_title(f"{np.round(resolution[n], 2)} GHz")
+    fig.tight_layout()
 
-# plt.figure()
-# for i in snr:
-#     plt.loglog(n, i, 'o')
+    if save:
+        plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
+    else:
+        plt.pause(0.05)

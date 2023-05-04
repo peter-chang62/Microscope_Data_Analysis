@@ -17,16 +17,16 @@ def irfft(x, axis=-1):
 
 
 # %% -----
-# path = (
-#     r"/media/peterchang/Peter SSD/Research_Projects/"
-#     + r"Microscope/FreeRunningSpectra/03-23-2023/"
-# )
-path = r"D:\\Microscope\\FreeRunningSpectra\\03-23-2023/"
+path = (
+    r"/media/peterchang/Peter SSD/Research_Projects/"
+    + r"Microscope/FreeRunningSpectra/03-23-2023/"
+)
+# path = r"D:\\Microscope\\FreeRunningSpectra\\03-23-2023/"
 ppifg = 77760
 center = ppifg // 2
 
 # %% ----- load data
-data = np.load(path + "think_off_bio_sample_51408x77760.npy")
+data = np.load(path + "think_on_bio_sample_51408x77760.npy")
 shape = data.shape
 data.resize(data.size)
 data = data[center:-center]
@@ -124,7 +124,7 @@ for n, x in enumerate(tqdm(data)):
         ft[i[0] : i[1]] = np.nan
     run_avg[n] = ft
 
-np.save("run.npy", run_avg)
+np.save("run_sample.npy", run_avg)
 
 # %% ----- absorbance snr
 # run_avg = np.load("temp.npy")
