@@ -279,7 +279,7 @@ resolution = ppifg / apod
 n = np.arange(snr.shape[1]) + 1
 tau = ppifg / 1e9
 
-fig_r, ax_r = plt.subplots(1, 1)
+fig_r, ax_r = plt.subplots(1, 1, figsize=figsize)
 ax_r.pcolormesh(
     n[10 : int(1e3)] * tau,
     resolution,
@@ -294,7 +294,7 @@ ax_r_2.set_xlabel("# of averaged spectra")
 ax_r.set_ylabel("resolution (GHz)")
 fig_r.tight_layout()
 
-fig_r_s, ax_r_s = plt.subplots(1, 1)
+fig_r_s, ax_r_s = plt.subplots(1, 1, figsize=figsize)
 ax_r_s.loglog(
     n[:-1][10 : int(1e3)] * tau,
     1 / snr[0][:-1][10 : int(1e3)],
