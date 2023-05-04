@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import clipboard_and_style_sheet as cr
 from tqdm import tqdm
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+import matplotlib.colors as colors
 
 
 ppifg = 77760
@@ -258,3 +259,57 @@ ax_bio.plot(bio["x"], bio["y"] / np.nanmax(bio["y"]))
 ax_bio.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_bio.set_ylabel("power spectral density")
 fig_bio.tight_layout()
+
+# %% ----- apodization speed analysis
+snr = np.load("SNR_2D.npy")
+resolution = np.logspace(np.log10(1), np.log10(100), num=100)
+apod = ppifg // resolution
+apod[apod % 2 == 1] += 1
+apod = apod.astype(int)
+resolution = ppifg / apod
+n = np.arange(snr.shape[1]) + 1
+tau = ppifg / 1e9
+
+fig_r, ax_r = plt.subplots(1, 1)
+ax_r.pcolormesh(
+    n[10 : int(1e3)] * tau,
+    resolution,
+    1 / snr[:, 10 : int(1e3)],
+    cmap="cividis",
+)
+ax_r.set_xscale("log")
+ax_r.set_yscale("log")
+ax_r.set_xlabel("time (s)")
+ax_r_2 = ax_r.secondary_xaxis("top", functions=(lambda x: x / tau, lambda x: x * tau))
+ax_r_2.set_xlabel("# of averaged spectra")
+ax_r.set_ylabel("resolution (GHz)")
+fig_r.tight_layout()
+
+fig_r_s, ax_r_s = plt.subplots(1, 1)
+ax_r_s.loglog(
+    n[:-1][10 : int(1e3)] * tau,
+    1 / snr[0][:-1][10 : int(1e3)],
+    "o",
+    label="1 GHz",
+)
+ind_5 = abs(resolution - 5).argmin()
+ax_r_s.loglog(
+    n[:-1][10 : int(1e3)] * tau,
+    1 / snr[ind_5][:-1][10 : int(1e3)],
+    "o",
+    label=f"{int(np.round(resolution[ind_5]))} GHz",
+)
+ind_50 = abs(resolution - 50).argmin()
+ax_r_s.loglog(
+    n[:-1][10 : int(1e3)] * tau,
+    1 / snr[ind_50][:-1][10 : int(1e3)],
+    "o",
+    label=f"{int(np.round(resolution[ind_50]))} GHz",
+)
+ax_r_s.legend(loc="best")
+ax_r_s.set_xlabel("time (s)")
+ax_r_s_2 = ax_r_s.secondary_xaxis(
+    "top", functions=(lambda x: x / ppifg, lambda x: x * ppifg)
+)
+ax_r_s_2.set_xlabel("# of averaged spectra")
+ax_r_s.set_ylabel("absorbance snr")
