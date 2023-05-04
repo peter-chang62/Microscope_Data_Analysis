@@ -69,7 +69,7 @@ for m, a in enumerate(tqdm(apod)):
         for n in tqdm(range(len(index) - 1)):
             t = irfft(run[index[n] : index[n + 1]])
             t = t[:, center - a // 2 : center + a // 2]
-            run_a[index[n] : index[n + 1]] = rfft(t)
+            run_a[index[n] : index[n + 1]] = abs(rfft(t))
 
     f = np.fft.rfftfreq(a)
     f_ll, f_ul = 0.0660088483243921, 0.21660454260433362

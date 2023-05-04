@@ -17,10 +17,11 @@ def irfft(x, axis=-1):
 
 
 # %% -----
-path = (
-    r"/media/peterchang/Peter SSD/Research_Projects/"
-    + r"Microscope/FreeRunningSpectra/03-23-2023/"
-)
+# path = (
+#     r"/media/peterchang/Peter SSD/Research_Projects/"
+#     + r"Microscope/FreeRunningSpectra/03-23-2023/"
+# )
+path = r"D:\\Microscope\\FreeRunningSpectra\\03-23-2023/"
 ppifg = 77760
 center = ppifg // 2
 
@@ -123,34 +124,34 @@ for n, x in enumerate(tqdm(data)):
         ft[i[0] : i[1]] = np.nan
     run_avg[n] = ft
 
-# np.save("temp.npy", run_avg)
+np.save("run.npy", run_avg)
 
-# %% -----
+# %% ----- absorbance snr
 # run_avg = np.load("temp.npy")
 
-absorb = run_avg[:, 4973:17302]
-absorb = -np.log(absorb / absorb[-1])
-snr = np.std(absorb, axis=1)
+# absorb = run_avg[:, 4973:17302]
+# absorb = -np.log(absorb / absorb[-1])
+# snr = np.std(absorb, axis=1)
 
 # %% ----- make a gif showing how the noise averages down!
-stream = run_avg
-nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
-nu += nu[-1] * 2
-wl = 299792458 / nu
-norm = np.nanmax(stream[-1])
-fig_s, ax_s = plt.subplots(1, 1)
-ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
-ind[-1] = len(stream) - 1
-ind = np.append(np.arange(9), ind[ind > 8])
-t = np.round(ind * ppifg * 1e3 / 1e9, 2)
-save = False
-for n, ft in enumerate(tqdm(stream[ind])):
-    ax_s.clear()
-    ax_s.plot(wl, ft / norm, ".", markersize=1)
-    ax_s.axis(False)
-    ax_s.set_ylim(ymin=-0.05, ymax=1.3)
-    fig_s.tight_layout()
-    if save:
-        plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
-    else:
-        plt.pause(0.05)
+# stream = run_avg
+# nu = np.fft.rfftfreq(ppifg, d=1e-3) * ppifg
+# nu += nu[-1] * 2
+# wl = 299792458 / nu
+# norm = np.nanmax(stream[-1])
+# fig_s, ax_s = plt.subplots(1, 1)
+# ind = np.logspace(0, np.log10(len(stream)), dtype=int, num=100)
+# ind[-1] = len(stream) - 1
+# ind = np.append(np.arange(9), ind[ind > 8])
+# t = np.round(ind * ppifg * 1e3 / 1e9, 2)
+# save = False
+# for n, ft in enumerate(tqdm(stream[ind])):
+#     ax_s.clear()
+#     ax_s.plot(wl, ft / norm, ".", markersize=1)
+#     ax_s.axis(False)
+#     ax_s.set_ylim(ymin=-0.05, ymax=1.3)
+#     fig_s.tight_layout()
+#     if save:
+#         plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
+#     else:
+#         plt.pause(0.05)
