@@ -97,7 +97,8 @@ t_b[np.isnan(t_b)] = 0
 t = irfft(t)
 t_b = irfft(t_b)
 save = True
-fig, ax = plt.subplots(1, 1)
+figsize = np.array([4.64, 3.63])
+fig, ax = plt.subplots(1, 1, figsize=figsize)
 for n, a in enumerate(tqdm(apod)):
     ft = abs(rfft(t[center - a // 2 : center + a // 2]))
     ft_b = abs(rfft(t_b[center - a // 2 : center + a // 2]))
@@ -114,6 +115,7 @@ for n, a in enumerate(tqdm(apod)):
     ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
     ax.set_ylabel("absorbance")
     ax.set_title(f"{np.round(resolution[n], 2)} GHz")
+    ax.axis(False)
     fig.tight_layout()
 
     if save:
