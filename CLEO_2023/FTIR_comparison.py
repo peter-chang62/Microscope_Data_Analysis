@@ -21,7 +21,7 @@ path = r"/media/peterchang/Peter SSD/Research_Projects/Microscope/OvarianFTIR/I3
 
 x = np.fromfile(path + "I3_output", dtype="<f")
 x.resize(394, 1152, 3072)
-wnum = np.genfromtxt("wnum.csv", delimiter=",")
+wnum = np.genfromtxt(path + "wnum.csv", delimiter=",")
 wl = 1e4 / wnum
 
 (ind,) = np.logical_and(3.3 < wl, wl < 3.6).nonzero()
