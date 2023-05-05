@@ -107,23 +107,58 @@ ax_s_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 fig_s.tight_layout()
 
 # %% ----- interferogram train
-# train = np.load(
-#     r"/Volumes/Peter SSD/Research_Projects/Microscope/"
-#     + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
-#     mmap_mode="r",
-# )
-# train = train[:25].copy()
-# shape = train.shape
-# train.resize(train.size)
-# train = train[center:-center]
-# train.resize((shape[0] - 1, shape[1]))
-# t = np.arange(train.size) * 1e-3
+train = np.load(
+    r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+    + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
+    mmap_mode="r",
+)
+train = train[:25].copy()
+shape = train.shape
+train.resize(train.size)
+train = train[center:-center]
+train.resize((shape[0] - 1, shape[1]))
+t = np.arange(train.size) * 1e-3
 
-# fig_t, ax_t = plt.subplots(1, 1, figsize=np.array([4.63, 1.43]))
-# ax_t.plot(t, train.flatten())
-# ax_t.set_xlabel("time ($\\mathrm{\\mu s}$)")
-# ax_t.get_yaxis().set_visible(False)
-# fig_t.tight_layout()
+fig_t, ax_t = plt.subplots(1, 1, figsize=np.array([4.63, 1.43]))
+ax_t.plot(t, train.flatten())
+ax_t.set_xlabel("time ($\\mathrm{\\mu s}$)")
+ax_t.get_yaxis().set_visible(False)
+fig_t.tight_layout()
+
+# %% --- interferogram train gif
+train = np.load(
+    r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+    + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
+    mmap_mode="r",
+)
+shape = train.shape
+train.resize(train.size)
+train = train[center:-center]
+train.resize((shape[0] - 1, shape[1]))
+
+window = 50
+t = np.arange(-window // 2, window // 2) * 1e-3
+
+fig_t_g, ax_t_g = plt.subplots(1, 1, figsize=figsize)
+N_ifg = 100
+norm = train[:100].max()
+vmax = 1.05
+vmin = train[:100].min() / norm - 0.05
+save = True
+for n, ifg in enumerate(tqdm(train[:100])):
+    ax_t_g.clear()
+    ax_t_g.plot(
+        t,
+        ifg[center - window // 2 : center + window // 2] / norm,
+        linewidth=2,
+    )
+    ax_t_g.set_ylim(vmin, vmax)
+    ax_t_g.axis(False)
+    fig_t_g.tight_layout()
+    if save:
+        plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
+    else:
+        plt.pause(0.01)
 
 # %% ----- snr
 snr = np.load("../fig_commit/plot_data/snr.npz")
