@@ -71,32 +71,3 @@ ax_2 = ax.secondary_xaxis(
 )
 ax.get_yaxis().set_visible(False)
 ax_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
-
-# %%
-fig, ax = plt.subplots(1, 1)
-ax.pcolormesh(
-    np.linspace(*[nu[0], nu[-1]], 100) * 1e-12,
-    np.arange(2),
-    np.zeros((2, 100)),
-    cmap="gray",
-    alpha=0.25,
-)
-[
-    ax.axvline(
-        window(100e6, 12.85e3 / 100) * i * 1e-12, color="k", linewidth=2, linestyle="--"
-    )
-    for i in range(1, 4)
-]
-ax.pcolormesh(
-    np.linspace(*[wind_laser[0], wind_laser[1]], 100) * 1e-12,
-    np.arange(2),
-    np.zeros((2, 100)),
-    cmap="RdBu",
-    alpha=0.5,
-)
-ax.set_xlabel("THz")
-ax_2 = ax.secondary_xaxis(
-    "top", functions=(lambda x: x * 1e12 / conversion, lambda x: x * conversion * 1e-12)
-)
-ax.get_yaxis().set_visible(False)
-ax_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
