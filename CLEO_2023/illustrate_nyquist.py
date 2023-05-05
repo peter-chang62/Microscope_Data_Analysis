@@ -19,8 +19,10 @@ conversion = c / cm
 
 nu = np.arange(0, wind_1ghz * 3, 1e9)
 
-# %%
-fig, ax = plt.subplots(1, 1)
+figsize = np.array([4.64, 3.63])
+
+# %% ----- 1 GHz scenario
+fig, ax = plt.subplots(1, 1, figsize=figsize)
 ax.pcolormesh(
     np.linspace(*[nu[0], nu[-1]], 100) * 1e-12,
     np.arange(2),
@@ -29,7 +31,7 @@ ax.pcolormesh(
     alpha=0.25,
 )
 [
-    ax.axvline(wind_1ghz * i * 1e-12, color="k", linewidth=2, linestyle="--")
+    ax.axvline(wind_1ghz * i * 1e-12, color="k", linewidth=1, linestyle="--")
     for i in range(1, 4)
 ]
 ax.pcolormesh(
@@ -46,8 +48,8 @@ ax_2 = ax.secondary_xaxis(
 ax.get_yaxis().set_visible(False)
 ax_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 
-# %%
-fig, ax = plt.subplots(1, 1)
+# %% ----- 100 MHz scenario
+fig, ax = plt.subplots(1, 1, figsize=figsize)
 ax.pcolormesh(
     np.linspace(*[nu[0], nu[-1]], 100) * 1e-12,
     np.arange(2),
@@ -56,7 +58,7 @@ ax.pcolormesh(
     alpha=0.25,
 )
 [
-    ax.axvline(wind_100MHz * i * 1e-12, color="k", linewidth=1, linestyle="--")
+    ax.axvline(wind_100MHz * i * 1e-12, color="k", linewidth=.5, linestyle="--")
     for i in range(1, 301)
 ]
 ax.pcolormesh(
