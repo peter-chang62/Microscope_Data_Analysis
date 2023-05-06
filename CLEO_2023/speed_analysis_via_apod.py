@@ -106,7 +106,7 @@ t_b[np.isnan(t_b)] = 0
 
 t = irfft(t)
 t_b = irfft(t_b)
-save = False
+save = True
 figsize = np.array([4.64, 3.63])
 fig, ax = plt.subplots(1, 1, figsize=figsize)
 for n, a in enumerate(tqdm(apod)):
@@ -120,12 +120,18 @@ for n, a in enumerate(tqdm(apod)):
     (ind,) = np.logical_and(3.34 < wl, wl < 3.577).nonzero()
 
     ax.clear()
-    ax.plot(wl[ind], absorb[ind])
+    ax.plot(
+        wl[ind],
+        absorb[ind],
+        # label=f"{np.round(resolution[n], 2)} GHz",
+    )
     ax.set_ylim(0.17062564355116486 - 0.07, 0.2977848306378814 + 0.07)
     ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
     ax.set_ylabel("absorbance")
-    ax.set_title(f"{np.round(resolution[n], 2)} GHz")
-    # ax.axis(False)
+    ax.set_title(f"{np.round(resolution[n], 2)} GHz", fontsize=18)
+    ax.axis(False)
+    # ax.legend(loc="best", fontsize=16)
+    ax.spines[["right", "top"]].set_visible(False)
     fig.tight_layout()
 
     if save:
