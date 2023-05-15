@@ -165,14 +165,14 @@ snr = np.load("../fig_commit/plot_data/snr.npz")
 fig_snr, ax_snr = plt.subplots(1, 1, figsize=figsize)
 ax_snr.loglog(snr["x"], snr["y"], "o")
 ax_snr.set_xlabel("time (s)")
-ax_snr.set_ylabel("absorbance snr")
+ax_snr.set_ylabel("SNR")
 tau = ppifg / 1e9
 ax_snr_2 = ax_snr.secondary_xaxis(
     "top", functions=(lambda x: x / tau, lambda x: x * tau)
 )
 ax_snr_2.set_xlabel("# of averaged spectra")
 fig_snr.tight_layout()
-
+    
 # %% ----- pixel
 pixel = np.load("../fig_commit/plot_data/pixel.npz")
 fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
@@ -305,7 +305,7 @@ ax_bio.set_ylabel("power spectral density")
 fig_bio.tight_layout()
 
 # %% ----- apodization speed analysis
-snr = np.load("SNR_2D.npy")
+snr = np.load("../fig_commit/plot_data/SNR_2D.npy")
 resolution = np.logspace(np.log10(1), np.log10(100), num=100)
 apod = ppifg // resolution
 apod[apod % 2 == 1] += 1
@@ -356,4 +356,5 @@ ax_r_s_2 = ax_r_s.secondary_xaxis(
     "top", functions=(lambda x: x / ppifg, lambda x: x * ppifg)
 )
 ax_r_s_2.set_xlabel("# of averaged spectra")
-ax_r_s.set_ylabel("absorbance snr")
+ax_r_s.set_ylabel("SNR")
+fig_r_s.tight_layout()
