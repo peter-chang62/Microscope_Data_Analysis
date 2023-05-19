@@ -49,8 +49,19 @@ figsize = np.array([4.64, 3.63])
 
 # %% ----- coarse
 coarse = np.load("../fig_commit/plot_data/coarse.npz")
-fig_c, ax_c = plt.subplots(1, 1, figsize=figsize)
-ax_c.pcolormesh(coarse["x"], coarse["y"], coarse["data"], cmap="cividis", vmax=47.5)
+fig_c, ax_c = plt.subplots(
+    1,
+    1,
+    # figsize=figsize,
+)
+ax_c.pcolormesh(
+    coarse["x"],
+    coarse["y"],
+    coarse["data"],
+    cmap="cividis",
+    vmin=15,
+    vmax=60,
+)
 ax_c.plot(coarse["x"][154], coarse["y"][139], "o", color="C2")
 ax_c.plot(coarse["x"][266], coarse["y"][167], "o", color="C3")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
@@ -73,8 +84,19 @@ fig_c.tight_layout()
 
 # %% ----- fine
 fine = np.load("../fig_commit/plot_data/fine.npz")
-fig_f, ax_f = plt.subplots(1, 1, figsize=figsize)
-ax_f.pcolormesh(fine["x"], fine["y"], fine["data"], cmap="cividis", vmax=45.7)
+fig_f, ax_f = plt.subplots(
+    1,
+    1,
+    # figsize=figsize,
+)
+ax_f.pcolormesh(
+    fine["x"],
+    fine["y"],
+    fine["data"],
+    cmap="cividis",
+    vmin=15,
+    vmax=50,
+)
 # ax_f.set_xlabel("$\\mathrm{\\mu m}$")
 # ax_f.set_ylabel("$\\mathrm{\\mu m}$")
 ax_f.axis(False)
@@ -193,7 +215,8 @@ ax_c_usaf.pcolormesh(
     coarse_usaf["y"],
     coarse_usaf["data"],
     cmap="cividis",
-    vmax=160.5,
+    vmin=85,
+    vmax=195,
 )
 ax_c_usaf.plot(coarse_usaf["x"][39], coarse_usaf["y"][64], "o", color="C2")
 ax_c_usaf.plot(coarse_usaf["x"][81], coarse_usaf["y"][113], "o", color="C3")
@@ -223,7 +246,8 @@ ax_f_usaf.pcolormesh(
     fine_usaf["y"],
     fine_usaf["data"],
     cmap="cividis",
-    vmax=168.93,
+    vmin=90,
+    vmax=185,
 )
 ax_f_usaf.set_aspect("equal")
 ax_f_usaf.set_xlabel("$\\mathrm{\\mu m}$")
@@ -246,7 +270,12 @@ fig_f_usaf.tight_layout()
 # %% ----- I3 FTIR image
 I3 = np.load("../fig_commit/plot_data/I3_FTIR_image.npy")
 fig_i3, ax_i3 = plt.subplots(1, 1)
-ax_i3.pcolormesh(I3, cmap="cividis", vmin=0, vmax=10)
+ax_i3.pcolormesh(
+    I3,
+    cmap="cividis",
+    vmin=-1,
+    vmax=15,
+)
 ax_i3.set_aspect("equal")
 
 # %% ---- pixel usaf
