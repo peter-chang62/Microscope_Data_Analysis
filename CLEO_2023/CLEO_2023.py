@@ -126,39 +126,40 @@ fig_s.tight_layout()
 # fig_t.tight_layout()
 
 # # %% --- interferogram train gif
-train = np.load(
-    r"/Volumes/Peter SSD/Research_Projects/Microscope/"
-    + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
-    mmap_mode="r",
-)
-shape = train.shape
-train.resize(train.size)
-train = train[center:-center]
-train.resize((shape[0] - 1, shape[1]))
+# train = np.load(
+#     r"/Volumes/Peter SSD/Research_Projects/Microscope/"
+#     + r"Images/04-15-2023/bckgnd_stream_25704x77760.npy",
+#     mmap_mode="r",
+# )
+# shape = train.shape
+# train.resize(train.size)
+# train = train[center:-center]
+# train.resize((shape[0] - 1, shape[1]))
 
-window = 50
-t = np.arange(-window // 2, window // 2) * 1e-3
+# window = 50
+# t = np.arange(-window // 2, window // 2) * 1e-3
 
-fig_t_g, ax_t_g = plt.subplots(1, 1, figsize=figsize)
-N_ifg = 100
-norm = train[:100].max()
-vmax = 1.05
-vmin = train[:100].min() / norm - 0.05
-save = True
-for n, ifg in enumerate(tqdm(train[:100])):
-    ax_t_g.clear()
-    ax_t_g.plot(
-        t,
-        ifg[center - window // 2 : center + window // 2] / norm, 'o--',
-        linewidth=2,
-    )
-    ax_t_g.set_ylim(vmin, vmax)
-    ax_t_g.axis(False)
-    fig_t_g.tight_layout()
-    if save:
-        plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
-    else:
-        plt.pause(0.01)
+# fig_t_g, ax_t_g = plt.subplots(1, 1, figsize=figsize)
+# N_ifg = 100
+# norm = train[:100].max()
+# vmax = 1.05
+# vmin = train[:100].min() / norm - 0.05
+# save = True
+# for n, ifg in enumerate(tqdm(train[:100])):
+#     ax_t_g.clear()
+#     ax_t_g.plot(
+#         t,
+#         ifg[center - window // 2 : center + window // 2] / norm,
+#         "o--",
+#         linewidth=2,
+#     )
+#     ax_t_g.set_ylim(vmin, vmax)
+#     ax_t_g.axis(False)
+#     fig_t_g.tight_layout()
+#     if save:
+#         plt.savefig(f"../fig/{n}.png", dpi=300, transparent=True)
+#     else:
+#         plt.pause(0.01)
 
 # %% ----- snr
 snr = np.load("../fig_commit/plot_data/snr.npz")
@@ -172,7 +173,7 @@ ax_snr_2 = ax_snr.secondary_xaxis(
 )
 ax_snr_2.set_xlabel("# of averaged spectra")
 fig_snr.tight_layout()
-    
+
 # %% ----- pixel
 pixel = np.load("../fig_commit/plot_data/pixel.npz")
 fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
@@ -241,6 +242,12 @@ scalebar = AnchoredSizeBar(
 ax_f_usaf.add_artist(scalebar)
 
 fig_f_usaf.tight_layout()
+
+# %% ----- I3 FTIR image
+I3 = np.load("../fig_commit/plot_data/I3_FTIR_image.npy")
+fig_i3, ax_i3 = plt.subplots(1, 1)
+ax_i3.pcolormesh(I3, cmap="cividis", vmin=0, vmax=10)
+ax_i3.set_aspect("equal")
 
 # %% ---- pixel usaf
 fig_p_usaf, ax_p_usaf = plt.subplots(1, 1, figsize=figsize)

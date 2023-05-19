@@ -25,27 +25,31 @@ c = 299792458
 ppifg = 77760
 center = ppifg // 2
 
-# path = r"/media/peterchang/Peter SSD/Research_Projects/Microscope/OvarianFTIR/I3/"
+# %% ----- FTIR image for core I3
+path = r"/Volumes/Peter SSD/Research_Projects/Microscope/OvarianFTIR/I3/"
 
-# x = np.fromfile(path + "I3_output", dtype="<f")
-# x.resize(394, 1152, 3072)
-# wnum = np.genfromtxt(path + "wnum.csv", delimiter=",")
-# wl = 1e4 / wnum
+x = np.fromfile(path + "I3_output", dtype="<f")
+x.resize(394, 1152, 3072)
+wnum = np.genfromtxt(path + "wnum.csv", delimiter=",")
+wl = 1e4 / wnum
 
-# (ind,) = np.logical_and(3.3 < wl, wl < 3.6).nonzero()
-# (ind_full,) = np.logical_and(2.9 < wl, wl < 3.65).nonzero()
+(ind,) = np.logical_and(3.3 < wl, wl < 3.6).nonzero()
+(ind_full,) = np.logical_and(2.9 < wl, wl < 3.65).nonzero()
 
-# # %%
-# img = simpson(x[ind], axis=0)
-# fig, ax = plt.subplots(1, 2)
-# ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="cividis", vmin=0, vmax=10)
-# ax[1].imshow(
-#     np.load("../fig_commit/plot_data/coarse.npz")["data"][::-1][21:285, 16:309],
-#     cmap="cividis",
-#     vmax=47.5,
-# )
-# [i.axis(False) for i in ax]
-# fig.tight_layout()
+# %%
+img = simpson(x[ind], axis=0)
+fig, ax = plt.subplots(1, 2)
+ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="cividis", vmin=0, vmax=10)
+ax[1].imshow(
+    np.load("../fig_commit/plot_data/coarse.npz")["data"][::-1][21:285, 16:309],
+    cmap="cividis",
+    vmax=47.5,
+)
+[i.axis(False) for i in ax]
+fig.tight_layout()
+
+# save
+np.save("../fig_commit/plot_data/I3_FTIR_image.npy", img[:, ::-1][:, 1783:3071])
 
 # %% ----- plot the full absorption feature!
 
