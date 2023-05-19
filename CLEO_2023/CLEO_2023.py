@@ -91,7 +91,7 @@ for vmin in range(15, 30):
         break
 
 # %% ----- fine
-single = True
+single = False
 for vmin in range(15, 30):
     if single:
         vmin = 21
@@ -130,7 +130,7 @@ for vmin in range(15, 30):
 
     if single:
         break
-        
+
 # %% ----- stream
 stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
