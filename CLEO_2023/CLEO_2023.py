@@ -48,73 +48,89 @@ figsize = np.array([4.64, 3.63])
 #         plt.pause(0.05)
 
 # %% ----- coarse
-coarse = np.load("../fig_commit/plot_data/coarse.npz")
-fig_c, ax_c = plt.subplots(
-    1,
-    1,
-    # figsize=figsize,
-)
-ax_c.pcolormesh(
-    coarse["x"],
-    coarse["y"],
-    coarse["data"],
-    cmap="cividis",
-    vmin=15,
-    vmax=60,
-)
-ax_c.plot(coarse["x"][154], coarse["y"][139], "o", color="C2")
-ax_c.plot(coarse["x"][266], coarse["y"][167], "o", color="C3")
-ax_c.set_xlabel("$\\mathrm{\\mu m}$")
-ax_c.set_ylabel("$\\mathrm{\\mu m}$")
-ax_c.set_aspect("equal")
+single = True
+for vmin in range(15, 30):
+    if single:
+        vmin = 15
+    coarse = np.load("../fig_commit/plot_data/coarse.npz")
+    fig_c, ax_c = plt.subplots(
+        1,
+        1,
+        # figsize=figsize,
+    )
+    ax_c.pcolormesh(
+        coarse["x"],
+        coarse["y"],
+        coarse["data"],
+        cmap="cividis",
+        vmin=vmin,
+        vmax=60,
+    )
+    ax_c.plot(coarse["x"][154], coarse["y"][139], "o", color="C2")
+    ax_c.plot(coarse["x"][266], coarse["y"][167], "o", color="C3")
+    ax_c.set_xlabel("$\\mathrm{\\mu m}$")
+    ax_c.set_ylabel("$\\mathrm{\\mu m}$")
+    ax_c.set_aspect("equal")
 
-# scalebar
-scalebar = AnchoredSizeBar(
-    ax_c.transData,
-    100,
-    "100 $\\mathrm{\\mu m}}$",
-    "upper right",
-    frameon=False,
-    color="w",
-    size_vertical=5,
-)
-ax_c.add_artist(scalebar)
+    # scalebar
+    scalebar = AnchoredSizeBar(
+        ax_c.transData,
+        100,
+        "100 $\\mathrm{\\mu m}}$",
+        "upper right",
+        frameon=False,
+        color="w",
+        size_vertical=5,
+    )
+    ax_c.add_artist(scalebar)
+    if not single:
+        ax_c.set_title(vmin)
+    fig_c.tight_layout()
 
-fig_c.tight_layout()
+    if single:
+        break
 
 # %% ----- fine
-fine = np.load("../fig_commit/plot_data/fine.npz")
-fig_f, ax_f = plt.subplots(
-    1,
-    1,
-    # figsize=figsize,
-)
-ax_f.pcolormesh(
-    fine["x"],
-    fine["y"],
-    fine["data"],
-    cmap="cividis",
-    vmin=15,
-    vmax=50,
-)
-# ax_f.set_xlabel("$\\mathrm{\\mu m}$")
-# ax_f.set_ylabel("$\\mathrm{\\mu m}$")
-ax_f.axis(False)
-ax_f.set_aspect("equal")
+single = True
+for vmin in range(15, 30):
+    if single:
+        vmin = 21
+    fine = np.load("../fig_commit/plot_data/fine.npz")
+    fig_f, ax_f = plt.subplots(
+        1,
+        1,
+        # figsize=figsize,
+    )
+    ax_f.pcolormesh(
+        fine["x"],
+        fine["y"],
+        fine["data"],
+        cmap="cividis",
+        vmin=vmin,
+        vmax=50,
+    )
+    # ax_f.set_xlabel("$\\mathrm{\\mu m}$")
+    # ax_f.set_ylabel("$\\mathrm{\\mu m}$")
+    ax_f.axis(False)
+    ax_f.set_aspect("equal")
 
-scalebar = AnchoredSizeBar(
-    ax_f.transData,
-    100,
-    "100 $\\mathrm{\\mu m}}$",
-    "upper left",
-    frameon=False,
-    color="w",
-    size_vertical=5 / 1.75,
-)
-ax_f.add_artist(scalebar)
+    scalebar = AnchoredSizeBar(
+        ax_f.transData,
+        100,
+        "100 $\\mathrm{\\mu m}}$",
+        "upper left",
+        frameon=False,
+        color="w",
+        size_vertical=5 / 1.75,
+    )
+    ax_f.add_artist(scalebar)
+    if not single:
+        ax_f.set_title(vmin)
+    fig_f.tight_layout()
 
-fig_f.tight_layout()
-
+    if single:
+        break
+        
 # %% ----- stream
 stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
