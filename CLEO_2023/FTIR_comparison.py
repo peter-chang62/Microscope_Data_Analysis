@@ -28,7 +28,7 @@ center = ppifg // 2
 # %% ----- FTIR image for core I3
 path = r"/Volumes/Peter SSD/Research_Projects/Microscope/OvarianFTIR/I3/"
 
-x = np.fromfile(path + "I3_output", dtype="<f")
+x = np.memmap(path + "I3_output", dtype="<f", mode="r")
 x.resize(394, 1152, 3072)
 wnum = np.genfromtxt(path + "wnum.csv", delimiter=",")
 wl = 1e4 / wnum
@@ -39,7 +39,7 @@ wl = 1e4 / wnum
 # %%
 img = simpson(x[ind], axis=0)
 fig, ax = plt.subplots(1, 2)
-ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="cividis", vmin=0, vmax=10)
+ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="cividis", vmin=0, vmax=13)
 ax[1].imshow(
     np.load("../fig_commit/plot_data/coarse.npz")["data"][::-1][21:285, 16:309],
     cmap="cividis",

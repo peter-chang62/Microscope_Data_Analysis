@@ -1,0 +1,27 @@
+run_sample.npy and run.npy is the running average for spectra taken on the bio-sample. It is done at 1 GHz average using filter cavity approach! These files are large, but were needed to generate the snr figures. 
+
+I've regenerated the 50 GHz and 100 GHz hyperspectral images for both the bio sample adn the usaf target. The 50 GHz one is redundant but now it's saved localy on disk together with the new 100 GHz hyperspectral images. They are saved in .h5 files, the two subcategories to look at are data (spectra), and absorbance!
+
+you can refer back to 04-15-2023.py adn 04-20-2023.py and CLEO_2023.py to figure out where you showed point spectra at CLEO!
+
+Okay, I'm not opposed to generating the .h5 files that you did, but now we're at a slow point where you don't know what to do next. I think you should come up with a list of figures that you want to have, then make them, then together with Scott figure out what to change, keep, remove and add and iterate that way. I think that's what Scott has in mind too, and he's asking for the start of the iteration on Monday! So, with that said, here's my list of figures (first round):
+
+    1. Experimental Setup: 
+        a) generated from powerpoint
+        b) simple but with enough info about laser system and microscope,
+        c) shade the boxes for effect like Alex
+        d) maybe can be a larger figure with blow up to real photos of samples (or not, see how it looks)
+        e) you can start with the figures you already have on the CLEO slides and improve them!
+
+    2. 2D plots
+        a) bio-sample coarse with blow up to show fine image
+        b) zoom in of the FTIR comparison for the fine image 
+        c) SU-8 target coarse and blow up to show fine image
+
+        d) speed analysis 2D plot
+
+    3. 1D plots
+        a) use Igor Pro?
+            i) do it in Python first, and see if Scott will accept that, from what Molly says it's likely he'll ask for Igor
+
+        b) Point spectra at 100 GHz, I think it's more appealing to show the full laser spectrum at 100 GHz taken at different points on the sample

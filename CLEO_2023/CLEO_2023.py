@@ -91,10 +91,10 @@ for vmin in range(15, 30):
         break
 
 # %% ----- fine
-single = False
+single = True
 for vmin in range(15, 30):
     if single:
-        vmin = 21
+        vmin = 17
     fine = np.load("../fig_commit/plot_data/fine.npz")
     fig_f, ax_f = plt.subplots(
         1,
@@ -405,7 +405,7 @@ ax_r_s.loglog(
 ax_r_s.legend(loc="best")
 ax_r_s.set_xlabel("time (s)")
 ax_r_s_2 = ax_r_s.secondary_xaxis(
-    "top", functions=(lambda x: x / ppifg, lambda x: x * ppifg)
+    "top", functions=(lambda x: x * ppifg, lambda x: x / ppifg)
 )
 ax_r_s_2.set_xlabel("# of averaged spectra")
 ax_r_s.set_ylabel("SNR")
