@@ -1,125 +1,89 @@
+# %%
 import numpy as np
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-from scipy.signal import convolve
+import pynlo
+from scipy.constants import c
+from scipy.integrate import simpson
 
-path = r"/Users/peterchang/Resilio Sync/OvarianFTIR/"
-# path = r"temp/OvarianFTIR/"
-data = np.fromfile(path + "D1", "<f")
-
-data.shape = (394, 1280, 1280)
-wnum = np.genfromtxt(path + "D1.hdr", skip_header=18, skip_footer=1, delimiter=",")
-wl = 1e4 / wnum
-
-wnum_resolution = np.mean(np.diff(wnum))
-c = 299792458
-cm = 1e-2
-freq_resolution = wnum_resolution * c / cm
-
-ppifg = 77760
-center = ppifg // 2
-resolution = 50
-apod = int(np.round(ppifg / resolution))
-if apod % 2 == 1:
-    apod += 1
-
-dcs_bckgnd = abs(
-    np.fft.rfft(
-        np.fft.ifftshift(
-            np.load("avg_off_bio_sample.npy")[center - apod // 2 : center + apod // 2]
-        )
-    )
+# %% --------------------------------------------------------------------------
+v_min = c / 3000e-9
+v_max = c / 800e-9
+v0 = c / 1560e-9
+npts = 2**13
+t_window = 20e-12
+e_p = 4.0e-9
+t_fwhm = 250e-15
+pulse_grat = pynlo.light.Pulse.Sech(
+    npts,
+    v_min,
+    v_max,
+    v0,
+    e_p,
+    t_fwhm,
+    t_window,
 )
-dcs_bio = abs(
-    np.fft.rfft(
-        np.fft.ifftshift(
-            np.load("avg_on_bio_sample.npy")[center - apod // 2 : center + apod // 2]
-        )
-    )
-)
-absrptn = dcs_bio / dcs_bckgnd
-absrbnc = -np.log(absrptn)
-v_grid = np.fft.rfftfreq(apod, d=1e-9) * ppifg
-v_grid += v_grid[-1] * 2
-wl_grid = 299792458.0 / v_grid * 1e6
-wnum_grid = 1e4 / wl_grid
 
-# %%
-(ind_dcs,) = np.logical_and(3.03 < wl_grid, wl_grid < 3.65).nonzero()
-(ind_reddy,) = np.logical_and(3.03 < wl, wl < 3.65).nonzero()
+pulse_hnlf = pulse_grat.copy()
+pulse_osc = pulse_grat.copy()
+pulse_osc.e_p = 0.05e-9
+
+# %% --------------------------------------------------------------------------
+s_grat = np.genfromtxt("CLEO_2023/SPECTRUM_GRAT_PAIR.txt")
+v_grid = c / (s_grat[:, 0] * 1e-9)
+pulse_grat.import_p_v(v_grid, s_grat[:, 1])
+
+s_hnlf = np.genfromtxt("CLEO_2023/Spectrum_Stitched_Together_wl_nm.txt")
+v_grid = c / (s_hnlf[:, 0] * 1e-9)
+pulse_hnlf.import_p_v(v_grid, s_hnlf[:, 1])
+
+# pulse_hnlf.e_p = 2000e-9
+
+# %% --------------------------------------------------------------------------
+data = np.load("CLEO_2023/run.npy", mmap_mode="r")
+p_v_mir = data[-1][100:].copy()
+nu = np.fft.rfftfreq(77760, d=1e-9)[100:] * 77762
+nu += nu[-1] * 2
+wl = c * 1e6 / nu
+
+ind = ~np.isnan(p_v_mir)
+
+area = simpson(p_v_mir[ind], x=nu[ind])
+power = area * 1e9  # W
+factor = power / 3e-3
+p_v_mir /= factor
+
+# %% --------------------------------------------------------------------------
+# norm = pulse_hnlf.p_v.max()
+fact_pulse = pulse_grat.v_grid**2 / c * 1e12
+fact_mir = nu**2 / c * 1e12
+p_v_osc = pulse_osc.p_v * fact_pulse
+p_v_grat = pulse_grat.p_v * fact_pulse
+p_v_hnlf = pulse_hnlf.p_v * fact_pulse
+p_v_mir_plot = p_v_mir * fact_mir
+
+ymin, ymax = p_v_hnlf.max() * 1e-6, p_v_hnlf.max() * 5
+(ind_osc,) = np.logical_and(ymin < p_v_osc, p_v_osc < ymax).nonzero()
+(ind_grat,) = np.logical_and(ymin < p_v_grat, p_v_grat < ymax).nonzero()
+(ind_hnlf,) = np.logical_and(ymin < p_v_hnlf, p_v_hnlf < ymax).nonzero()
+(ind_mir,) = np.logical_and(ymin < p_v_mir_plot, p_v_mir_plot < ymax).nonzero()
+
 fig, ax = plt.subplots(1, 1)
-ax.plot(wl[ind_reddy], data[:, 1280 // 2, 1280 // 2][ind_reddy], ".-")
-ax.plot(wl_grid[ind_dcs], absrbnc[ind_dcs])
-conversion = lambda x: 1e4 / x
-ax2 = ax.secondary_xaxis("top", functions=(conversion, conversion))
-ax2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
-ax.set_ylim(0, 0.4)
+ax.semilogy(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], label="oscillator")
+ax.semilogy(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], label="amplifier output")
+ax.semilogy(
+    pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], label="supercontinuum"
+)
+ax.semilogy(wl[ind_mir], p_v_mir_plot[ind_mir], label="MIR")
+
+alpha = 0.4
+ax.fill_between(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], alpha=alpha)
+ax.fill_between(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], alpha=alpha)
+ax.fill_between(pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], alpha=alpha)
+ax.fill_between(wl[ind_mir], p_v_mir_plot[ind_mir], alpha=0.4)
+
 ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax.set_ylabel("log PSD (mW / nm)")
+ax.set_ylim(ymin=ymin)
+ax.legend(loc="best")
 fig.tight_layout()
-
-# %%
-(ind,) = np.logical_and(2890 < wnum_grid, wnum_grid < 2950).nonzero()
-ind_max = np.argmax(absrbnc[ind]) + ind.min()
-
-# %%
-ind_match = np.argmin(abs(wl - wl_grid[ind_max]))
-plt.figure()
-plt.title(
-    "$\\mathrm{\\lambda}=$" + f"{np.round(wl[ind_match], 2)}" + " $\\mathrm{\\mu m}$"
-)
-plt.imshow(data[ind_match])
-
-# %% convolve
-# ---------- what's the real scan rate?
-
-# ==================================
-# You achieve the same effect if you just convolve it with a window of ones by
-# the way. However, the image really just "blurs", it doesn't get smoother.
-# That's likely something you would know if you were familiar with image
-# processing.
-# ==================================
-
-vel = 5 * 12  # 5 um / pixel * 8 pixels / second
-tau = 500 * ppifg / 1e9
-blur = vel * tau
-sptl_rsltn = 5 + blur
-
-img_ftir = data[ind_match].copy()
-step = int(np.round(sptl_rsltn / (1000 / 1280)))
-size = np.asarray(img_ftir.shape) // step
-img = np.zeros(size)
-i = 0
-j = 0
-for n in range(img.shape[0]):
-    i += step
-    j = 0
-    for m in range(img.shape[1]):
-        section = img_ftir[i : i + step, j : j + step]
-        img[n, m] = np.mean(section)
-        j += step
-
-plt.figure()
-plt.title(
-    "$\\mathrm{\\lambda}=$"
-    + f"{np.round(wl[ind_match], 2)}"
-    + " $\\mathrm{\\mu m}$"
-    + "\n FTIR reference convolved to 7 $\\mathrm{\\mu m}$ resolution"
-)
-plt.imshow(img)
-plt.tight_layout()
-
-# %% diagnose
-# fig, ax = plt.subplots(1, 1)
-# save = False
-# for n in tqdm(range(data.shape[0])):
-#     ax.clear()
-#     ax.set_title(
-#         "$\\mathrm{\\lambda}=$" + f"{np.round(wl[n], 2)}" + " $\\mathrm{\\mu m}$"
-#     )
-#     ax.imshow(data[n])
-#     fig.tight_layout()
-#     if save:
-#         plt.savefig(f"fig/{n}.png")
-#     else:
-#         plt.pause(0.05)

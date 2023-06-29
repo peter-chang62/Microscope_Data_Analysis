@@ -2,10 +2,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 import tables
 from scipy.integrate import simpson
 from tqdm import tqdm
+import pynlo
 
 figsize = np.array([4.64, 3.63])
 
@@ -31,8 +32,8 @@ wl = 299792458 / nu
 
 img = absorbance[:, :, 97]
 fig_c, ax_c = plt.subplots(1, 1)
-x = np.arange(img.shape[1]) * 1.2
-y = np.arange(img.shape[0]) * 1.2
+x = np.arange(img.shape[1]) * 5
+y = np.arange(img.shape[0]) * 5
 ax_c.pcolormesh(
     x,
     y,
@@ -169,8 +170,8 @@ v_p = 10
 factor = 1 + v_p * tau_p
 
 fig_f_usaf, ax_f_usaf = plt.subplots(1, 1)
-x = np.arange(img.shape[1]) * 10
-y = np.arange(img.shape[0]) * 10 / factor
+x = np.arange(img.shape[1]) * 1.75
+y = np.arange(img.shape[0]) * 1.75 / factor
 ax_f_usaf.pcolormesh(x, y, img[::-1, ::-1], vmin=10, cmap="CMRmap_r")
 ax_f_usaf.plot(x[::-1][pt_bckgnd[1]], y[::-1][pt_bckgnd[0]], "o", color="C3")
 ax_f_usaf.plot(x[::-1][pt_absorb[1]], y[::-1][pt_absorb[0]], "o", color="C2")
@@ -258,7 +259,7 @@ n = np.arange(snr.shape[1]) + 1
 tau = ppifg / 1e9
 
 fig_r, ax_r = plt.subplots(1, 1, figsize=figsize)
-ax_r.pcolormesh(
+img = ax_r.pcolormesh(
     n[10 : int(1e3)] * tau,
     resolution,
     1 / snr[:, 10 : int(1e3)],
@@ -270,4 +271,46 @@ ax_r.set_xlabel("time (s)")
 ax_r_2 = ax_r.secondary_xaxis("top", functions=(lambda x: x / tau, lambda x: x * tau))
 ax_r_2.set_xlabel("# of averaged spectra")
 ax_r.set_ylabel("resolution (GHz)")
+
+colorbar = plt.colorbar(img, label="LOG SNR")
+
 fig_r.tight_layout()
+
+# %% --------------------------------------------------------------------------
+n_points = 2**11
+min_wl = 800e-9
+max_wl = 3e-6
+center_wl = 1550e-9
+t_fwhm = 50e-15
+time_window = 20e-12
+e_p = 3.5e-9
+
+c = 299792458
+pulse_g = pynlo.light.Pulse.Sech(
+    n_points,
+    c / max_wl,
+    c / min_wl,
+    c / center_wl,
+    e_p,
+    t_fwhm,
+    min_time_window=time_window,
+)
+s_grat = np.genfromtxt("SPECTRUM_GRAT_PAIR.txt")
+s_hnlf = np.genfromtxt("Spectrum_Stitched_Together_wl_nm.txt")
+pulse_g.import_p_v(c / (s_grat[:, 0] * 1e-9), s_grat[:, 1], phi_v=None)
+
+pulse_h = pulse_g.copy()
+pulse_h.import_p_v(c / (s_hnlf[:, 0] * 1e-9), s_hnlf[:, 1], phi_v=None)
+
+fig_grat, ax_grat = plt.subplots(1, 1)
+ax_grat.plot(pulse_g.wl_grid * 1e6, pulse_g.p_v / pulse_g.p_v.max())
+ax_grat.set_yticks([])
+ax_grat.set_ylabel("linear intensity (a.u.)")
+ax_grat.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax_grat.spines["top"].set_visible(False)
+ax_grat.spines["right"].set_visible(False)
+
+fig_hnlf, ax_hnlf = plt.subplots(1, 1)
+ax_hnlf.plot(pulse_h.wl_grid * 1e6, pulse_h.p_v / pulse_h.p_v.max())
+ax_hnlf.set_ylabel("linear intensity (a.u.)")
+ax_hnlf.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")

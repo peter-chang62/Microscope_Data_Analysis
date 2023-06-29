@@ -1,7 +1,7 @@
 # %% ----- package imports
 import numpy as np
 import matplotlib.pyplot as plt
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 from tqdm import tqdm
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.colors as colors

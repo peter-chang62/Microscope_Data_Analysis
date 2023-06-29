@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 from scipy.integrate import simpson
 
 try:
@@ -39,10 +39,10 @@ wl = 1e4 / wnum
 # %%
 img = simpson(x[ind], axis=0)
 fig, ax = plt.subplots(1, 2)
-ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="cividis", vmin=0, vmax=13)
+ax[0].imshow(img[:, ::-1][:, 1783:3071], cmap="CMRmap_r", vmin=0, vmax=13)
 ax[1].imshow(
     np.load("../fig_commit/plot_data/coarse.npz")["data"][::-1][21:285, 16:309],
-    cmap="cividis",
+    cmap="CMRmap_r",
     vmax=47.5,
 )
 [i.axis(False) for i in ax]
