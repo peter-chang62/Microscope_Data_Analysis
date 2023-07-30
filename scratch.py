@@ -1,89 +1,55 @@
 # %%
 import numpy as np
-import clipboard as cr
 import matplotlib.pyplot as plt
-import pynlo
+import clipboard as cr
 from scipy.constants import c
-from scipy.integrate import simpson
 
-# %% --------------------------------------------------------------------------
-v_min = c / 3000e-9
-v_max = c / 800e-9
-v0 = c / 1560e-9
-npts = 2**13
-t_window = 20e-12
-e_p = 4.0e-9
-t_fwhm = 250e-15
-pulse_grat = pynlo.light.Pulse.Sech(
-    npts,
-    v_min,
-    v_max,
-    v0,
-    e_p,
-    t_fwhm,
-    t_window,
-)
 
-pulse_hnlf = pulse_grat.copy()
-pulse_osc = pulse_grat.copy()
-pulse_osc.e_p = 0.05e-9
+# %%
+path = r"/Volumes/Peter SSD/Research_Projects/Microscope/Images/04-15-2023/bckgnd_stream_25704x77760.npy"
+data = np.load(path, mmap_mode="r")
+ppifg = 77760
+center = ppifg // 2
+shape = data.shape
+data.resize(data.size)
+data = data[center:-center]
+data.resize((shape[0] - 1, shape[1]))
 
-# %% --------------------------------------------------------------------------
-s_grat = np.genfromtxt("CLEO_2023/SPECTRUM_GRAT_PAIR.txt")
-v_grid = c / (s_grat[:, 0] * 1e-9)
-pulse_grat.import_p_v(v_grid, s_grat[:, 1])
 
-s_hnlf = np.genfromtxt("CLEO_2023/Spectrum_Stitched_Together_wl_nm.txt")
-v_grid = c / (s_hnlf[:, 0] * 1e-9)
-pulse_hnlf.import_p_v(v_grid, s_hnlf[:, 1])
+ft = np.fft.rfft(np.fft.fftshift(data[0]))
+f = np.fft.rfftfreq(ppifg)
 
-# pulse_hnlf.e_p = 2000e-9
+resolution = 100
+N = ppifg // resolution
+N = N if N % 2 == 0 else N + 1
 
-# %% --------------------------------------------------------------------------
-data = np.load("CLEO_2023/run.npy", mmap_mode="r")
-p_v_mir = data[-1][100:].copy()
-nu = np.fft.rfftfreq(77760, d=1e-9)[100:] * 77762
+ifg_a = data[0].copy()
+ifg_a = ifg_a[center - N // 2 : center + N // 2]
+
+ft_a = np.fft.rfft(np.fft.fftshift(ifg_a))
+f_a = np.fft.rfftfreq(N)
+
+# %%
+lims = 0.0164, 0.2409
+idx_f = np.logical_and(lims[0] < f, f < lims[1]).nonzero()
+idx_a = np.logical_and(lims[0] < f_a, f_a < lims[1]).nonzero()
+norm_f = abs(ft)[idx_f].max()
+norm_a = abs(ft)[idx_a].max()
+
+# %%
+nu = np.fft.rfftfreq(ppifg, d=1e-9) * ppifg
 nu += nu[-1] * 2
-wl = c * 1e6 / nu
+wl = c / nu
 
-ind = ~np.isnan(p_v_mir)
+nu_a = np.fft.rfftfreq(N, d=1e-9) * ppifg
+nu_a += nu_a[-1] * 2
+wl_a = c / nu_a
 
-area = simpson(p_v_mir[ind], x=nu[ind])
-power = area * 1e9  # W
-factor = power / 3e-3
-p_v_mir /= factor
-
-# %% --------------------------------------------------------------------------
-# norm = pulse_hnlf.p_v.max()
-fact_pulse = pulse_grat.v_grid**2 / c * 1e12
-fact_mir = nu**2 / c * 1e12
-p_v_osc = pulse_osc.p_v * fact_pulse
-p_v_grat = pulse_grat.p_v * fact_pulse
-p_v_hnlf = pulse_hnlf.p_v * fact_pulse
-p_v_mir_plot = p_v_mir * fact_mir
-
-ymin, ymax = p_v_hnlf.max() * 1e-6, p_v_hnlf.max() * 5
-(ind_osc,) = np.logical_and(ymin < p_v_osc, p_v_osc < ymax).nonzero()
-(ind_grat,) = np.logical_and(ymin < p_v_grat, p_v_grat < ymax).nonzero()
-(ind_hnlf,) = np.logical_and(ymin < p_v_hnlf, p_v_hnlf < ymax).nonzero()
-(ind_mir,) = np.logical_and(ymin < p_v_mir_plot, p_v_mir_plot < ymax).nonzero()
-
-fig, ax = plt.subplots(1, 1)
-ax.semilogy(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], label="oscillator")
-ax.semilogy(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], label="amplifier output")
-ax.semilogy(
-    pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], label="supercontinuum"
-)
-ax.semilogy(wl[ind_mir], p_v_mir_plot[ind_mir], label="MIR")
-
-alpha = 0.4
-ax.fill_between(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], alpha=alpha)
-ax.fill_between(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], alpha=alpha)
-ax.fill_between(pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], alpha=alpha)
-ax.fill_between(wl[ind_mir], p_v_mir_plot[ind_mir], alpha=0.4)
-
-ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-ax.set_ylabel("log PSD (mW / nm)")
-ax.set_ylim(ymin=ymin)
-ax.legend(loc="best")
-fig.tight_layout()
+# %%
+plt.figure()
+plt.plot(wl * 1e6, abs(ft) / norm_a, ".", markersize=1, label="1 GHz resolution")
+plt.plot(wl_a * 1e6, abs(ft_a) / norm_a, label="100 GHz resolution")
+plt.ylim(-0.05, 1.05)
+plt.legend(loc="best")
+plt.xlabel("wavelength ($\\mathrm{\\mu m}$)")
+plt.tight_layout()

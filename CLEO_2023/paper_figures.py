@@ -81,9 +81,11 @@ wl = 299792458 / nu
 
 fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
 norm = data[pt_bckgnd].max()
-ax_p.plot(wl, data[pt_bckgnd] / norm, "C3")
-ax_p.plot(wl, data[pt_less_absorb] / norm, "C2")
-ax_p.plot(wl, data[pt_big_absorb] / norm, "C1")
+# ax_p.plot(wl, data[pt_bckgnd] / norm, "C3")
+# ax_p.plot(wl, data[pt_less_absorb] / norm, "C2")
+# ax_p.plot(wl, data[pt_big_absorb] / norm, "C1")
+ax_p.plot(wl, -np.log(data[pt_less_absorb] / data[pt_bckgnd]), "C2")  # absorbance pt 1
+ax_p.plot(wl, -np.log(data[pt_big_absorb] / data[pt_bckgnd]), "C1")  # absorbance pt 2
 ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
 ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
@@ -201,8 +203,9 @@ wl = 299792458 / nu
 
 norm = data[pt_bckgnd].max()
 fig_p_usaf, ax_p_usaf = plt.subplots(1, 1, figsize=figsize)
-ax_p_usaf.plot(wl, data[pt_bckgnd] / norm, "C3")
-ax_p_usaf.plot(wl, data[pt_absorb] / norm, "C2")
+# ax_p_usaf.plot(wl, data[pt_bckgnd] / norm, "C3")
+# ax_p_usaf.plot(wl, data[pt_absorb] / norm, "C2")
+ax_p_usaf.plot(wl, -np.log(data[pt_absorb] / data[pt_bckgnd]), "C2")  # absorbance plot
 ax_p_usaf.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_usaf_2 = ax_p_usaf.secondary_xaxis(
     "top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x)

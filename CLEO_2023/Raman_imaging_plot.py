@@ -57,6 +57,7 @@ def loglog(x, y, ax, color, label=None):
         ax.loglog(x, y, "o", color=color, label=label)
 
 
+# %% --------------------------------------------------------------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
@@ -97,4 +98,49 @@ loglog(
 ax.set_xlabel("spectral acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
+fig.suptitle("bandwidth vs. spectral acquisition speed")
+fig.tight_layout()
+
+# %% --------------------------------------------------------------------------
+fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
+loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
+loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
+loglog(evans.pix_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
+loglog(saar.pix_acq_spd, saar.bandwidth, ax, color="C4", label="SRS")
+loglog(fu_am_chem.pix_acq_spd, fu_am_chem.bandwidth, ax, color="C5", label="m-SRS")
+loglog(liao.pix_acq_spd, liao.bandwidth, ax, color="C5")
+loglog(chowdary.pix_acq_spd, kee.bandwidth, ax, color="C6", label="NIVI")
+loglog(
+    ozeki.pix_acq_spd,
+    ozeki.bandwidth,
+    ax,
+    color="C7",
+    label="swept-source-SRS",
+)
+loglog(
+    fu_phys_chem.pix_acq_spd,
+    fu_phys_chem.bandwidth,
+    ax,
+    color="C8",
+    label="spectral-focusing-SRS",
+)
+loglog(lin.pix_acq_spd, lin.bandwidth, ax, color="C8")
+loglog(
+    napoli.pix_acq_spd,
+    napoli.bandwidth,
+    ax,
+    color="C9",
+    label="spectral-focusing-CARS",
+)
+loglog(
+    ideguchi.pix_acq_spd,
+    ideguchi.bandwidth,
+    ax,
+    color="slateblue",
+    label="comb-CARS",
+)
+ax.set_xlabel("spectral acquisition speed (Hz)")
+ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
+ax.legend(loc="best")
+fig.suptitle("bandwidth vs. pixel acquisition speed")
 fig.tight_layout()

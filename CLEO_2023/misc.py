@@ -1,5 +1,5 @@
 # %% ----- package imports
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,6 +20,18 @@ ax.set_xlabel("Spectral Acquisition Rate (Hz)")
 ax.set_ylabel("Optical Bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.spines[["right", "top"]].set_visible(False)
 fig.tight_layout()
+
+# %% ----- background axes to match Raman imaging review paper
+fig, ax = plt.subplots(1, 1)
+ax.set_xscale("log")
+ax.set_yscale("log")
+ax.set_xticks([1, 10, 100, 1000])
+ax.set_yticks([10**i for i in range(-4, 4)])
+ax.set_xlabel("Spectral Content ($\\mathrm{cm^{-1}}$)")
+ax.set_ylabel("Time (ms)")
+ax.spines[["right", "top"]].set_visible(False)
+fig.tight_layout()
+
 
 # %% ----- 100 MHz & 200 MHz
 fig, ax = plt.subplots(1, 1, figsize=figsize)
