@@ -139,7 +139,7 @@ loglog(
     color="slateblue",
     label="comb-CARS",
 )
-ax.set_xlabel("spectral acquisition speed (Hz)")
+ax.set_xlabel("pixel acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
 fig.suptitle("bandwidth vs. pixel acquisition speed")
