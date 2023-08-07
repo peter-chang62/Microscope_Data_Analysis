@@ -242,7 +242,7 @@ norm = np.nanmax(avg_500)
 stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
 ax_s.plot(stream["x"], stream["y1"], ".", markersize=1, label="single shot @ 1 GHz")
-ax_s.plot(wl, bckgnd[-1] / norm, ".", markersize=1, label="25,700 averages @ 1 GHz")
+ax_s.plot(wl, bckgnd[-1] / norm, ".", markersize=1, label="51,400 averages @ 1 GHz")
 ax_s.plot(wl_a, abs(ft_a) / norm, label="500 averages @ 100 GHz")
 ax_s.set_ylim(ymax=2)
 ax_s.legend(loc="best", markerscale=10)
@@ -274,10 +274,23 @@ ax_r.set_xlabel("time (s)")
 ax_r_2 = ax_r.secondary_xaxis("top", functions=(lambda x: x / tau, lambda x: x * tau))
 ax_r_2.set_xlabel("# of averaged spectra")
 ax_r.set_ylabel("resolution (GHz)")
-
 colorbar = plt.colorbar(img, label="LOG SNR")
-
 fig_r.tight_layout()
+
+fig_allan, ax_allan = plt.subplots(1, 1, figsize=figsize)
+ax_allan.loglog(n[10 : int(1e3)] * tau, snr[0, 10 : int(1e3)], "-", linewidth=3, label="1 GHz")
+ax_allan.loglog(n[10 : int(1e3)] * tau, snr[25, 10 : int(1e3)], "-", linewidth=3, label="25 GHz")
+ax_allan.loglog(n[10 : int(1e3)] * tau, snr[50, 10 : int(1e3)], "-", linewidth=3, label="50 GHz")
+ax_allan.loglog(n[10 : int(1e3)] * tau, snr[99, 10 : int(1e3)], "-", linewidth=3, label="100 GHz")
+ax_allan_2 = ax_allan.secondary_xaxis(
+    "top", functions=(lambda x: x / tau, lambda x: x * tau)
+)
+ax_allan.set_xlabel("time (s)")
+ax_allan_2.set_xlabel("# of averaged spectra")
+ax_allan.set_ylabel("resolution (GHz)")
+ax_allan.axvline(500 * tau, color="k", linestyle="--")
+ax_allan.legend(loc="best")
+fig_allan.tight_layout()
 
 # %% --------------------------------------------------------------------------
 n_points = 2**11

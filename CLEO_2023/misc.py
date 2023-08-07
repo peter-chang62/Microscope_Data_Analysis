@@ -8,7 +8,8 @@ def bandwidth(fr, dfr):
     return fr**2 / (2 * dfr)
 
 
-figsize = np.array([3.99, 2.83])
+# figsize = np.array([3.99, 2.83])
+figsize = np.array([4.64, 3.63])  # matches paper_figures.py
 
 # %% ----- background axes for intro slide
 fig, ax = plt.subplots(1, 1)
@@ -120,7 +121,7 @@ ax.semilogy(
     color="C3",
     linestyle="--",
 )
-ax.axvline(2, color="k", linestyle="--", linewidth=2)
+# ax.axvline(2, color="k", linestyle="--", linewidth=2)
 ax.legend(loc="best")
 ax.set_xlabel("acquisition speed for $\\mathrm{\\Delta \\nu}$ (MHz)")
 ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")
