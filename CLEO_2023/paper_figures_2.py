@@ -68,18 +68,20 @@ ymin, ymax = p_v_hnlf.max() * 1e-6, p_v_hnlf.max() * 5
 (ind_hnlf,) = np.logical_and(ymin < p_v_hnlf, p_v_hnlf < ymax).nonzero()
 (ind_mir,) = np.logical_and(ymin < p_v_mir_plot, p_v_mir_plot < ymax).nonzero()
 
-fig, ax = plt.subplots(1, 1)
-ax.semilogy(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], label="oscillator")
-ax.semilogy(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], label="amplifier output")
+fig, ax = plt.subplots(1, 1, figsize=np.array([5.51, 3.14]))
 ax.semilogy(
     pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], label="supercontinuum"
+)
+ax.semilogy(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], label="oscillator")
+ax.semilogy(
+    pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], label="amplifier output"
 )
 ax.semilogy(wl[ind_mir], p_v_mir_plot[ind_mir], label="MIR")
 
 alpha = 0.4
+ax.fill_between(pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], alpha=alpha)
 ax.fill_between(pulse_osc.wl_grid[ind_osc] * 1e6, p_v_osc[ind_osc], alpha=alpha)
 ax.fill_between(pulse_grat.wl_grid[ind_grat] * 1e6, p_v_grat[ind_grat], alpha=alpha)
-ax.fill_between(pulse_hnlf.wl_grid[ind_hnlf] * 1e6, p_v_hnlf[ind_hnlf], alpha=alpha)
 ax.fill_between(wl[ind_mir], p_v_mir_plot[ind_mir], alpha=0.4)
 
 ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
