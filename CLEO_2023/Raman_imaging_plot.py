@@ -15,7 +15,17 @@ pub = collections.namedtuple(
     ],
 )
 
+
 # %% --------------------------------------------------------------------------
+def loglog(x, y, ax, color, label=None):
+    if isinstance(x, np.ndarray):
+        assert x.shape == y.shape, "x and y must have the same shape"
+        ax.loglog(x, y, "-", linewidth=5, color=color, label=label, alpha=0.5)
+    else:
+        ax.loglog(x, y, "o", color=color, label=label)
+
+
+# %% ----------------- Raman --------------------------------------------------
 kee = pub("b_CARS", 59.0, 59.0, 2500.0, 13.0)
 ploetz = pub("fSRM", 5e2, 1.0, 3400.0, 25.0)
 evans = pub("CARS", 6.26e6, 6.25e6, 3.0, 3.0)
@@ -47,17 +57,12 @@ napoli = pub(
 lin = pub("spectral-focusing-SRS", 5.5e4, 5.5e4, 200.0, 10.0)
 ideguchi = pub("comb-CARS", 100.0, 50.0, 1200.0, 10.0)
 
-
-# %% --------------------------------------------------------------------------
-def loglog(x, y, ax, color, label=None):
-    if isinstance(x, np.ndarray):
-        assert x.shape == y.shape, "x and y must have the same shape"
-        ax.loglog(x, y, "-", linewidth=5, color=color, label=label, alpha=0.5)
-    else:
-        ax.loglog(x, y, "o", color=color, label=label)
+# %% ----------------- FTIR ---------------------------------------------------
 
 
-# %% --------------------------------------------------------------------------
+# %% ----------------- THZ-QCL ------------------------------------------------
+
+# %% -------------- plot with spectral acquisition speed ----------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
@@ -101,7 +106,7 @@ ax.legend(loc="best")
 fig.suptitle("bandwidth vs. spectral acquisition speed")
 fig.tight_layout()
 
-# %% --------------------------------------------------------------------------
+# %% -------------- plot with pixel acquisition speed -------------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
 loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
