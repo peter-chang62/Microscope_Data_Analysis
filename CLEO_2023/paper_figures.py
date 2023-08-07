@@ -7,6 +7,21 @@ import tables
 from scipy.integrate import simpson
 from tqdm import tqdm
 import pynlo
+from matplotlib.colors import LinearSegmentedColormap
+
+# get colormap
+ncolors = 256
+color_array = plt.get_cmap("CMRmap_r")(range(ncolors))
+
+# change alpha values
+# color_array[:, -1] = np.linspace(1, 0, ncolors)
+color_array[0][-1] = 0  # just send the white values to transparent!
+
+# create a colormap object
+map_object = LinearSegmentedColormap.from_list(name="CMRmap_r_t", colors=color_array)
+
+# register this new colormap with matplotlib
+plt.register_cmap(cmap=map_object)
 
 figsize = np.array([4.64, 3.63])
 
@@ -41,7 +56,7 @@ ax_c.pcolormesh(
     # vmin=0.15,  # fine
     vmin=0.19,  # coarse
     vmax=0.66586,
-    cmap="CMRmap_r",
+    cmap="CMRmap_r_t",
 )
 ax_c.set_aspect("equal")
 ax_c.set_xlabel("$\\mathrm{\\mu m}$")
@@ -79,18 +94,56 @@ nu = np.fft.rfftfreq(N, d=1e-3) * ppifg
 nu += nu[-1] * 2
 wl = 299792458 / nu
 
-fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
-norm = data[pt_bckgnd].max()
-# ax_p.plot(wl, data[pt_bckgnd] / norm, "C3")
-# ax_p.plot(wl, data[pt_less_absorb] / norm, "C2")
-# ax_p.plot(wl, data[pt_big_absorb] / norm, "C1")
-ax_p.plot(wl, -np.log(data[pt_less_absorb] / data[pt_bckgnd]), "C2")  # absorbance pt 1
-ax_p.plot(wl, -np.log(data[pt_big_absorb] / data[pt_bckgnd]), "C1")  # absorbance pt 2
-ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
-ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
-ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-ax_p.set_ylabel("power spectral density (a.u.)")
+# fig_p, ax_p = plt.subplots(1, 1, figsize=figsize)
+# norm = data[pt_bckgnd].max()
+# # ax_p.plot(wl, data[pt_bckgnd] / norm, "C3")
+# # ax_p.plot(wl, data[pt_less_absorb] / norm, "C2")
+# # ax_p.plot(wl, data[pt_big_absorb] / norm, "C1")
+# ax_p.plot(wl, -np.log(data[pt_less_absorb] / data[pt_bckgnd]), "C2")  # absorbance pt 1
+# ax_p.plot(wl, -np.log(data[pt_big_absorb] / data[pt_bckgnd]), "C1")  # absorbance pt 2
+# ax_p_2 = ax_p.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
+# ax_p_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+# ax_p.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+# ax_p.set_ylabel("power spectral density (a.u.)")
+# fig_p.tight_layout()
+
+fig_p, ax_p = plt.subplots(2, 1, figsize=figsize)
+wnum = 1e4 / wl
+ax_p[0].plot(
+    wnum,
+    -np.log(data[pt_big_absorb] / data[pt_bckgnd]),
+    "C2",
+)  # absorbance pt 2
+ax_p[1].plot(
+    wl,
+    -np.log(data[pt_less_absorb] / data[pt_bckgnd]),
+    "C3",
+)  # absorbance pt 1
+ax_p[0].set_xlim(1e4 / 3.267, 1e4 / 3.67)
+ax_p[1].set_xlim(3.267, 3.67)
+ax_p[0].set_ylim(0.439, 0.575)
+ax_p[1].set_ylim(0.163, 0.309)
+ax_p[0].spines.bottom.set_visible(False)
+ax_p[1].spines.top.set_visible(False)
+ax_p[0].xaxis.tick_top()
+ax_p[0].xaxis.set_label_position("top")
+d = 0.5  # proportion of vertical to horizontal extent of the slanted line
+kwargs = dict(
+    marker=[(-1, -d), (1, d)],
+    markersize=12,
+    linestyle="none",
+    color="k",
+    mec="k",
+    mew=1,
+    clip_on=False,
+)
+ax_p[0].plot([0, 1], [0, 0], transform=ax_p[0].transAxes, **kwargs)
+ax_p[1].plot([0, 1], [1, 1], transform=ax_p[1].transAxes, **kwargs)
+ax_p[0].set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+ax_p[1].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+fig_p.supylabel("absorbance")
 fig_p.tight_layout()
+fig_p.subplots_adjust(hspace=0.1)  # adjust space between axes
 
 img = absorbance[:, :, 97]
 fig_f, ax_f = plt.subplots(1, 1)
@@ -102,14 +155,13 @@ ax_f.pcolormesh(
     img,
     vmin=0.15,  # fine
     vmax=0.66586,
-    cmap="CMRmap_r",
+    cmap="CMRmap_r_t",
 )
 ax_f.set_aspect("equal")
 ax_f.axis(False)
-ax_f.plot(x[pt_bckgnd[1]], y[pt_bckgnd[0]], "o", color="C3")
-ax_f.plot(x[pt_less_absorb[1]], y[pt_less_absorb[0]], "o", color="C2")
-ax_f.plot(x[pt_big_absorb[1]], y[pt_big_absorb[0]], "o", color="C1")
-
+# ax_f.plot(x[pt_bckgnd[1]], y[pt_bckgnd[0]], "o", color="C3")
+ax_f.plot(x[pt_less_absorb[1]], y[pt_less_absorb[0]], "o", color="C3")
+ax_f.plot(x[pt_big_absorb[1]], y[pt_big_absorb[0]], "o", color="C2")
 scalebar = AnchoredSizeBar(
     ax_f.transData,
     100,
@@ -120,7 +172,6 @@ scalebar = AnchoredSizeBar(
     size_vertical=5 / 1.75,
 )
 ax_f.add_artist(scalebar)
-
 fig_f.tight_layout()
 
 # %% --------------------------------------------------------------------------
@@ -137,7 +188,7 @@ v_p = 10
 factor = 1 + v_p * tau_p
 x = np.arange(img.shape[1]) * 10
 y = np.arange(img.shape[0]) * 10 / factor
-ax_c_usaf.pcolormesh(y, x, img[::-1, ::-1].T, vmin=6.5, cmap="CMRmap_r")
+ax_c_usaf.pcolormesh(y, x, img[::-1, ::-1].T, vmin=6.5, cmap="CMRmap_r_t")
 ax_c_usaf.set_aspect("equal")
 ax_c_usaf.set_xlabel("$\\mathrm{\\mu m}$")
 ax_c_usaf.set_ylabel("$\\mathrm{\\mu m}$")
@@ -164,6 +215,7 @@ absorbance = file.root.absorbance
 img = simpson(absorbance[:, :, 90:110], axis=-1)
 
 pt_absorb = 54, 36
+pt_absorb_2 = 52, 117
 pt_bckgnd = 52, 78
 
 ppifg = 77760
@@ -174,9 +226,9 @@ factor = 1 + v_p * tau_p
 fig_f_usaf, ax_f_usaf = plt.subplots(1, 1)
 x = np.arange(img.shape[1]) * 1.75
 y = np.arange(img.shape[0]) * 1.75 / factor
-ax_f_usaf.pcolormesh(x, y, img[::-1, ::-1], vmin=10, cmap="CMRmap_r")
-ax_f_usaf.plot(x[::-1][pt_bckgnd[1]], y[::-1][pt_bckgnd[0]], "o", color="C3")
+ax_f_usaf.pcolormesh(x, y, img[::-1, ::-1], vmin=10, cmap="CMRmap_r_t")
 ax_f_usaf.plot(x[::-1][pt_absorb[1]], y[::-1][pt_absorb[0]], "o", color="C2")
+ax_f_usaf.plot(x[::-1][pt_absorb_2[1]], y[::-1][pt_absorb_2[0]], "o", color="C3")
 ax_f_usaf.set_aspect("equal")
 ax_f_usaf.axis(False)
 
@@ -206,6 +258,9 @@ fig_p_usaf, ax_p_usaf = plt.subplots(1, 1, figsize=figsize)
 # ax_p_usaf.plot(wl, data[pt_bckgnd] / norm, "C3")
 # ax_p_usaf.plot(wl, data[pt_absorb] / norm, "C2")
 ax_p_usaf.plot(wl, -np.log(data[pt_absorb] / data[pt_bckgnd]), "C2")  # absorbance plot
+ax_p_usaf.plot(
+    wl, -np.log(data[pt_absorb_2] / data[pt_bckgnd]), "C3"
+)  # absorbance plot
 ax_p_usaf.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_p_usaf_2 = ax_p_usaf.secondary_xaxis(
     "top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x)
@@ -278,10 +333,18 @@ colorbar = plt.colorbar(img, label="LOG SNR")
 fig_r.tight_layout()
 
 fig_allan, ax_allan = plt.subplots(1, 1, figsize=figsize)
-ax_allan.loglog(n[10 : int(1e3)] * tau, snr[0, 10 : int(1e3)], "-", linewidth=3, label="1 GHz")
-ax_allan.loglog(n[10 : int(1e3)] * tau, snr[25, 10 : int(1e3)], "-", linewidth=3, label="25 GHz")
-ax_allan.loglog(n[10 : int(1e3)] * tau, snr[50, 10 : int(1e3)], "-", linewidth=3, label="50 GHz")
-ax_allan.loglog(n[10 : int(1e3)] * tau, snr[99, 10 : int(1e3)], "-", linewidth=3, label="100 GHz")
+ax_allan.loglog(
+    n[10 : int(1e3)] * tau, snr[0, 10 : int(1e3)], "-", linewidth=3, label="1 GHz"
+)
+ax_allan.loglog(
+    n[10 : int(1e3)] * tau, snr[25, 10 : int(1e3)], "-", linewidth=3, label="25 GHz"
+)
+ax_allan.loglog(
+    n[10 : int(1e3)] * tau, snr[50, 10 : int(1e3)], "-", linewidth=3, label="50 GHz"
+)
+ax_allan.loglog(
+    n[10 : int(1e3)] * tau, snr[99, 10 : int(1e3)], "-", linewidth=3, label="100 GHz"
+)
 ax_allan_2 = ax_allan.secondary_xaxis(
     "top", functions=(lambda x: x / tau, lambda x: x * tau)
 )
