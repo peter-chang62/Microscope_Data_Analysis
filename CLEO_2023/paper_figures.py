@@ -122,7 +122,7 @@ ax_p[1].plot(
 ax_p[0].set_xlim(1e4 / 3.267, 1e4 / 3.67)
 ax_p[1].set_xlim(3.267, 3.67)
 ax_p[0].set_ylim(0.439, 0.575)
-ax_p[1].set_ylim(0.163, 0.309)
+ax_p[1].set_ylim(0.11, 0.309)
 ax_p[0].spines.bottom.set_visible(False)
 ax_p[1].spines.top.set_visible(False)
 ax_p[0].xaxis.tick_top()
@@ -141,7 +141,7 @@ ax_p[0].plot([0, 1], [0, 0], transform=ax_p[0].transAxes, **kwargs)
 ax_p[1].plot([0, 1], [1, 1], transform=ax_p[1].transAxes, **kwargs)
 ax_p[0].set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax_p[1].set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
-fig_p.supylabel("absorbance")
+fig_p.supylabel("absorbance", fontsize=10)
 fig_p.tight_layout()
 fig_p.subplots_adjust(hspace=0.1)  # adjust space between axes
 
