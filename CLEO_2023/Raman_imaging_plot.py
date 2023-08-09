@@ -20,7 +20,7 @@ pub = collections.namedtuple(
 def loglog(x, y, ax, color, label=None):
     if isinstance(x, np.ndarray):
         assert x.shape == y.shape, "x and y must have the same shape"
-        ax.loglog(x, y, "-", linewidth=5, color=color, label=label, alpha=0.5)
+        ax.loglog(x, y, "-", linewidth=5, color=color, label=label, alpha=0.6)
     else:
         ax.loglog(x, y, "o", color=color, label=label)
 
@@ -58,12 +58,20 @@ lin = pub("spectral-focusing-SRS", 5.5e4, 5.5e4, 200.0, 10.0)
 ideguchi = pub("comb-CARS", 100.0, 50.0, 1200.0, 10.0)
 
 # %% ----------------- FTIR ---------------------------------------------------
+nasse = pub("ftir_multbeam_fpa_sync", 2.65e3, 2.65e3, 3000, "unknown?")
 
+# %% ----------------- DCS EOM ------------------------------------------------
+khan = pub("dcs_fpa_eom_dfg_wvgd", 8.19e4, 8.19e4, 5.4, 0.6)
+
+# %% ----------------- DCS mode-locked lasers ---------------------------------
+ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
 
 # %% ----------------- THZ-QCL ------------------------------------------------
 
 # %% -------------- plot with spectral acquisition speed ----------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
+
+# Raman
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.spec_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
@@ -97,9 +105,17 @@ loglog(
     ideguchi.spec_acq_spd,
     ideguchi.bandwidth,
     ax,
-    color="slateblue",
+    color="gold",
     label="comb-CARS",
 )
+
+# FTIR
+loglog(nasse.spec_acq_spd, nasse.bandwidth, ax, color="darkslateblue", label="multi-beam synchrotron FTIR")
+
+# MIR DCS
+loglog(khan.spec_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
+loglog(ghz.spec_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
+
 ax.set_xlabel("spectral acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
@@ -108,6 +124,8 @@ fig.tight_layout()
 
 # %% -------------- plot with pixel acquisition speed -------------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
+
+# Raman
 loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.pix_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
@@ -141,9 +159,17 @@ loglog(
     ideguchi.pix_acq_spd,
     ideguchi.bandwidth,
     ax,
-    color="slateblue",
+    color="gold",
     label="comb-CARS",
 )
+
+# FTIR
+loglog(nasse.pix_acq_spd, nasse.bandwidth, ax, color="darkslateblue", label="multi-beam synchrotron FTIR")
+
+# MIR DCS
+loglog(khan.pix_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
+loglog(ghz.pix_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
+
 ax.set_xlabel("pixel acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
