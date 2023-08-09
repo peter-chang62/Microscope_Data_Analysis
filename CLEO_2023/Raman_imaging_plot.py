@@ -70,8 +70,8 @@ ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
 
 # %% -------------- plot with spectral acquisition speed ----------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
-
-# Raman
+ax.spines.top.set_visible(False)
+ax.spines.right.set_visible(False)
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.spec_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
@@ -124,8 +124,8 @@ fig.tight_layout()
 
 # %% -------------- plot with pixel acquisition speed -------------------------
 fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
-
-# Raman
+ax.spines.top.set_visible(False)
+ax.spines.right.set_visible(False)
 loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.pix_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
