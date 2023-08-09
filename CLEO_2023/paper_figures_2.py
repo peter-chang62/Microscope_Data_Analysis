@@ -55,8 +55,12 @@ p_v_mir /= factor
 
 # %% --------------------------------------------------------------------------
 # norm = pulse_hnlf.p_v.max()
-fact_pulse = pulse_grat.v_grid**2 / c * 1e12
-fact_mir = nu**2 / c * 1e12
+fact_pulse = pulse_grat.v_grid**2 / c  # J/m
+fact_mir = nu**2 / c  # J/m
+
+fact_pulse *= 1e9 * 1e3 * 1e-9  # J/m -> mW / nm
+fact_mir *= 1e9 * 1e3 * 1e-9  # J/m -> mW / nm
+
 p_v_osc = pulse_osc.p_v * fact_pulse
 p_v_grat = pulse_grat.p_v * fact_pulse
 p_v_hnlf = pulse_hnlf.p_v * fact_pulse
@@ -88,4 +92,14 @@ ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax.set_ylabel("log PSD (mW / nm)")
 ax.set_ylim(ymin=ymin)
 ax.legend(loc="best")
+ax.spines.top.set_visible(False)
+ax.spines.right.set_visible(False)
+fig.tight_layout()
+
+# %% ----- zoom in
+fig, ax = plt.subplots(1, 1, figsize=np.array([5.51, 3.14]))
+ax.semilogy(wl[ind_mir], p_v_mir_plot[ind_mir], "C3", linewidth=3)
+ax.set_xlim(3.291448006317889, 3.304626501344066)
+ax.set_ylim(0.0038434516417464085, 0.004600041961029162)
+ax.axis(False)
 fig.tight_layout()
