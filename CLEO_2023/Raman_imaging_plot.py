@@ -68,8 +68,75 @@ ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
 
 # %% ----------------- THZ-QCL ------------------------------------------------
 
+# %% -------------- plot with pixel acquisition speed -------------------------
+# fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
+# ax.spines.top.set_visible(False)
+# ax.spines.right.set_visible(False)
+
+# # Raman
+# loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
+# loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
+# loglog(evans.pix_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
+# loglog(saar.pix_acq_spd, saar.bandwidth, ax, color="C4", label="SRS")
+# loglog(fu_am_chem.pix_acq_spd, fu_am_chem.bandwidth, ax, color="C5", label="m-SRS")
+# loglog(liao.pix_acq_spd, liao.bandwidth, ax, color="C5")
+# loglog(chowdary.pix_acq_spd, kee.bandwidth, ax, color="C6", label="NIVI")
+# loglog(
+#     ozeki.pix_acq_spd,
+#     ozeki.bandwidth,
+#     ax,
+#     color="C7",
+#     label="swept-source-SRS",
+# )
+# loglog(
+#     fu_phys_chem.pix_acq_spd,
+#     fu_phys_chem.bandwidth,
+#     ax,
+#     color="C8",
+#     label="spectral-focusing-SRS",
+# )
+# loglog(lin.pix_acq_spd, lin.bandwidth, ax, color="C8")
+# loglog(
+#     napoli.pix_acq_spd,
+#     napoli.bandwidth,
+#     ax,
+#     color="C9",
+#     label="spectral-focusing-CARS",
+# )
+# loglog(
+#     ideguchi.pix_acq_spd,
+#     ideguchi.bandwidth,
+#     ax,
+#     color="gold",
+#     label="comb-CARS",
+# )
+
+# # FTIR
+# loglog(
+#     nasse.pix_acq_spd,
+#     nasse.bandwidth,
+#     ax,
+#     color="darkslateblue",
+#     label="multi-beam synchrotron FTIR",
+# )
+
+# # MIR DCS
+# loglog(khan.pix_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
+# loglog(ghz.pix_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
+
+# ax.set_xlabel("pixel acquisition speed (Hz)")
+# ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
+# ax.legend(loc="best")
+# fig.suptitle("bandwidth vs. pixel acquisition speed")
+# fig.tight_layout()
+
 # %% -------------- plot with spectral acquisition speed ----------------------
-fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
+fig, ax = plt.subplots(
+    1,
+    1,
+    figsize=np.array([8.3, 5.75]),
+    num="bandwidth vs. spectral acquisition speed",
+)
 ax.spines.top.set_visible(False)
 ax.spines.right.set_visible(False)
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
@@ -110,68 +177,35 @@ loglog(
 )
 
 # FTIR
-loglog(nasse.spec_acq_spd, nasse.bandwidth, ax, color="darkslateblue", label="multi-beam synchrotron FTIR")
+loglog(
+    nasse.spec_acq_spd,
+    nasse.bandwidth,
+    ax,
+    color="darkslateblue",
+    label="multi-beam synchrotron FTIR",
+)
 
 # MIR DCS
 loglog(khan.spec_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
 loglog(ghz.spec_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
 
+# Diagonal line
+y_lim = (2.11058754816463, 4832.777493106092)
+x_lim = (32.31428955730705, 18258176.431627173)
+
+# x_pt = np.array(x_lim)
+x_pt = np.array([1, 10e6])  # 1s -> video rate
+y_pt = np.array([3000, 3])  # 3 cm (video rate Raman) -> 3000 (~broadest)
+log_stp = 0.5
+N = 3
+for i in np.arange(-log_stp * N, log_stp * (N + 1), log_stp):
+    ax.plot(x_pt, y_pt * 10**i, linestyle="--", color="gray", alpha=0.5)
+    # ax.plot(x_pt * 10 ** i, y_pt, 'k--')
+
+# ax.set_aspect("equal")
+ax.set_xlim(x_lim)
+ax.set_ylim(y_lim)
 ax.set_xlabel("spectral acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
-fig.suptitle("bandwidth vs. spectral acquisition speed")
-fig.tight_layout()
-
-# %% -------------- plot with pixel acquisition speed -------------------------
-fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
-ax.spines.top.set_visible(False)
-ax.spines.right.set_visible(False)
-loglog(kee.pix_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
-loglog(ploetz.pix_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
-loglog(evans.pix_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
-loglog(saar.pix_acq_spd, saar.bandwidth, ax, color="C4", label="SRS")
-loglog(fu_am_chem.pix_acq_spd, fu_am_chem.bandwidth, ax, color="C5", label="m-SRS")
-loglog(liao.pix_acq_spd, liao.bandwidth, ax, color="C5")
-loglog(chowdary.pix_acq_spd, kee.bandwidth, ax, color="C6", label="NIVI")
-loglog(
-    ozeki.pix_acq_spd,
-    ozeki.bandwidth,
-    ax,
-    color="C7",
-    label="swept-source-SRS",
-)
-loglog(
-    fu_phys_chem.pix_acq_spd,
-    fu_phys_chem.bandwidth,
-    ax,
-    color="C8",
-    label="spectral-focusing-SRS",
-)
-loglog(lin.pix_acq_spd, lin.bandwidth, ax, color="C8")
-loglog(
-    napoli.pix_acq_spd,
-    napoli.bandwidth,
-    ax,
-    color="C9",
-    label="spectral-focusing-CARS",
-)
-loglog(
-    ideguchi.pix_acq_spd,
-    ideguchi.bandwidth,
-    ax,
-    color="gold",
-    label="comb-CARS",
-)
-
-# FTIR
-loglog(nasse.pix_acq_spd, nasse.bandwidth, ax, color="darkslateblue", label="multi-beam synchrotron FTIR")
-
-# MIR DCS
-loglog(khan.pix_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
-loglog(ghz.pix_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
-
-ax.set_xlabel("pixel acquisition speed (Hz)")
-ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
-ax.legend(loc="best")
-fig.suptitle("bandwidth vs. pixel acquisition speed")
 fig.tight_layout()
