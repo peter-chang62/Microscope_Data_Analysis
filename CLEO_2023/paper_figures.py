@@ -5,26 +5,9 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import clipboard as cr
 import tables
 from scipy.integrate import simpson
-from tqdm import tqdm
 import pynlo
-from matplotlib.colors import LinearSegmentedColormap
-
-# get colormap
-ncolors = 256
-color_array = plt.get_cmap("CMRmap_r")(range(ncolors))
-
-# change alpha values
-# color_array[:, -1] = np.linspace(1, 0, ncolors)
-color_array[0][-1] = 0  # just send the white values to transparent!
-
-# create a colormap object
-map_object = LinearSegmentedColormap.from_list(name="CMRmap_r_t", colors=color_array)
-
-# register this new colormap with matplotlib
-plt.register_cmap(cmap=map_object)
 
 figsize = np.array([4.64, 3.63])
-
 
 # %% --------------------------------------------------------------------------
 # file = tables.open_file("bio_sample_100GHz_fine.h5", "r")
@@ -297,7 +280,8 @@ norm = np.nanmax(avg_500)
 stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
 ax_s.plot(stream["x"], stream["y1"], ".", markersize=1, label="single shot @ 1 GHz")
-ax_s.plot(wl, bckgnd[-1] / norm, ".", markersize=1, label="51,400 averages @ 1 GHz")
+# ax_s.plot(wl, bckgnd[-1] / norm, ".", markersize=1, label="51,400 averages @ 1 GHz")
+ax_s.plot(wl, bckgnd[bckgnd.shape[0] // 2] / norm, ".", markersize=1, label="25,700 averages @ 1 GHz")
 ax_s.plot(wl_a, abs(ft_a) / norm, label="500 averages @ 100 GHz")
 ax_s.set_ylim(ymax=2)
 ax_s.legend(loc="best", markerscale=10)
@@ -351,7 +335,7 @@ ax_allan_2 = ax_allan.secondary_xaxis(
 ax_allan.set_xlabel("time (s)")
 ax_allan_2.set_xlabel("# of averaged spectra")
 ax_allan.set_ylabel("resolution (GHz)")
-ax_allan.axvline(500 * tau, color="k", linestyle="--")
+# ax_allan.axvline(500 * tau, color="k", linestyle="--")
 ax_allan.legend(loc="best")
 fig_allan.tight_layout()
 

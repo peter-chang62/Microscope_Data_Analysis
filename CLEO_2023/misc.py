@@ -51,7 +51,7 @@ ax.semilogy(
     label=" 200MHz",
     color="C2",
 )
-ax.axvline(200, color="k", linestyle="--", linewidth=2)
+# ax.axvline(200, color="k", linestyle="--", linewidth=2)
 ax.legend(loc="best")
 ax.set_xlabel("acquisition speed for $\\mathrm{\\Delta \\nu}$ (Hz)")
 ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")
@@ -82,7 +82,7 @@ ax.semilogy(
     label="1 GHz",
     color="C1",
 )
-ax.axvline(20, color="k", linestyle="--", linewidth=2)
+# ax.axvline(20, color="k", linestyle="--", linewidth=2)
 ax.legend(loc="best")
 ax.set_xlabel("acquisition speed for $\\mathrm{\\Delta \\nu}$ (kHz)")
 ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")

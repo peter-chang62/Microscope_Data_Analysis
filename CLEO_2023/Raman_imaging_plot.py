@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import clipboard as cr
 import collections
+from scipy.constants import c
 
 pub = collections.namedtuple(
     "Publication",
@@ -64,7 +65,8 @@ nasse = pub("ftir_multbeam_fpa_sync", 2.65e3, 2.65e3, 3000, "unknown?")
 khan = pub("dcs_fpa_eom_dfg_wvgd", 8.19e4, 8.19e4, 5.4, 0.6)
 
 # %% ----------------- DCS mode-locked lasers ---------------------------------
-ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
+# ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
+ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1297, 3.3)  # set to match nyquist
 
 # %% ----------------- THZ-QCL ------------------------------------------------
 
@@ -131,14 +133,19 @@ ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
 # fig.tight_layout()
 
 # %% -------------- plot with spectral acquisition speed ----------------------
+y_lim = (2.11058754816463, 4832.777493106092)
+x_lim = (32.31428955730705, 18258176.431627173)
+figsize = np.array([8.3, 5.75])
+
 fig, ax = plt.subplots(
     1,
     1,
-    figsize=np.array([8.3, 5.75]),
+    figsize=figsize,
     num="bandwidth vs. spectral acquisition speed",
 )
 ax.spines.top.set_visible(False)
 ax.spines.right.set_visible(False)
+
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.spec_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
@@ -186,21 +193,20 @@ loglog(
 )
 
 # MIR DCS
-loglog(khan.spec_acq_spd, khan.bandwidth, ax, color="olive", label="MIR DCS EOM DFG")
+loglog(khan.spec_acq_spd, khan.bandwidth, ax, color="olive", label="EOM MIR DCS")
 loglog(ghz.spec_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
 
 # Diagonal line
-y_lim = (2.11058754816463, 4832.777493106092)
-x_lim = (32.31428955730705, 18258176.431627173)
-
 # x_pt = np.array(x_lim)
-x_pt = np.array([1, 10e6])  # 1s -> video rate
-y_pt = np.array([3000, 3])  # 3 cm (video rate Raman) -> 3000 (~broadest)
-log_stp = 0.5
+# x_pt = np.array([1, 10e6])  # 1s -> video rate
+x_pt = np.array(x_lim)  # 1s -> video rate
+# y_pt = np.array([3000, 3])  # 3 cm (video rate Raman) -> 3000 (~broadest)
+y_pt = 1e9**2 / (2 * x_pt) / c / 100  # slope for GHz
+log_stp = 1.0
 N = 3
 for i in np.arange(-log_stp * N, log_stp * (N + 1), log_stp):
     ax.plot(x_pt, y_pt * 10**i, linestyle="--", color="gray", alpha=0.5)
-    # ax.plot(x_pt * 10 ** i, y_pt, 'k--')
+    print(i)
 
 # ax.set_aspect("equal")
 ax.set_xlim(x_lim)
@@ -209,3 +215,19 @@ ax.set_xlabel("spectral acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
 fig.tight_layout()
+
+# %% ----- background colormap
+fig, ax = plt.subplots(1, 1, figsize=figsize)
+_x_bckgnd = np.linspace(*x_lim, 256)
+_y_bckgnd = np.linspace(*y_lim, 256)
+x_bckgnd, y_bckgnd = np.meshgrid(_x_bckgnd, _y_bckgnd)
+z_bckgnd = x_bckgnd * y_bckgnd
+ax.pcolormesh(x_bckgnd, y_bckgnd, z_bckgnd, cmap="GnBu")
+
+ax.set_xlim(x_lim)
+ax.set_ylim(y_lim)
+ax.set_xlabel("spectral acquisition speed (Hz)")
+ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
+fig.tight_layout()
+
+ax.axis(False)
