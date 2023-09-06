@@ -7,12 +7,15 @@ import clipboard as cr
 from scipy.integrate import simpson
 from tqdm import tqdm
 import os
-
+import platform
 
 data_index = 5
 wnum = np.genfromtxt("wnum.csv", delimiter=",")
 
-path = r"/Users/peterchang/Resilio Sync/July ovarian FTIR I3/good data/"
+if platform.system().lower() == "darwin":
+    path = r"/Users/peterchang/Resilio Sync/July ovarian FTIR I3/good data/"
+elif platform.system().lower() == "windows":
+    path = r"C:\\Users\\pchan\\Data\\July ovarian FTIR I3\\good data/"
 folder = [
     "wp_ov-63_hd_16ca/",
     "wp_ov-63_sd_1ca/",

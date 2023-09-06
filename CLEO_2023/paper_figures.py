@@ -129,7 +129,7 @@ fig_p.tight_layout()
 fig_p.subplots_adjust(hspace=0.1)  # adjust space between axes
 
 img = absorbance[:, :, 97]
-fig_f, ax_f = plt.subplots(1, 1)
+fig_f, ax_f = plt.subplots(1, 1, figsize=figsize)
 x = np.arange(img.shape[1]) * 1.2
 y = np.arange(img.shape[0]) * 1.2
 ax_f.pcolormesh(

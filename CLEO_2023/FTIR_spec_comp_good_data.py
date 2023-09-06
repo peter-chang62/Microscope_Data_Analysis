@@ -9,9 +9,13 @@ import os
 from scipy.optimize import minimize
 from scipy.interpolate import interp1d
 from tqdm import tqdm
+import platform
+
+figsize = np.array([4.64, 3.63])
 
 folders = [i.name for i in os.scandir("I3_good_data/")]
-folders.remove(".DS_Store")
+if "DS_Store" in folders:
+    folders.remove(".DS_Store")
 
 # %% --------------------------------------------------------------------------
 idx = 0
@@ -141,7 +145,10 @@ ax_f.add_artist(scalebar)
 fig_f.tight_layout()
 
 # %% --------------------------------------------------------------------------
-path = r"/Users/peterchang/Resilio Sync/July ovarian FTIR I3/good data/"
+if platform.system().lower() == "darwin":
+    path = r"/Users/peterchang/Resilio Sync/July ovarian FTIR I3/good data/"
+elif platform.system().lower() == "windows":
+    path = r"C:\\Users\\pchan\\Data\\July ovarian FTIR I3\\good data/"
 x = np.memmap(path + folders[idx] + "/I3_Cropped", dtype="<f")
 x.resize((394, *x_bp.shape))
 
@@ -197,12 +204,15 @@ def func(X, c1, c2):
 res = minimize(func, np.array([0, 0]), args=(curve1[26:54], curve2_gridded[26:54]))
 curve1_scale = curve1 * res.x[1] + res.x[0]
 
-fig, ax = plt.subplots(1, 1)
-ax.plot(wl_ftir[idx_overlap], curve1_scale, label="FTIR")
-ax.plot(wl, curve2 + 0.05, label="DCS 39 ms average")
-ax.plot(wl, curve2_2s + 0.05, label="DCS 2s average")
-ax.get_yaxis().set_visible(False)
+fig, ax = plt.subplots(1, 1, figsize=figsize)
+ax.plot(wl_ftir[idx_overlap], curve1_scale, label="FTIR", color="C3")
+ax.plot(wl, curve2 + 0.05, label="DCS 39 ms average", color="C1")
+ax.plot(wl, curve2_2s + 0.05, label="DCS 2s average", color="C2")
 ax.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
+ax.set_ylabel("absorbance (a.u.)")
+ax.get_yaxis().set_ticks([])
+ax_2 = ax.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
+ax_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
 ax.legend(loc="best")
 fig.tight_layout()
 
