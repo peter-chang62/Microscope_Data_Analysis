@@ -68,7 +68,11 @@ khan = pub("dcs_fpa_eom_dfg_wvgd", 8.19e4, 8.19e4, 5.4, 0.6)
 # ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1000, 3.3)
 ghz = pub("GHz_MIR_DCS", 1.29e4, 25.72, 1297, 3.3)  # set to match nyquist
 
-# %% ----------------- THZ-QCL ------------------------------------------------
+# %% ----------------- QCL ------------------------------------------------
+yeh = pub("QCL_DF-IR", 5461, 5461, 1100, 4)
+
+# %% ----------------- scanless up-conversion camera imaging ------------------
+zhao = pub("scanless_upconversion", 38.4e3, 38.4e3, 3015 - 640, 3.15)
 
 # %% -------------- plot with pixel acquisition speed -------------------------
 # fig, ax = plt.subplots(1, 1, figsize=np.array([8.3, 5.75]))
@@ -146,6 +150,7 @@ fig, ax = plt.subplots(
 ax.spines.top.set_visible(False)
 ax.spines.right.set_visible(False)
 
+# Raman
 loglog(kee.spec_acq_spd, kee.bandwidth, ax, color="C0", label="b-CARS")
 loglog(ploetz.spec_acq_spd, ploetz.bandwidth, ax, color="C1", label="f-SRM")
 loglog(evans.spec_acq_spd, evans.bandwidth, ax, color="C2", label="CARS")
@@ -192,28 +197,29 @@ loglog(
     label="multi-beam synchrotron FTIR",
 )
 
+# QCL
+loglog(yeh.spec_acq_spd, yeh.bandwidth, ax, color="r", label="QCL DF-IR")
+
 # MIR DCS
 loglog(khan.spec_acq_spd, khan.bandwidth, ax, color="olive", label="EOM MIR DCS")
 loglog(ghz.spec_acq_spd, ghz.bandwidth, ax, color="crimson", label="1 GHz MIR DCS")
 
+# scanless upconversion
+loglog(zhao.spec_acq_spd, zhao.bandwidth, ax, color="k", label="scanless up-conversion")
+
 # Diagonal line
-# x_pt = np.array(x_lim)
-# x_pt = np.array([1, 10e6])  # 1s -> video rate
 x_pt = np.array(x_lim)  # 1s -> video rate
-# y_pt = np.array([3000, 3])  # 3 cm (video rate Raman) -> 3000 (~broadest)
 y_pt = 1e9**2 / (2 * x_pt) / c / 100  # slope for GHz
 log_stp = 1.0
 N = 3
 for i in np.arange(-log_stp * N, log_stp * (N + 1), log_stp):
     ax.plot(x_pt, y_pt * 10**i, linestyle="--", color="gray", alpha=0.5)
-    print(i)
 
-# ax.set_aspect("equal")
 ax.set_xlim(x_lim)
 ax.set_ylim(y_lim)
 ax.set_xlabel("spectral acquisition speed (Hz)")
 ax.set_ylabel("optical bandwidth ($\\mathrm{cm^{-1}}$)")
-ax.legend(loc="best")
+# ax.legend(loc="best")
 fig.tight_layout()
 
 # %% ----- background colormap

@@ -67,67 +67,69 @@ for idx in range(len(names)):
 
 # %% ----------------------- just plot one ------------------------------------
 # idx = 6  # or 7
+im = iio.imread(folder + "wp_ov-65_sd_16ca_2850_band.png")
 # im = iio.imread(folder + names[idx])
 
-# lit = lightness(im)
-# lum = luminosity(im)
-# avg = average(im)
+lit = lightness(im)
+lum = luminosity(im)
+avg = average(im)
 
-# lit /= lit.max()
-# lum /= lum.max()
-# avg /= avg.max()
+lit /= lit.max()
+lum /= lum.max()
+avg /= avg.max()
 
-# # the luminosity looks the most like the original :)
-# fig, ax = plt.subplots(1, 1)
-# lum = convolve(lum, np.ones((2, 2)), mode="valid")
-# x = np.arange(lum.shape[1]) * 5.5 / 2
-# y = np.arange(lum.shape[0]) * 5.5 / 2
-# img = ax.pcolormesh(x, y, lum[::-1, ::-1], cmap="CMRmap_t")
-# ax.set_aspect("equal")
-# scalebar = AnchoredSizeBar(
-#     ax.transData,
-#     100,
-#     "100 $\\mathrm{\\mu m}}$",
-#     "upper right",
-#     frameon=False,
-#     color="k",
-#     size_vertical=5,
-# )
-# ax.add_artist(scalebar)
-# ax.axis(False)
-# fig.tight_layout()
+# the luminosity looks the most like the original :)
+fig, ax = plt.subplots(1, 1)
+lum = convolve(lum, np.ones((2, 2)), mode="valid")
+x = np.arange(lum.shape[1]) * 5.5 / 2
+y = np.arange(lum.shape[0]) * 5.5 / 2
+img = ax.pcolormesh(x, y, lum[::-1, ::-1], cmap="CMRmap_t")
+ax.set_aspect("equal")
+scalebar = AnchoredSizeBar(
+    ax.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "upper right",
+    frameon=False,
+    color="k",
+    size_vertical=5,
+)
+ax.add_artist(scalebar)
+ax.axis(False)
+fig.tight_layout()
 
 # %% ----------------------- just plot one ------------------------------------
 # idx = 4  # or 5
+im = iio.imread(folder + "wp_ov-65_hd_1ca_2850_band.png")
 # im = iio.imread(folder + names[idx])
 
-# lit = lightness(im)
-# lum = luminosity(im)
-# avg = average(im)
+lit = lightness(im)
+lum = luminosity(im)
+avg = average(im)
 
-# lit /= lit.max()
-# lum /= lum.max()
-# avg /= avg.max()
+lit /= lit.max()
+lum /= lum.max()
+avg /= avg.max()
 
-# # zoom in
-# fig, ax = plt.subplots(1, 1, figsize=figsize)
-# x = np.arange(lum.shape[1]) * 1.1
-# y = np.arange(lum.shape[0]) * 1.1
-# (idx_x,) = np.logical_and(164.52 < x, x < 709.22).nonzero()
-# (idx_y,) = np.logical_and(1000.0 < y, y < 1250.15).nonzero()
-# img = ax.pcolormesh(x[idx_x], y[idx_y], lum[::-1, ::-1][idx_y][:, idx_x], cmap="CMRmap_t")
-# ax.set_aspect("equal")
-# scalebar = AnchoredSizeBar(
-#     ax.transData,
-#     100,
-#     "100 $\\mathrm{\\mu m}}$",
-#     "upper left",
-#     frameon=False,
-#     color="k",
-#     size_vertical=5 / 1.75,
-# )
-# ax.add_artist(scalebar)
-# ax.axis(False)
-# fig.tight_layout()
+# zoom in
+fig, ax = plt.subplots(1, 1, figsize=figsize)
+x = np.arange(lum.shape[1]) * 1.1
+y = np.arange(lum.shape[0]) * 1.1
+(idx_x,) = np.logical_and(164.52 < x, x < 709.22).nonzero()
+(idx_y,) = np.logical_and(1000.0 < y, y < 1250.15).nonzero()
+img = ax.pcolormesh(x[idx_x], y[idx_y], lum[::-1, ::-1][idx_y][:, idx_x], cmap="CMRmap_t")
+ax.set_aspect("equal")
+scalebar = AnchoredSizeBar(
+    ax.transData,
+    100,
+    "100 $\\mathrm{\\mu m}}$",
+    "upper left",
+    frameon=False,
+    color="k",
+    size_vertical=5 / 1.75,
+)
+ax.add_artist(scalebar)
+ax.axis(False)
+fig.tight_layout()
 
 # plt.savefig("clipboard.png", transparent=True, dpi=300)

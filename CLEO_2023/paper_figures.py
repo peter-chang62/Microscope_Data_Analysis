@@ -249,7 +249,7 @@ ax_p_usaf_2 = ax_p_usaf.secondary_xaxis(
     "top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x)
 )
 ax_p_usaf_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
-ax_p_usaf.set_ylabel("power spectral density (a.u.)")
+ax_p_usaf.set_ylabel("absorbance")
 fig_p_usaf.tight_layout()
 
 # %% --------------------------------------------------------------------------
