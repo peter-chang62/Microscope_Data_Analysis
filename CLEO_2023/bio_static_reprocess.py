@@ -4,24 +4,23 @@ reprocess the static bio spectra for CLEO
 
 import numpy as np
 import matplotlib.pyplot as plt
-import mkl_fft
 from tqdm import tqdm
+import tables as tb
 
 
 def rfft(x, axis=-1):
-    return mkl_fft.rfft_numpy(np.fft.ifftshift(x, axes=axis), axis=axis)
+    return np.fft.rfft(np.fft.ifftshift(x, axes=axis), axis=axis)
 
 
 def irfft(x, axis=-1):
-    return np.fft.fftshift(mkl_fft.irfft_numpy(x, axis=axis), axes=axis)
+    return np.fft.fftshift(np.fft.irfft(x, axis=axis), axes=axis)
 
 
 # %% -----
 path = (
-    r"/media/peterchang/Peter SSD/Research_Projects/"
+    r"/Volumes/Peter SSD/Research_Projects/"
     + r"Microscope/FreeRunningSpectra/03-23-2023/"
 )
-# path = r"D:\\Microscope\\FreeRunningSpectra\\03-23-2023/"
 ppifg = 77760
 center = ppifg // 2
 

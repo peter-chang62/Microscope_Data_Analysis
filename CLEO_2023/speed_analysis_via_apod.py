@@ -7,7 +7,7 @@ bio_static_reprocess.py
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import clipboard_and_style_sheet
+import clipboard
 
 
 try:

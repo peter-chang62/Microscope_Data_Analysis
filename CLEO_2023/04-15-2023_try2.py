@@ -6,7 +6,7 @@ figured out here is how to initialize an appendable buffer on disk :)
 # %% ----- package imports
 import numpy as np
 import matplotlib.pyplot as plt
-import clipboard_and_style_sheet as cr
+import clipboard as cr
 from scipy.integrate import simpson
 from tqdm import tqdm
 import tables

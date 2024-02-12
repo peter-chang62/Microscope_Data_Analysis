@@ -98,8 +98,11 @@ fig.tight_layout()
 
 # %% ----- zoom in
 fig, ax = plt.subplots(1, 1, figsize=np.array([5.51, 3.14]))
-ax.semilogy(wl[ind_mir], p_v_mir_plot[ind_mir], "C3", linewidth=3)
-ax.set_xlim(3.291448006317889, 3.304626501344066)
-ax.set_ylim(0.0038434516417464085, 0.004600041961029162)
+x = wl[ind_mir]
+y = p_v_mir_plot[ind_mir]
+(idx,) = np.logical_and(3.294219591109948 < x, x < 3.301165682936091).nonzero()
+ax.semilogy(wl[ind_mir][idx], p_v_mir_plot[ind_mir][idx], ".-", color="C3")
+# ax.set_xlim(3.291448006317889, 3.304626501344066)
+# ax.set_ylim(0.0038434516417464085, 0.004600041961029162)
 ax.axis(False)
 fig.tight_layout()

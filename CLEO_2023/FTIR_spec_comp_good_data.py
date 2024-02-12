@@ -14,7 +14,7 @@ import platform
 figsize = np.array([4.64, 3.63])
 
 folders = [i.name for i in os.scandir("I3_good_data/")]
-if "DS_Store" in folders:
+if ".DS_Store" in folders:
     folders.remove(".DS_Store")
 
 # %% --------------------------------------------------------------------------
