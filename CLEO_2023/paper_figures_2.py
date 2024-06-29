@@ -37,7 +37,7 @@ s_hnlf = np.genfromtxt("Spectrum_Stitched_Together_wl_nm.txt")
 v_grid = c / (s_hnlf[:, 0] * 1e-9)
 pulse_hnlf.import_p_v(v_grid, s_hnlf[:, 1])
 
-# pulse_hnlf.e_p = 2000e-9
+pulse_hnlf.e_p = 2000e-9
 
 # %% --------------------------------------------------------------------------
 data = np.load("run.npy", mmap_mode="r")

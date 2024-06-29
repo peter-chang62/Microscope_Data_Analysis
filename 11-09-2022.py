@@ -7,7 +7,7 @@ import digital_phase_correction as dpc
 import phase_correction as pc
 import clipboard_and_style_sheet
 
-path = r"D:\Microscope\11-09-2022/"
+path = r"D:\\Microscope\11-09-2022/"
 # data = np.load(path + "stage1_5116_stage2_8500_53856x74180.npy") # bckgnd
 data = np.load(
     path + "stage1_5300_stage2_8970_53856x74180.npy"

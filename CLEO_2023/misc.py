@@ -58,34 +58,45 @@ ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")
 fig.tight_layout()
 
 # %% ----- 100 MHz, 200 MHz, & 1 GHz
+# fig, ax = plt.subplots(1, 1, figsize=figsize)
+# dfrep = np.linspace(50e2, 1000e2, 5000)
+# scale = 1e3
+# ax.semilogy(
+#     dfrep / scale,
+#     bandwidth(100e6, dfrep) * 1e-12,
+#     linewidth=3,
+#     label="100 MHz",
+#     color="C0",
+# )
+# ax.semilogy(
+#     dfrep / scale,
+#     bandwidth(200e6, dfrep) * 1e-12,
+#     linewidth=3,
+#     label=" 200MHz",
+#     color="C2",
+# )
+# ax.semilogy(
+#     dfrep / scale,
+#     bandwidth(1e9, dfrep) * 1e-12,
+#     linewidth=3,
+#     label="1 GHz",
+#     color="C1",
+# )
+# # ax.axvline(20, color="k", linestyle="--", linewidth=2)
+# ax.legend(loc="best")
+# ax.set_xlabel("acquisition speed for $\\mathrm{\\Delta \\nu}$ (kHz)")
+# ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")
+# fig.tight_layout()
+
+# %% ----- 100 MHz, 200 MHz, & 1 GHz
 fig, ax = plt.subplots(1, 1, figsize=figsize)
-dfrep = np.linspace(50e2, 1000e2, 5000)
-scale = 1e3
-ax.semilogy(
-    dfrep / scale,
-    bandwidth(100e6, dfrep) * 1e-12,
-    linewidth=3,
-    label="100 MHz",
-    color="C0",
-)
-ax.semilogy(
-    dfrep / scale,
-    bandwidth(200e6, dfrep) * 1e-12,
-    linewidth=3,
-    label=" 200MHz",
-    color="C2",
-)
-ax.semilogy(
-    dfrep / scale,
-    bandwidth(1e9, dfrep) * 1e-12,
-    linewidth=3,
-    label="1 GHz",
-    color="C1",
-)
-# ax.axvline(20, color="k", linestyle="--", linewidth=2)
+dnu = np.linspace(5e12, 100e12, 1000)
+ax.semilogy(dnu * 1e-12, 100e6**3 / (2 * dnu**2), linewidth=3, label="100 MHz")
+ax.semilogy(dnu * 1e-12, 200e6**3 / (2 * dnu**2), linewidth=3, label="200 MHz")
+ax.semilogy(dnu * 1e-12, 1e9**3 / (2 * dnu**2), linewidth=3, label="1 GHz")
+ax.set_xlabel("bandwidth $\\mathrm{\\Delta \\nu \\; (THz)}$")
+ax.set_ylabel("$\\mathrm{\\Delta f_r \\; / \\; N_0}$")
 ax.legend(loc="best")
-ax.set_xlabel("acquisition speed for $\\mathrm{\\Delta \\nu}$ (kHz)")
-ax.set_ylabel("$\\mathrm{\\Delta \\nu (THz)}$")
 fig.tight_layout()
 
 # %% ----- 100 MHz, 200 mHz, 1 GHz & 10 GHz

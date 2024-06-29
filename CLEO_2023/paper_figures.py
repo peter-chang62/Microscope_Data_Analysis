@@ -6,12 +6,16 @@ import clipboard as cr
 import tables
 from scipy.integrate import simpson
 import pynlo
+import sys
 
-figsize = np.array([4.64, 3.63])
+path = r"/Volumes/Peter SSD/Physical_Cloud/Microscope_Data_Analysis/CLEO_2023/"
+
+# figsize = np.array([4.64, 3.63])
+figsize = np.array([4.75, 3.19]) 
 
 # %% --------------------------------------------------------------------------
 # file = tables.open_file("bio_sample_100GHz_fine.h5", "r")
-file = tables.open_file("bio_sample_100GHz_coarse.h5", "r")
+file = tables.open_file(path + "bio_sample_100GHz_coarse.h5", "r")
 data = file.root.data
 absorbance = file.root.absorbance
 
@@ -59,7 +63,7 @@ ax_c.add_artist(scalebar)
 fig_c.tight_layout()
 
 # %% --------------------------------------------------------------------------
-file = tables.open_file("bio_sample_100GHz_fine.h5", "r")
+file = tables.open_file(path + "bio_sample_100GHz_fine.h5", "r")
 # file = tables.open_file("bio_sample_100GHz_coarse.h5", "r")
 data = file.root.data
 absorbance = file.root.absorbance
@@ -158,7 +162,7 @@ ax_f.add_artist(scalebar)
 fig_f.tight_layout()
 
 # %% --------------------------------------------------------------------------
-file = tables.open_file("su8_sample_100GHz_coarse.h5", "r")
+file = tables.open_file(path + "su8_sample_100GHz_coarse.h5", "r")
 data = file.root.data
 absorbance = file.root.absorbance
 
@@ -191,7 +195,7 @@ ax_c_usaf.add_artist(scalebar)
 fig_c_usaf.tight_layout()
 
 # %% --------------------------------------------------------------------------
-file = tables.open_file("su8_sample_100GHz_fine.h5", "r")
+file = tables.open_file(path + "su8_sample_100GHz_fine.h5", "r")
 data = file.root.data
 absorbance = file.root.absorbance
 
@@ -209,7 +213,11 @@ factor = 1 + v_p * tau_p
 fig_f_usaf, ax_f_usaf = plt.subplots(1, 1)
 x = np.arange(img.shape[1]) * 1.75
 y = np.arange(img.shape[0]) * 1.75 / factor
-ax_f_usaf.pcolormesh(x, y, img[::-1, ::-1], vmin=10, cmap="CMRmap_r_t")
+vmin, vmax = (7.464922712350008, 26.802141931500223)
+# img = ax_f_usaf.pcolormesh(x, y, img[::-1, ::-1], vmin=10, cmap="CMRmap_r_t")
+img = ax_f_usaf.pcolormesh(
+    x, y, img[::-1, ::-1], vmin=vmin, vmax=vmax, cmap="CMRmap_r_t"
+)
 ax_f_usaf.plot(x[::-1][pt_absorb[1]], y[::-1][pt_absorb[0]], "o", color="C2")
 ax_f_usaf.plot(x[::-1][pt_absorb_2[1]], y[::-1][pt_absorb_2[0]], "o", color="C3")
 ax_f_usaf.set_aspect("equal")
@@ -253,7 +261,7 @@ ax_p_usaf.set_ylabel("absorbance")
 fig_p_usaf.tight_layout()
 
 # %% --------------------------------------------------------------------------
-bckgnd = np.load("run.npy", mmap_mode="r")
+bckgnd = np.load(path + "run.npy", mmap_mode="r")
 
 ppifg = 77760
 center = ppifg // 2
@@ -279,9 +287,21 @@ norm = np.nanmax(avg_500)
 
 stream = np.load("../fig_commit/plot_data/stream.npz")
 fig_s, ax_s = plt.subplots(1, 1, figsize=figsize)
-ax_s.plot(stream["x"], stream["y1"], ".", markersize=1, label="single shot (78$\\mathrm{\\mu s}$) @ 1 GHz")
+ax_s.plot(
+    stream["x"],
+    stream["y1"],
+    ".",
+    markersize=1,
+    label="single shot (78$\\mathrm{\\mu s}$) @ 1 GHz",
+)
 # ax_s.plot(wl, bckgnd[-1] / norm, ".", markersize=1, label="51,400 averages @ 1 GHz")
-ax_s.plot(wl, bckgnd[bckgnd.shape[0] // 2] / norm, ".", markersize=1, label="25,700 averages (2s) @ 1 GHz")
+ax_s.plot(
+    wl,
+    bckgnd[bckgnd.shape[0] // 2] / norm,
+    ".",
+    markersize=1,
+    label="25,700 averages (2s) @ 1 GHz",
+)
 ax_s.plot(wl_a, abs(ft_a) / norm, label="500 averages (39ms) @ 100 GHz")
 ax_s.set_ylim(ymax=2)
 ax_s.legend(loc="best", markerscale=10)
@@ -289,6 +309,8 @@ ax_s.set_xlabel("wavelength ($\\mathrm{\\mu m}$)")
 ax_s.set_ylabel("power spectral density")
 ax_s_2 = ax_s.secondary_xaxis("top", functions=(lambda x: 1e4 / x, lambda x: 1e4 / x))
 ax_s_2.set_xlabel("wavenumber ($\\mathrm{cm^{-1}}$)")
+ax_s.set_xlim(2.545112160195894, 3.8968553020314953)
+ax_s.set_ylim(-0.031025488337056595, 1.456384886346501)
 fig_s.tight_layout()
 
 snr = np.load("../fig_commit/plot_data/SNR_2D.npy")
@@ -358,8 +380,8 @@ pulse_g = pynlo.light.Pulse.Sech(
     t_fwhm,
     min_time_window=time_window,
 )
-s_grat = np.genfromtxt("SPECTRUM_GRAT_PAIR.txt")
-s_hnlf = np.genfromtxt("Spectrum_Stitched_Together_wl_nm.txt")
+s_grat = np.genfromtxt(path + "SPECTRUM_GRAT_PAIR.txt")
+s_hnlf = np.genfromtxt(path + "Spectrum_Stitched_Together_wl_nm.txt")
 pulse_g.import_p_v(c / (s_grat[:, 0] * 1e-9), s_grat[:, 1], phi_v=None)
 
 pulse_h = pulse_g.copy()

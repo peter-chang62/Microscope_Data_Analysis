@@ -98,8 +98,9 @@ apod = apod.astype(int)
 # np.save("SNR_2D.npy", SNR)
 
 # %% ----- gif showing how the snr increases with apodization
-run = np.load("run.npy", mmap_mode="r")
-run_bio = np.load("run_sample.npy", mmap_mode="r")
+path = r"/Volumes/Peter SSD/Physical_Cloud/Microscope_Data_Analysis/CLEO_2023/"
+run = np.load(path + "run.npy", mmap_mode="r")
+run_bio = np.load(path + "run_sample.npy", mmap_mode="r")
 t = run[500].copy()  # after 500 averages
 t_b = run_bio[500].copy()
 t[np.isnan(t)] = 0

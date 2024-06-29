@@ -136,8 +136,9 @@ center = ppifg // 2
 # np.save("off_bio_sample_snr_avg_res_1ghz_step.npy", SNR)
 
 # %% ----- look at 2D map for SNR
-data = np.load("off_bio_sample_nof0_pc_running_avg.npy", mmap_mode="r")
-sigma = np.load("off_bio_sample_snr_avg_res_1ghz_step.npy")
+path_2 = r"/Volumes/Peter SSD/Physical_Cloud/Microscope_Data_Analysis/CLEO_2023/"
+data = np.load(path_2 + "off_bio_sample_nof0_pc_running_avg.npy", mmap_mode="r")
+sigma = np.load(path_2 + "off_bio_sample_snr_avg_res_1ghz_step.npy")
 
 sigma = np.where(sigma == 0, np.nan, sigma)
 factor_improvement_res = np.nanmean(sigma[0] / sigma, axis=1)
@@ -157,7 +158,8 @@ resolution = ppifg / apod
 n = np.arange(sigma.shape[1]) + 1
 tau = ppifg / 1e9
 
-figsize = np.array([4.64, 3.63])
+# figsize = np.array([4.64, 3.63])
+figsize = np.array([4.75, 3.19])
 fig_r, ax_r = plt.subplots(1, 1, figsize=figsize)
 img = ax_r.pcolormesh(
     n[0 : int(1e3)] * tau,
@@ -252,7 +254,10 @@ n_ifg = np.arange(factor_improvement_t.size, dtype=float) + 1
 t = n_ifg * ppifg / 1e9
 ax_impr_t.loglog(t[:1000], factor_improvement_t[:1000], "o", markersize=markersize)
 ax_impr_t.loglog(
-    t[:1000], factor_improvement_t[0] * np.sqrt(n_ifg[:1000]), linewidth=2, linestyle="--"
+    t[:1000],
+    factor_improvement_t[0] * np.sqrt(n_ifg[:1000]),
+    linewidth=2,
+    linestyle="--",
 )
 ax_impr_t.set_xlabel("time (s)")
 ax_impr_t.set_ylabel("$\\mathrm{SNR_\\tau \\; / \\; SNR_{78\\mu s}}$")
